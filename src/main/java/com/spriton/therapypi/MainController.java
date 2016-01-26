@@ -12,26 +12,29 @@ public class MainController {
     public static void main(String[] args) throws Exception {
         Config.init(args, "therapypi.properties");
         DataServer.init();
-        Machine machine = null;
+
 
         if(Config.config.getBoolean("hardware", false)) {
-            machine = Machine.create()
+            log.info("Setting up hardware machine");
+            Machine.setInstance(Machine.create()
                     .angle(new PotAngle())
                     .joystick(new HardJoystick())
                     .liftMotor(new HardLiftMotor())
                     .rotationMotor(new HardRotationMotor())
-                    .limitSwitch(new HardLimitSwitch(Switch.STATE.OFF));
+                    .limitSwitch(new HardLimitSwitch(Switch.State.OFF)));
 
         } else {
-            machine = Machine.create()
+            log.info("Setting up software machine");
+            Machine.setInstance(Machine.create()
                     .angle(new SoftAngle())
                     .joystick(new SoftJoystick())
                     .liftMotor(new SoftLiftMotor())
                     .rotationMotor(new SoftRotationMotor())
-                    .limitSwitch(new SoftLimitSwitch(Switch.STATE.OFF));
+                    .limitSwitch(new SoftLimitSwitch(Switch.State.OFF)));
         }
 
-        machine.run();
+        log.info("Running machine...");
+        Machine.instance().run();
     }
 
 }

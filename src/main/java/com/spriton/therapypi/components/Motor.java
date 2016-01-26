@@ -2,19 +2,19 @@ package com.spriton.therapypi.components;
 
 public abstract class Motor {
 
-    public static enum STATE { STOPPED, DOWN_SLOW, DOWN_FAST, UP_SLOW, UP_FAST };
+    public static enum State { STOPPED, DOWN_SLOW, DOWN_FAST, UP_SLOW, UP_FAST };
 
-    private STATE state = STATE.STOPPED;
+    private State state = State.STOPPED;
 
     public Motor() {
 
     }
 
-    public STATE getState() {
+    public State getState() {
         return state;
     }
 
-    public void setState(STATE state) {
+    public void setState(State state) {
         this.state = state;
     }
 

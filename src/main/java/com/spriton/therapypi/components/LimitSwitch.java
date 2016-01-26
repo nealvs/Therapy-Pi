@@ -2,7 +2,7 @@ package com.spriton.therapypi.components;
 
 public class LimitSwitch extends Switch {
 
-    public LimitSwitch(STATE state) {
+    public LimitSwitch(State state) {
         super(state);
     }
 

@@ -4,7 +4,7 @@ import com.spriton.therapypi.components.LimitSwitch;
 
 public class HardLimitSwitch extends LimitSwitch {
 
-    public HardLimitSwitch(STATE state) {
+    public HardLimitSwitch(State state) {
         super(state);
     }
 }

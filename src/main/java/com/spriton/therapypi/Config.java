@@ -12,10 +12,14 @@ public class Config  {
     private static Configurations configs = new Configurations();
     public static Configuration config = null;
 
-    public static void init(String propertiesFile) throws Exception {
+    public static void init(String[] args, String propertiesFile) throws Exception {
+        if(args != null && args.length > 0) {
+            propertiesFile = args[0];
+        }
         File file = new File(propertiesFile);
         log.info("Loading properties: " + file.getAbsolutePath());
         config = configs.properties(file);
+
     }
 
 }

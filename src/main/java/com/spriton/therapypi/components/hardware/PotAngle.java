@@ -4,5 +4,14 @@ import com.spriton.therapypi.components.Angle;
 
 public class PotAngle extends Angle {
 
+    public static int SpiChannel = 0;
+    public static int TotalDegrees = 300;
+
+    public PotAngle() {
+
+
+
+    }
+
 
 }

@@ -11,11 +11,10 @@ public class MainController {
 
     public static void main(String[] args) throws Exception {
         Config.init(args, "therapypi.properties");
-        DataServer.init();
-
 
         if(Config.config.getBoolean("hardware", false)) {
             log.info("Setting up hardware machine");
+            SpiInterface.init();
             Machine.setInstance(Machine.create()
                     .angle(new PotAngle())
                     .joystick(new HardJoystick())
@@ -35,6 +34,8 @@ public class MainController {
 
         log.info("Running machine...");
         Machine.instance().run();
+
+        DataServer.init();
     }
 
 }

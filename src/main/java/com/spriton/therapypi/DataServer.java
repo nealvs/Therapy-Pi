@@ -26,6 +26,9 @@ public class DataServer {
 
         // Setup endpoints
         status();
+        reset();
+        stopSession();
+        updateJoystick();
         login();
         userList();
         createUser();
@@ -34,25 +37,60 @@ public class DataServer {
     public static void status() {
         get("/status", (req, res) -> {
             JsonObject info = new JsonObject();
-            if(Machine.instance() != null && Machine.instance().angle != null) {
-                info.addProperty("angle", Machine.instance().angle.value);
-            }
-            if(Machine.instance() != null && Machine.instance().rotationMotor != null) {
-                info.addProperty("rotationMotor", Machine.instance().rotationMotor.getState().name());
-            }
             if(Machine.instance() != null) {
-                info.addProperty("activeMotor", Machine.instance().activeMotor.name());
-            }
-            if(Machine.instance() != null && Machine.instance().liftMotor != null) {
-                info.addProperty("liftMotor", Machine.instance().liftMotor.getState().name());
-            }
-            if(Machine.instance() != null && Machine.instance().holdStopwatch != null) {
-                info.addProperty("holdTime", Machine.instance().holdStopwatch.elapsed(TimeUnit.SECONDS));
-            }
-            if(Machine.instance() != null && Machine.instance().sessionStopwatch != null) {
-                info.addProperty("sessionTime", Machine.instance().sessionStopwatch.elapsed(TimeUnit.SECONDS));
+                if (Machine.instance().type != null) {
+                    info.addProperty("type", Machine.instance().type.name());
+                }
+                if (Machine.instance().seat != null) {
+                    info.addProperty("seat", Machine.instance().seat.value);
+                }
+                if (Machine.instance().joystick != null) {
+                    info.addProperty("joystick", Machine.instance().joystick.value);
+                }
+                if (Machine.instance().angle != null) {
+                    info.addProperty("angle", Machine.instance().angle.value);
+                }
+                if (Machine.instance().rotationMotor != null) {
+                    info.addProperty("rotationMotor", Machine.instance().rotationMotor.getState().name());
+                }
+                if (Machine.instance() != null) {
+                    info.addProperty("activeMotor", Machine.instance().activeMotor.name());
+                }
+                if ( Machine.instance().liftMotor != null) {
+                    info.addProperty("liftMotor", Machine.instance().liftMotor.getState().name());
+                }
+                if (Machine.instance().holdStopwatch != null) {
+                    info.addProperty("holdTime", Machine.instance().holdStopwatch.elapsed(TimeUnit.SECONDS));
+                }
+                if ( Machine.instance().sessionStopwatch != null) {
+                    info.addProperty("sessionTime", Machine.instance().sessionStopwatch.elapsed(TimeUnit.SECONDS));
+                }
             }
             return info.toString();
+        });
+    }
+
+    public static void reset() {
+        post("/reset", (req, res) -> {
+            JsonObject result = new JsonObject();
+            Machine.instance().reset();
+            return result.toString();
+        });
+    }
+
+    public static void stopSession() {
+        post("/stopSession", (req, res) -> {
+            JsonObject result = new JsonObject();
+
+            return result.toString();
+        });
+    }
+
+    public static void updateJoystick() {
+        post("/updateJoystick", (req, res) -> {
+            JsonObject result = new JsonObject();
+
+            return result.toString();
         });
     }
 

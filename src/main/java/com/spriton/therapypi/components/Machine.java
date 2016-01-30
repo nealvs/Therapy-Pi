@@ -1,13 +1,18 @@
 package com.spriton.therapypi.components;
 
 import com.google.common.base.Stopwatch;
+import com.spriton.therapypi.components.hardware.*;
+import com.spriton.therapypi.components.software.*;
 
 public class Machine {
 
     private static Machine instance;
+    public static enum Type { HARDWARE, SOFTWARE };
 
+    public Type type = Type.HARDWARE;
     public Angle angle;
     public Joystick joystick;
+    public Seat seat;
     public LiftMotor liftMotor;
     public RotationMotor rotationMotor;
     public LimitSwitch limitSwitch;
@@ -20,6 +25,34 @@ public class Machine {
 
     public void run() {
 
+    }
+
+    public void reset() {
+        joystick.reset();
+        angle.reset();
+        activeMotor = MotorType.NONE;
+        sessionStopwatch = Stopwatch.createUnstarted();
+        holdStopwatch = Stopwatch.createUnstarted();
+    }
+
+    public static void setInstance(Type type) {
+        if(type == Type.HARDWARE) {
+            Machine.setInstance(Machine.create()
+                    .angle(new PotAngle())
+                    .joystick(new HardJoystick())
+                    .seat(new HardSeat())
+                    .liftMotor(new HardLiftMotor())
+                    .rotationMotor(new HardRotationMotor())
+                    .limitSwitch(new HardLimitSwitch(Switch.State.OFF)));
+        } else if(type == Type.SOFTWARE) {
+            Machine.setInstance(Machine.create()
+                    .angle(new SoftAngle())
+                    .joystick(new SoftJoystick())
+                    .seat(new SoftSeat())
+                    .liftMotor(new SoftLiftMotor())
+                    .rotationMotor(new SoftRotationMotor())
+                    .limitSwitch(new SoftLimitSwitch(Switch.State.OFF)));
+        }
     }
 
     public static void setInstance(Machine instance) {
@@ -41,6 +74,11 @@ public class Machine {
 
     public Machine joystick(Joystick joystick) {
         this.joystick = joystick;
+        return this;
+    }
+
+    public Machine seat(Seat seat) {
+        this.seat = seat;
         return this;
     }
 

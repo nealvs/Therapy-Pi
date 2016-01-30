@@ -15,21 +15,10 @@ public class MainController {
         if(Config.config.getBoolean("hardware", false)) {
             log.info("Setting up hardware machine");
             SpiInterface.init();
-            Machine.setInstance(Machine.create()
-                    .angle(new PotAngle())
-                    .joystick(new HardJoystick())
-                    .liftMotor(new HardLiftMotor())
-                    .rotationMotor(new HardRotationMotor())
-                    .limitSwitch(new HardLimitSwitch(Switch.State.OFF)));
-
+            Machine.setInstance(Machine.Type.HARDWARE);
         } else {
             log.info("Setting up software machine");
-            Machine.setInstance(Machine.create()
-                    .angle(new SoftAngle())
-                    .joystick(new SoftJoystick())
-                    .liftMotor(new SoftLiftMotor())
-                    .rotationMotor(new SoftRotationMotor())
-                    .limitSwitch(new SoftLimitSwitch(Switch.State.OFF)));
+            Machine.setInstance(Machine.Type.SOFTWARE);
         }
 
         log.info("Running machine...");

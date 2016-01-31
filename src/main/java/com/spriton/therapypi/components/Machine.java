@@ -1,8 +1,11 @@
 package com.spriton.therapypi.components;
 
 import com.google.common.base.Stopwatch;
+import com.google.gson.JsonObject;
 import com.spriton.therapypi.components.hardware.*;
 import com.spriton.therapypi.components.software.*;
+
+import java.util.concurrent.TimeUnit;
 
 public class Machine {
 
@@ -16,7 +19,7 @@ public class Machine {
     public LiftMotor liftMotor;
     public RotationMotor rotationMotor;
     public LimitSwitch limitSwitch;
-    public MotorType activeMotor = MotorType.NONE;
+    public MotorType activeMotor = MotorType.LIFT_MOTOR;
 
     public static enum MotorType { NONE, LIFT_MOTOR, ROTATION_MOTOR };
 
@@ -38,6 +41,7 @@ public class Machine {
     public static void setInstance(Type type) {
         if(type == Type.HARDWARE) {
             Machine.setInstance(Machine.create()
+                    .type(type)
                     .angle(new PotAngle())
                     .joystick(new HardJoystick())
                     .seat(new HardSeat())
@@ -46,6 +50,7 @@ public class Machine {
                     .limitSwitch(new HardLimitSwitch(Switch.State.OFF)));
         } else if(type == Type.SOFTWARE) {
             Machine.setInstance(Machine.create()
+                    .type(type)
                     .angle(new SoftAngle())
                     .joystick(new SoftJoystick())
                     .seat(new SoftSeat())
@@ -54,6 +59,39 @@ public class Machine {
                     .limitSwitch(new SoftLimitSwitch(Switch.State.OFF)));
         }
     }
+
+    public JsonObject toJson() {
+        JsonObject info = new JsonObject();
+        if (type != null) {
+            info.addProperty("type", type.name());
+        }
+        if (seat != null) {
+            info.addProperty("seat", seat.value);
+        }
+        if (joystick != null) {
+            info.addProperty("joystick", joystick.value);
+        }
+        if (angle != null) {
+            info.addProperty("angle", angle.value);
+        }
+        if (rotationMotor != null) {
+            info.addProperty("rotationMotor", rotationMotor.getState().name());
+        }
+        if (Machine.instance() != null) {
+            info.addProperty("activeMotor", activeMotor.name());
+        }
+        if (liftMotor != null) {
+            info.addProperty("liftMotor", liftMotor.getState().name());
+        }
+        if (holdStopwatch != null) {
+            info.addProperty("holdTime", holdStopwatch.elapsed(TimeUnit.SECONDS));
+        }
+        if (sessionStopwatch != null) {
+            info.addProperty("sessionTime", sessionStopwatch.elapsed(TimeUnit.SECONDS));
+        }
+        return info;
+    }
+
 
     public static void setInstance(Machine instance) {
         Machine.instance = instance;
@@ -69,6 +107,11 @@ public class Machine {
 
     public Machine angle(Angle angle) {
         this.angle = angle;
+        return this;
+    }
+
+    public Machine type(Type type) {
+        this.type = type;
         return this;
     }
 

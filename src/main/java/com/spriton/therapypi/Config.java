@@ -10,7 +10,7 @@ public class Config  {
 
     private static Logger log = Logger.getLogger(Config.class);
     private static Configurations configs = new Configurations();
-    public static Configuration config = null;
+    public static Configuration values = null;
 
     public static void init(String[] args, String propertiesFile) throws Exception {
         if(args != null && args.length > 0) {
@@ -18,7 +18,7 @@ public class Config  {
         }
         File file = new File(propertiesFile);
         log.info("Loading properties: " + file.getAbsolutePath());
-        config = configs.properties(file);
+        values = configs.properties(file);
 
     }
 

@@ -14,19 +14,19 @@ public class MainController {
         Config.init(args, "therapypi.properties");
         DataAccess.init();
 
-//        if(Config.values.getBoolean("hardware", false)) {
-//            log.info("Setting up hardware machine");
-//            SpiInterface.init();
-//            Machine.setInstance(Machine.Type.HARDWARE);
-//        } else {
-//            log.info("Setting up software machine");
-//            Machine.setInstance(Machine.Type.SOFTWARE);
-//        }
-//
-//        log.info("Running machine...");
-//        Machine.instance().run();
-//
-//        DataServer.init();
+        if(Config.values.getBoolean("hardware", false)) {
+            log.info("Setting up hardware machine");
+            SpiInterface.init();
+            Machine.setInstance(Machine.Type.HARDWARE);
+        } else {
+            log.info("Setting up software machine");
+            Machine.setInstance(Machine.Type.SOFTWARE);
+        }
+
+        log.info("Running machine...");
+        Machine.instance().run();
+
+        DataServer.init();
 
         //DataAccess.shutdown();
     }

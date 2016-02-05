@@ -4,14 +4,17 @@ import com.google.common.base.Stopwatch;
 import com.google.gson.JsonObject;
 import com.spriton.therapypi.components.hardware.*;
 import com.spriton.therapypi.components.software.*;
+import org.apache.log4j.Logger;
 
 import java.util.concurrent.TimeUnit;
 
 public class Machine {
 
+    private static Logger log = Logger.getLogger(Machine.class);
     private static Machine instance;
     public static enum Type { HARDWARE, SOFTWARE };
 
+    public boolean running = true;
     public Type type = Type.HARDWARE;
     public Angle angle;
     public Joystick joystick;
@@ -26,16 +29,72 @@ public class Machine {
     public Stopwatch sessionStopwatch = Stopwatch.createUnstarted();
     public Stopwatch holdStopwatch = Stopwatch.createUnstarted();
 
-    public void run() {
-
+    public Motor getCurrentMotor() {
+        if(activeMotor == MotorType.LIFT_MOTOR) {
+            return liftMotor;
+        } else if(activeMotor == MotorType.ROTATION_MOTOR) {
+            return rotationMotor;
+        }
+        return null;
     }
 
-    public void reset() {
+    public void run() {
+        running = true;
+
+        new Thread() {
+            @Override
+            public void run() {
+                while(running) {
+                    try {
+
+                        Motor currentMotor = getCurrentMotor();
+                        if(currentMotor != null) {
+                            Motor.State currentState = currentMotor.getState();
+                            Motor.State newState = Motor.getStateFromJoystickValue(joystick.value);
+
+                            if(currentState != newState) {
+                                currentMotor.setState(newState);
+                            }
+
+                            if(activeMotor == MotorType.LIFT_MOTOR) {
+                                seat.update(newState);
+                            } else if(activeMotor == MotorType.ROTATION_MOTOR) {
+                                angle.update(newState);
+                            }
+
+                            if(seat.isMaxHeight()) {
+                                activeMotor = MotorType.ROTATION_MOTOR;
+                            }
+
+                            if(seat.isMaxHeight() || seat.isMinHeight()) {
+                                liftMotor.setState(Motor.State.STOPPED);
+                            }
+
+                            if(angle.isMaxAngle() || angle.isMinAngle()) {
+                                rotationMotor.setState(Motor.State.STOPPED);
+                            }
+                        }
+
+
+                        Thread.sleep(100);
+                    } catch(Exception ex) {
+                        log.error("Error in machine run thread", ex);
+                    }
+                }
+            }
+        }.start();
+    }
+
+    public void reset() throws Exception {
         joystick.reset();
         angle.reset();
-        activeMotor = MotorType.NONE;
+        seat.reset();
+        activeMotor = MotorType.LIFT_MOTOR;
         sessionStopwatch = Stopwatch.createUnstarted();
         holdStopwatch = Stopwatch.createUnstarted();
+        running = false;
+        Thread.sleep(100);
+        run();
     }
 
     public static void setInstance(Type type) {

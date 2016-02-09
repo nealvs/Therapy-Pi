@@ -1,10 +1,13 @@
 package com.spriton.therapypi.database;
 
+import com.google.gson.JsonObject;
+
 import javax.persistence.*;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @Entity
-@Table(name="session")
+@Table(name="patient_session")
 public class PatientSession {
 
     @Id
@@ -39,6 +42,26 @@ public class PatientSession {
     private Date deleted;
 
     public PatientSession() {}
+
+    public JsonObject toJson() {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss a");
+        JsonObject result = new JsonObject();
+        result.addProperty("id", id);
+        result.addProperty("patientId", patientId);
+        result.addProperty("highAngle", highAngle);
+        result.addProperty("lowAngle", lowAngle);
+        result.addProperty("highHoldSeconds", highHoldSeconds);
+        result.addProperty("lowHoldSeconds", lowHoldSeconds);
+        result.addProperty("repetitions", repetitions);
+        if(startTime != null) {
+            result.addProperty("startTime", dateFormat.format(startTime));
+        }
+        if(endTime != null) {
+            result.addProperty("endTime", dateFormat.format(endTime));
+        }
+        result.addProperty("totalSeconds", totalSeconds);
+        return result;
+    }
 
     public Integer getId() {
         return id;

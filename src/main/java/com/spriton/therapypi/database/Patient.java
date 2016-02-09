@@ -1,7 +1,12 @@
 package com.spriton.therapypi.database;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+
 import javax.persistence.*;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name="patient")
@@ -24,7 +29,29 @@ public class Patient {
     @Column(name="deleted")
     private Date deleted;
 
+    @Transient
+    private List<PatientSession> sessions;
+
     public Patient() {}
+
+    public JsonObject toJson() {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        JsonObject json = new JsonObject();
+        json.addProperty("id", id);
+        json.addProperty("firstName", firstName);
+        json.addProperty("lastName", lastName);
+        if(created != null) {
+            json.addProperty("created", dateFormat.format(created));
+        }
+        if(sessions != null) {
+            JsonArray sessionArray = new JsonArray();
+            for(PatientSession session : sessions) {
+                sessionArray.add(session.toJson());
+            }
+            json.add("sessions", sessionArray);
+        }
+        return json;
+    }
 
     public Integer getId() {
         return id;
@@ -72,5 +99,13 @@ public class Patient {
 
     public void setDeleted(Date deleted) {
         this.deleted = deleted;
+    }
+
+    public List<PatientSession> getSessions() {
+        return sessions;
+    }
+
+    public void setSessions(List<PatientSession> sessions) {
+        this.sessions = sessions;
     }
 }

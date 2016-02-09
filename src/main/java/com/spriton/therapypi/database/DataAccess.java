@@ -36,8 +36,8 @@ public class DataAccess {
     public static SessionFactory getSessionFactory() {
         if(sessionFactory == null) {
             Configuration config = new Configuration().configure();
-            config.addPackage("com.spriton.therapypi.database");
             config.addAnnotatedClass(Patient.class);
+            config.addAnnotatedClass(PatientSession.class);
             config.setProperty("hibernate.connection.driver_class", "org.h2.Driver");
             config.setProperty("hibernate.connection.url", Config.values.getString("DATABASE_URL", DEFAULT_DATABASE_URL));
             config.setProperty("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
@@ -57,8 +57,41 @@ public class DataAccess {
         }
     }
 
+    public static List<Patient> getAllPatients() {
+        try(Session session = getSessionFactory().openSession()) {
+            List<Patient> patients = session.createQuery("FROM Patient WHERE deleted IS NULL ORDER BY lastName, firstName").list();
+            return patients;
+        }
+    }
+
+    public static Patient getPatient(int id) {
+        try(Session session = getSessionFactory().openSession()) {
+            Patient patient = session.get(Patient.class, id);
+            if(patient != null) {
+                patient.setSessions(getPatientSessions(patient.getId()));
+            }
+            return patient;
+        }
+    }
+
+    public static PatientSession getSession(int id) {
+        try(Session session = getSessionFactory().openSession()) {
+            return session.get(PatientSession.class, id);
+        }
+    }
+
+    public static List<PatientSession> getPatientSessions(int id) {
+        try(Session session = getSessionFactory().openSession()) {
+            List<PatientSession> sessions = session
+                    .createQuery("FROM PatientSession WHERE patientId = :id AND deleted IS NULL")
+                    .setInteger("id", id)
+                    .list();
+            return sessions;
+        }
+    }
 
     public static void shutdown() {
         getSessionFactory().close();
     }
+
 }

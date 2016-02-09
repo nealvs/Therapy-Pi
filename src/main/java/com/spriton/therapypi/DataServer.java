@@ -1,8 +1,12 @@
 package com.spriton.therapypi;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.spriton.therapypi.components.Machine;
+import com.spriton.therapypi.database.DataAccess;
+import com.spriton.therapypi.database.Patient;
+import com.spriton.therapypi.database.PatientSession;
 import org.apache.log4j.Logger;
 
 import static spark.Spark.*;
@@ -29,8 +33,10 @@ public class DataServer {
         stopSession();
         updateJoystick();
         login();
-        userList();
-        createUser();
+        patientList();
+        patient();
+        session();
+        createPatient();
     }
 
     public static void setupOptions() {
@@ -96,14 +102,6 @@ public class DataServer {
         });
     }
 
-    public static void userList() {
-        get("/userList",  "application/json", (req, res) -> {
-            JsonObject result = new JsonObject();
-
-            return result.toString();
-        });
-    }
-
     public static void login() {
         post("/login",  "application/json", (req, res) -> {
             JsonObject result = new JsonObject();
@@ -112,8 +110,50 @@ public class DataServer {
         });
     }
 
-    public static void createUser() {
-        post("/createUser",  "application/json", (req, res) -> {
+    public static void patientList() {
+        get("/patientList",  "application/json", (req, res) -> {
+            JsonObject result = new JsonObject();
+            JsonArray patients = new JsonArray();
+            for(Patient patient : DataAccess.getAllPatients()) {
+                patients.add(patient.toJson());
+            }
+            result.add("patients", patients);
+            return result.toString();
+        });
+    }
+
+    public static void patient() {
+        get("/patient/:id",  "application/json", (req, res) -> {
+            JsonObject result = new JsonObject();
+            Patient patient = DataAccess.getPatient(Integer.parseInt(req.params("id")));
+            if(patient != null) {
+                result.add("patient", patient.toJson());
+            }
+            return result.toString();
+        });
+    }
+
+    public static void session() {
+        get("/session/:id",  "application/json", (req, res) -> {
+            JsonObject result = new JsonObject();
+            PatientSession session = DataAccess.getSession(Integer.parseInt(req.params("id")));
+            if(session != null) {
+                result.add("session", session.toJson());
+            }
+            return result.toString();
+        });
+    }
+
+    public static void createPatient() {
+        post("/createPatient",  "application/json", (req, res) -> {
+            JsonObject result = new JsonObject();
+
+            return result.toString();
+        });
+    }
+
+    public static void deletePatient() {
+        post("/deletePatient",  "application/json", (req, res) -> {
             JsonObject result = new JsonObject();
 
             return result.toString();

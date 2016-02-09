@@ -9,7 +9,7 @@ CREATE TABLE patient (
     deleted DATETIME
 );
 
-CREATE TABLE session (
+CREATE TABLE patient_session (
     id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
     patient_id INT NOT NULL REFERENCES patient(id),
     high_angle INT,
@@ -24,5 +24,5 @@ CREATE TABLE session (
 );
 
 INSERT INTO patient (id, first_name, last_name) VALUES (1, 'Test', 'User');
-INSERT INTO session (patient_id, high_angle, low_angle, high_hold_seconds, low_hold_seconds, repetitions, start_time, end_time, total_seconds)
+INSERT INTO patient_session (patient_id, high_angle, low_angle, high_hold_seconds, low_hold_seconds, repetitions, start_time, end_time, total_seconds)
              VALUES (1, 110, 5, 10, 4, 20, '2016-01-01 12:00:00', '2016-01-01 12:20:00', 1200);

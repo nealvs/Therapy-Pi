@@ -1,5 +1,7 @@
 package com.spriton.therapypi.components;
 
+import com.spriton.therapypi.Config;
+
 public abstract class Angle {
 
     public double rawValue = 0.0;
@@ -8,6 +10,12 @@ public abstract class Angle {
     public static double DEFAULT_ANGLE = 90;
     public static double MAX_ANGLE = 160;
     public static double MIN_ANGLE = -5;
+
+    public Angle() {
+        DEFAULT_ANGLE = Config.values.getDouble("DEFAULT_ANGLE", DEFAULT_ANGLE);
+        MAX_ANGLE = Config.values.getDouble("MAX_ANGLE", MAX_ANGLE);
+        MIN_ANGLE = Config.values.getDouble("MIN_ANGLE", MIN_ANGLE);
+    }
 
     public void reset() {
         rawValue = 0.0;
@@ -35,4 +43,6 @@ public abstract class Angle {
     public boolean isMinAngle() {
         return value <= MIN_ANGLE;
     }
+
+    public abstract void read() throws Exception;
 }

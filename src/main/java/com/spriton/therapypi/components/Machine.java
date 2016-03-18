@@ -18,24 +18,14 @@ public class Machine {
     public Type type = Type.HARDWARE;
     public Angle angle;
     public Joystick joystick;
-    public Seat seat;
-    public LiftMotor liftMotor;
     public RotationMotor rotationMotor;
-    public LimitSwitch limitSwitch;
-    public MotorType activeMotor = MotorType.LIFT_MOTOR;
-
-    public static enum MotorType { NONE, LIFT_MOTOR, ROTATION_MOTOR };
+    public Switch motorSwitch;
 
     public Stopwatch sessionStopwatch = Stopwatch.createUnstarted();
     public Stopwatch holdStopwatch = Stopwatch.createUnstarted();
 
     public Motor getCurrentMotor() {
-        if(activeMotor == MotorType.LIFT_MOTOR) {
-            return liftMotor;
-        } else if(activeMotor == MotorType.ROTATION_MOTOR) {
-            return rotationMotor;
-        }
-        return null;
+        return rotationMotor;
     }
 
     public void run() {
@@ -46,29 +36,19 @@ public class Machine {
             public void run() {
                 while(running) {
                     try {
+                        joystick.read();
+                        angle.read();
 
                         Motor currentMotor = getCurrentMotor();
                         if(currentMotor != null) {
-                            Motor.State currentState = currentMotor.getState();
-                            Motor.State newState = Motor.getStateFromJoystickValue(joystick.value);
+                            Motor.State currentMotorState = currentMotor.getState();
+                            Motor.State newMotorState = Motor.getStateFromJoystickValue(joystick.value);
 
-                            if(currentState != newState) {
-                                currentMotor.setState(newState);
-                            }
+                            currentMotor.setState(newMotorState);
+                            currentMotor.applyState();
 
-                            if(activeMotor == MotorType.LIFT_MOTOR) {
-                                seat.update(newState);
-                            } else if(activeMotor == MotorType.ROTATION_MOTOR) {
-                                angle.update(newState);
-                            }
-
-                            if(seat.isMaxHeight()) {
-                                activeMotor = MotorType.ROTATION_MOTOR;
-                            }
-
-                            if(seat.isMaxHeight() || seat.isMinHeight()) {
-                                liftMotor.setState(Motor.State.STOPPED);
-                            }
+                            // For software only.  Uses the motor state to update the angle virutally.
+                            angle.update(newMotorState);
 
                             if(angle.isMaxAngle() || angle.isMinAngle()) {
                                 rotationMotor.setState(Motor.State.STOPPED);
@@ -88,8 +68,6 @@ public class Machine {
     public void reset() throws Exception {
         joystick.reset();
         angle.reset();
-        seat.reset();
-        activeMotor = MotorType.LIFT_MOTOR;
         sessionStopwatch = Stopwatch.createUnstarted();
         holdStopwatch = Stopwatch.createUnstarted();
         running = false;
@@ -101,21 +79,17 @@ public class Machine {
         if(type == Type.HARDWARE) {
             Machine.setInstance(Machine.create()
                     .type(type)
-                    .angle(new PotAngle())
+                    .angle(new HardEncoder())
                     .joystick(new HardJoystick())
-                    .seat(new HardSeat())
-                    .liftMotor(new HardLiftMotor())
-                    .rotationMotor(new HardRotationMotor())
-                    .limitSwitch(new HardLimitSwitch(Switch.State.OFF)));
+                    .motorSwitch(new MotorRelaySwitch(Switch.State.OFF))
+                    .rotationMotor(new HardRotationMotor()));
         } else if(type == Type.SOFTWARE) {
             Machine.setInstance(Machine.create()
                     .type(type)
                     .angle(new SoftAngle())
                     .joystick(new SoftJoystick())
-                    .seat(new SoftSeat())
-                    .liftMotor(new SoftLiftMotor())
-                    .rotationMotor(new SoftRotationMotor())
-                    .limitSwitch(new SoftLimitSwitch(Switch.State.OFF)));
+                    .motorSwitch(new SoftSwitch(Switch.State.OFF))
+                    .rotationMotor(new SoftRotationMotor()));
         }
     }
 
@@ -123,9 +97,6 @@ public class Machine {
         JsonObject info = new JsonObject();
         if (type != null) {
             info.addProperty("type", type.name());
-        }
-        if (seat != null) {
-            info.addProperty("seat", seat.value);
         }
         if (joystick != null) {
             info.addProperty("joystick", joystick.value);
@@ -136,11 +107,8 @@ public class Machine {
         if (rotationMotor != null) {
             info.addProperty("rotationMotor", rotationMotor.getState().name());
         }
-        if (Machine.instance() != null) {
-            info.addProperty("activeMotor", activeMotor.name());
-        }
-        if (liftMotor != null) {
-            info.addProperty("liftMotor", liftMotor.getState().name());
+        if (motorSwitch != null) {
+            info.addProperty("motorSwitch", motorSwitch.getState().name());
         }
         if (holdStopwatch != null) {
             info.addProperty("holdTime", holdStopwatch.elapsed(TimeUnit.SECONDS));
@@ -179,23 +147,13 @@ public class Machine {
         return this;
     }
 
-    public Machine seat(Seat seat) {
-        this.seat = seat;
-        return this;
-    }
-
-    public Machine liftMotor(LiftMotor liftMotor) {
-        this.liftMotor = liftMotor;
+    public Machine motorSwitch(Switch motorSwitch) {
+        this.motorSwitch = motorSwitch;
         return this;
     }
 
     public Machine rotationMotor(RotationMotor rotationMotor) {
         this.rotationMotor = rotationMotor;
-        return this;
-    }
-
-    public Machine limitSwitch(LimitSwitch limitSwitch) {
-        this.limitSwitch = limitSwitch;
         return this;
     }
 

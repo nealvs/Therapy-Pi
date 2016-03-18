@@ -4,5 +4,8 @@ import com.spriton.therapypi.components.Angle;
 
 public class SoftAngle extends Angle {
 
+    @Override
+    public void read() throws Exception {
 
+    }
 }

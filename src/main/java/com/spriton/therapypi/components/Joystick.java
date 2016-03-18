@@ -1,5 +1,7 @@
 package com.spriton.therapypi.components;
 
+import java.io.IOException;
+
 public abstract class Joystick {
 
     public double rawValue = 0.0;
@@ -10,4 +12,5 @@ public abstract class Joystick {
         value = 0.0;
     }
 
+    public abstract void read() throws Exception;
 }

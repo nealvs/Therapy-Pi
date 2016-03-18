@@ -31,4 +31,6 @@ public abstract class Motor {
         this.state = state;
     }
 
+    public abstract void applyState() throws Exception;
+
 }

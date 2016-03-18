@@ -13,5 +13,8 @@ public class PotAngle extends Angle {
 
     }
 
+    @Override
+    public void read() {
 
+    }
 }

@@ -18,4 +18,6 @@ public abstract class Switch {
         this.state = state;
     }
 
+    public abstract void applyState() throws Exception;
+
 }

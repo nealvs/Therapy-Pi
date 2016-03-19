@@ -36,6 +36,9 @@ public class Machine {
                         angle.read();
 
                         Motor.State newMotorState = Motor.getStateFromJoystickValue(joystick.value);
+                        if(rotationMotor.getState() != newMotorState) {
+                            log.debug("Changing motor state to: " + newMotorState.name());
+                        }
                         rotationMotor.setState(newMotorState);
 
                         // For software only.  Uses the motor state to update the angle virtually.

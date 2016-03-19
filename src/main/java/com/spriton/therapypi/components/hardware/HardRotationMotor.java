@@ -17,10 +17,9 @@ public class HardRotationMotor extends RotationMotor {
     public void applyState() throws Exception {
         String command = Config.values.getString("DIGITAL_TO_ANALOG_BIN", "dac");
         double outputValue = getValue();
-        //command += " " + outputValue + " " + outputValue;
         Process process = new ProcessBuilder()
                 .redirectErrorStream(true)
-                .command(command)
+                .command(command, Double.toString(outputValue), Double.toString(outputValue))
                 .start();
         InputStream stdOut = process.getInputStream();
         if(!process.waitFor(Config.values.getInt("MOTOR_WRITE_TIMEOUT_MS", 500), TimeUnit.MILLISECONDS)) {

@@ -24,10 +24,6 @@ public class Machine {
     public Stopwatch sessionStopwatch = Stopwatch.createUnstarted();
     public Stopwatch holdStopwatch = Stopwatch.createUnstarted();
 
-    public Motor getCurrentMotor() {
-        return rotationMotor;
-    }
-
     public void run() {
         running = true;
 
@@ -39,24 +35,17 @@ public class Machine {
                         joystick.read();
                         angle.read();
 
-                        Motor currentMotor = getCurrentMotor();
-                        if(currentMotor != null) {
-                            Motor.State currentMotorState = currentMotor.getState();
-                            Motor.State newMotorState = Motor.getStateFromJoystickValue(joystick.value);
+                        Motor.State newMotorState = Motor.getStateFromJoystickValue(joystick.value);
+                        rotationMotor.setState(newMotorState);
 
-                            currentMotor.setState(newMotorState);
-                            currentMotor.applyState();
+                        // For software only.  Uses the motor state to update the angle virtually.
+                        angle.update(newMotorState);
 
-                            // For software only.  Uses the motor state to update the angle virutally.
-                            angle.update(newMotorState);
-
-                            if(angle.isMaxAngle() || angle.isMinAngle()) {
-                                rotationMotor.setState(Motor.State.STOPPED);
-                            }
+                        if(angle.isMaxAngle() || angle.isMinAngle()) {
+                            rotationMotor.setState(Motor.State.STOPPED);
                         }
 
-
-                        Thread.sleep(100);
+                        rotationMotor.applyState();
                     } catch(Exception ex) {
                         log.error("Error in machine run thread", ex);
                     }

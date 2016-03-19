@@ -10,6 +10,8 @@ import java.util.concurrent.TimeUnit;
 public class HardEncoder extends Angle {
 
     private static Logger log = Logger.getLogger(HardJoystick.class);
+
+    // We are getting voltage for now, so these aren't used currently
     private int MAX_RAW = 8_388_607;
     private int MIN_RAW = 16_820;
 
@@ -21,10 +23,10 @@ public class HardEncoder extends Angle {
     @Override
     public void read() throws Exception {
         String command = Config.values.getString("ANALOG_TO_DIGITAL_BIN", "adc");
-        //command += " " + Config.values.getInt("ENCODER_INPUT", 7);
+        int channel = Config.values.getInt("ENCODER_INPUT_CHANNEL", 7);
         Process process = new ProcessBuilder()
                 .redirectErrorStream(true)
-                .command(command)
+                .command(command, Integer.toString(channel))
                 .start();
         InputStream stdOut = process.getInputStream();
         if(!process.waitFor(Config.values.getInt("ENCODER_READ_TIMEOUT_MS", 500), TimeUnit.MILLISECONDS)) {
@@ -35,6 +37,7 @@ public class HardEncoder extends Angle {
             String response = in.readLine();
             log.debug("Encoder Raw Value: " + response);
             this.rawValue = Double.parseDouble(response);
+            this.value = this.rawValue;
         }
     }
 }

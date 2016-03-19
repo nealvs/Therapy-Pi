@@ -9,6 +9,8 @@ import java.util.concurrent.TimeUnit;
 public class HardJoystick extends Joystick {
 
     private static Logger log = Logger.getLogger(HardJoystick.class);
+
+    // We are getting voltage for now, so these aren't used currently
     private int MAX_RAW = 8_388_607;
     private int MIN_RAW = 16_820;
 
@@ -20,10 +22,10 @@ public class HardJoystick extends Joystick {
     @Override
     public void read() throws Exception {
         String command = Config.values.getString("ANALOG_TO_DIGITAL_BIN", "adc");
-        //command += " " + Config.values.getInt("JOYSTICK_INPUT", 6);
+        int channel = Config.values.getInt("JOYSTICK_INPUT_CHANNEL", 6);
         Process process = new ProcessBuilder()
                 .redirectErrorStream(true)
-                .command(command)
+                .command(command, Integer.toString(channel))
                 .start();
         InputStream stdOut = process.getInputStream();
         if(!process.waitFor(Config.values.getInt("JOYSTICK_READ_TIMEOUT_MS", 500), TimeUnit.MILLISECONDS)) {
@@ -34,6 +36,7 @@ public class HardJoystick extends Joystick {
             String response = in.readLine();
             log.debug("Joystick Value: " + response);
             this.rawValue = Double.parseDouble(response);
+            this.value = this.rawValue;
         }
     }
 

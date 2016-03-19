@@ -19,7 +19,7 @@ public class HardRotationMotor extends RotationMotor {
         double outputValue = getValue();
         Process process = new ProcessBuilder()
                 .redirectErrorStream(true)
-                .command(command, Double.toString(outputValue), Double.toString(outputValue))
+                .command("sudo", command, Double.toString(outputValue), Double.toString(outputValue))
                 .start();
         InputStream stdOut = process.getInputStream();
         if(!process.waitFor(Config.values.getInt("MOTOR_WRITE_TIMEOUT_MS", 500), TimeUnit.MILLISECONDS)) {

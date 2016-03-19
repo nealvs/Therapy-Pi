@@ -25,7 +25,7 @@ public class HardJoystick extends Joystick {
         int channel = Config.values.getInt("JOYSTICK_INPUT_CHANNEL", 6);
         Process process = new ProcessBuilder()
                 .redirectErrorStream(true)
-                .command("sudo", command, Integer.toString(channel))
+                .command(command, Integer.toString(channel))
                 .start();
         InputStream stdOut = process.getInputStream();
         if(!process.waitFor(Config.values.getInt("JOYSTICK_READ_TIMEOUT_MS", 500), TimeUnit.MILLISECONDS)) {

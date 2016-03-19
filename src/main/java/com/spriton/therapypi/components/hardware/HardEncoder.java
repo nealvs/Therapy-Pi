@@ -26,7 +26,7 @@ public class HardEncoder extends Angle {
         int channel = Config.values.getInt("ENCODER_INPUT_CHANNEL", 7);
         Process process = new ProcessBuilder()
                 .redirectErrorStream(true)
-                .command("sudo", command, Integer.toString(channel))
+                .command(command, Integer.toString(channel))
                 .start();
         InputStream stdOut = process.getInputStream();
         if(!process.waitFor(Config.values.getInt("ENCODER_READ_TIMEOUT_MS", 500), TimeUnit.MILLISECONDS)) {

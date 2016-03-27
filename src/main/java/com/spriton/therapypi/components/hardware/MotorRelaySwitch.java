@@ -10,8 +10,8 @@ public class MotorRelaySwitch extends Switch {
 
     public MotorRelaySwitch(State state) {
         super(state);
-        //gpio = GpioFactory.getInstance();
-        //switchPin = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_04, "Motor Relay Control", PinState.HIGH);
+        gpio = GpioFactory.getInstance();
+        switchPin = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_04, "Motor Relay Control", PinState.HIGH);
     }
 
     @Override

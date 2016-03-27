@@ -2,6 +2,7 @@ package com.spriton.therapypi.components;
 
 import com.google.common.base.Stopwatch;
 import com.google.gson.JsonObject;
+import com.spriton.therapypi.Config;
 import com.spriton.therapypi.components.hardware.*;
 import com.spriton.therapypi.components.software.*;
 import org.apache.log4j.Logger;
@@ -35,20 +36,28 @@ public class Machine {
                         joystick.read();
                         angle.read();
 
-                        Motor.State newMotorState = Motor.getStateFromJoystickValue(joystick.value);
-                        if(rotationMotor.getState() != newMotorState) {
-                            log.debug("Changing motor state to: " + newMotorState.name());
-                        }
-                        rotationMotor.setState(newMotorState);
+                        Motor.State originalMotorState = rotationMotor.getState();
+
+                        Motor.State joystickMotorState = Motor.getStateFromJoystickValue(joystick.value);
+                        rotationMotor.setState(joystickMotorState);
 
                         // For software only.  Uses the motor state to update the angle virtually.
-                        angle.update(newMotorState);
+                        angle.update(joystickMotorState);
 
                         if(angle.isMaxAngle() || angle.isMinAngle()) {
+                            motorSwitch.setState(Switch.State.OFF);
                             rotationMotor.setState(Motor.State.STOPPED);
+                        } else {
+                            motorSwitch.setState(Switch.State.ON);
                         }
+                        motorSwitch.applyState();
 
+                        if (rotationMotor.getState() != originalMotorState) {
+                            log.debug("Changing motor state to: " + joystickMotorState.name());
+                        }
                         rotationMotor.applyState();
+
+                        Thread.sleep(Config.values.getInt("MACHINE_LOOP_DELAY_MS", 100));
                     } catch(Exception ex) {
                         log.error("Error in machine run thread", ex);
                     }

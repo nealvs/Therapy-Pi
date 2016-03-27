@@ -8,8 +8,8 @@ public abstract class Angle {
     public double value = DEFAULT_ANGLE;
 
     public static double DEFAULT_ANGLE = 90;
-    public static double MAX_ANGLE = 160;
-    public static double MIN_ANGLE = -5;
+    public static double MAX_ANGLE = 170;
+    public static double MIN_ANGLE = -10;
 
     public Angle() {
         DEFAULT_ANGLE = Config.values.getDouble("DEFAULT_ANGLE", DEFAULT_ANGLE);
@@ -33,7 +33,7 @@ public abstract class Angle {
             value += 1;
         }
         // Keep within bounds
-        value = Math.max(-5, Math.min(160, value));
+        value = Math.max(MIN_ANGLE, Math.min(MAX_ANGLE, value));
     }
 
     public boolean isMaxAngle() {

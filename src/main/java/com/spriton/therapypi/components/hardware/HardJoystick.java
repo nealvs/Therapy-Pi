@@ -10,13 +10,8 @@ public class HardJoystick extends Joystick {
 
     private static Logger log = Logger.getLogger(HardJoystick.class);
 
-    // We are getting voltage for now, so these aren't used currently
-    private int MAX_RAW = 8_388_607;
-    private int MIN_RAW = 16_820;
-
     public HardJoystick() {
-        MAX_RAW = Config.values.getInt("MAX_RAW_JOYSTICK_VALUE", MAX_RAW);
-        MIN_RAW = Config.values.getInt("MIN_RAW_JOYSTICK_VALUE", MIN_RAW);
+
     }
 
     @Override

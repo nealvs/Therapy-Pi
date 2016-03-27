@@ -11,13 +11,18 @@ public class HardEncoder extends Angle {
 
     private static Logger log = Logger.getLogger(HardJoystick.class);
 
-    // We are getting voltage for now, so these aren't used currently
-    private int MAX_RAW = 8_388_607;
-    private int MIN_RAW = 16_820;
+    private static double MAX_RAW = 5.0;
+    private static double MIN_RAW = 0.0;
+    private static double DEGREE_RANGE = 365;
+    private double ANGLE_CALIBRATION_VOLTAGE = 2.5;
+    private double ANGLE_CALIBRATION_DEGREE = 1.0;
 
     public HardEncoder() {
-        MAX_RAW = Config.values.getInt("MAX_RAW_ENCODER_VALUE", MAX_RAW);
-        MIN_RAW = Config.values.getInt("MIN_RAW_ENCODER_VALUE", MIN_RAW);
+        DEGREE_RANGE = Config.values.getDouble("ENCODER_DEGREE_RANGE", DEGREE_RANGE);
+        MAX_RAW = Config.values.getDouble("MAX_RAW_ENCODER_VALUE", MAX_RAW);
+        MIN_RAW = Config.values.getDouble("MIN_RAW_ENCODER_VALUE", MIN_RAW);
+        ANGLE_CALIBRATION_DEGREE = Config.values.getDouble("ANGLE_CALIBRATION_DEGREE", ANGLE_CALIBRATION_DEGREE);
+        ANGLE_CALIBRATION_VOLTAGE = Config.values.getDouble("ANGLE_CALIBRATION_VOLTAGE", ANGLE_CALIBRATION_VOLTAGE);
     }
 
     @Override
@@ -28,6 +33,7 @@ public class HardEncoder extends Angle {
                 .redirectErrorStream(true)
                 .command(command, Integer.toString(channel))
                 .start();
+
         InputStream stdOut = process.getInputStream();
         if(!process.waitFor(Config.values.getInt("ENCODER_READ_TIMEOUT_MS", 500), TimeUnit.MILLISECONDS)) {
             log.error("Read from hardware encoder timed out.");
@@ -37,7 +43,17 @@ public class HardEncoder extends Angle {
             String response = in.readLine();
             log.debug("Encoder Raw Value: " + response);
             this.rawValue = Double.parseDouble(response);
-            this.value = this.rawValue;
+            this.value = getAngleFromRawVoltage(this.rawValue, ANGLE_CALIBRATION_VOLTAGE, ANGLE_CALIBRATION_DEGREE);
+            log.debug("Encoder Angle: " + this.value);
         }
     }
+
+    public static double getAngleFromRawVoltage(double voltage, double angleCalibrationVoltage, double angleCalibrationDegree) {
+        voltage = Math.max(MIN_RAW, Math.min(MAX_RAW, voltage));
+        double voltageDifference = voltage - angleCalibrationVoltage;
+        double degreePerVoltage = DEGREE_RANGE / MAX_RAW;
+        double result = voltageDifference * degreePerVoltage + angleCalibrationDegree;
+        return result;
+    }
+
 }

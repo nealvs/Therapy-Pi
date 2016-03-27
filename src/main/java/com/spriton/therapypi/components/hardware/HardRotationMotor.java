@@ -17,6 +17,7 @@ public class HardRotationMotor extends RotationMotor {
     public void applyState() throws Exception {
         String command = Config.values.getString("DIGITAL_TO_ANALOG_BIN", "dac");
         double outputValue = getValue();
+        log.debug("Writing motor value: " + outputValue);
         Process process = new ProcessBuilder()
                 .redirectErrorStream(true)
                 .command(command, Double.toString(outputValue), Double.toString(outputValue))

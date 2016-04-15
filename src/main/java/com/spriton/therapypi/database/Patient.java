@@ -13,7 +13,7 @@ import java.util.List;
 public class Patient {
 
     @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Column(name="id")
     private Integer id;
 
@@ -33,6 +33,13 @@ public class Patient {
     private List<PatientSession> sessions;
 
     public Patient() {}
+
+    public Patient(JsonObject obj) {
+        if(obj.has("firstName")) {
+            this.firstName = obj.get("firstName").getAsString();
+            this.lastName = obj.get("lastName").getAsString();
+        }
+    }
 
     public JsonObject toJson() {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");

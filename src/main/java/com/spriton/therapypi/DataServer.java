@@ -37,6 +37,7 @@ public class DataServer {
         patient();
         session();
         createPatient();
+        deletePatient();
     }
 
     public static void setupOptions() {
@@ -146,16 +147,20 @@ public class DataServer {
 
     public static void createPatient() {
         post("/createPatient",  "application/json", (req, res) -> {
-            JsonObject result = new JsonObject();
-
-            return result.toString();
+            JsonObject requestJson = (JsonObject) new JsonParser().parse(req.body());
+            Patient patient = new Patient(requestJson);
+            DataAccess.createPatient(patient);
+            return patient.toJson();
         });
     }
 
     public static void deletePatient() {
         post("/deletePatient",  "application/json", (req, res) -> {
             JsonObject result = new JsonObject();
-
+            JsonObject requestJson = (JsonObject) new JsonParser().parse(req.body());
+            if(requestJson.has("id")) {
+                DataAccess.deletePatient(requestJson.get("id").getAsInt());
+            }
             return result.toString();
         });
     }

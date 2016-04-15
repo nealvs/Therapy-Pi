@@ -10,6 +10,7 @@ import org.hibernate.cfg.Configuration;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.util.Date;
 import java.util.List;
 
 public class DataAccess {
@@ -71,6 +72,25 @@ public class DataAccess {
                 patient.setSessions(getPatientSessions(patient.getId()));
             }
             return patient;
+        }
+    }
+
+    public static Patient createPatient(Patient patient) {
+        try(Session session = getSessionFactory().openSession()) {
+            patient.setCreated(new Date());
+            session.save(patient);
+            return patient;
+        }
+    }
+
+    public static void deletePatient(int id) {
+        Patient patient = getPatient(id);
+        if(patient != null) {
+            patient.setDeleted(new Date());
+            try(Session session = getSessionFactory().openSession()) {
+                session.update(patient);
+                session.flush();
+            }
         }
     }
 

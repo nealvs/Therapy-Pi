@@ -30,6 +30,7 @@ public class DataServer {
         setupOptions();
         status();
         reset();
+        startSession();
         stopSession();
         updateJoystick();
         login();
@@ -73,6 +74,24 @@ public class DataServer {
             if (Machine.instance() != null) {
                 Machine.instance().reset();
                 result = Machine.instance().toJson();
+            }
+            return result.toString();
+        });
+    }
+
+    public static void startSession() {
+        post("/startSession",  "application/json", (req, res) -> {
+            JsonObject result = new JsonObject();
+            if(req.body() != null) {
+                JsonParser parser = new JsonParser();
+                JsonObject request = (JsonObject) parser.parse(req.body());
+                if(request.has("patientId")) {
+                    PatientSession session = new PatientSession();
+                    Patient patient = DataAccess.getPatient(request.get("patientId").getAsInt());
+                    session.setPatient(patient);
+                    session.start();
+                    Machine.instance().currentSession = session;
+                }
             }
             return result.toString();
         });

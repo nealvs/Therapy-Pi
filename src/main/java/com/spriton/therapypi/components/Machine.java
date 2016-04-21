@@ -5,7 +5,9 @@ import com.google.gson.JsonObject;
 import com.spriton.therapypi.Config;
 import com.spriton.therapypi.components.hardware.*;
 import com.spriton.therapypi.components.software.*;
+import com.spriton.therapypi.database.PatientSession;
 import org.apache.log4j.Logger;
+import org.eclipse.jetty.server.session.JDBCSessionManager;
 
 import java.util.concurrent.TimeUnit;
 
@@ -22,8 +24,7 @@ public class Machine {
     public RotationMotor rotationMotor;
     public Switch motorSwitch;
 
-    public Stopwatch sessionStopwatch = Stopwatch.createUnstarted();
-    public Stopwatch holdStopwatch = Stopwatch.createUnstarted();
+    public PatientSession currentSession = new PatientSession();
 
     public void run() {
         running = true;
@@ -57,6 +58,10 @@ public class Machine {
                         }
                         rotationMotor.applyState();
 
+                        if(currentSession != null) {
+                            currentSession.addAngleReading((int) angle.value);
+                        }
+
                         Thread.sleep(Config.values.getInt("MACHINE_LOOP_DELAY_MS", 100));
                     } catch(Exception ex) {
                         log.error("Error in machine run thread", ex);
@@ -69,8 +74,7 @@ public class Machine {
     public void reset() throws Exception {
         joystick.reset();
         angle.reset();
-        sessionStopwatch = Stopwatch.createUnstarted();
-        holdStopwatch = Stopwatch.createUnstarted();
+        currentSession.reset();
         running = false;
         Thread.sleep(100);
         run();
@@ -96,26 +100,23 @@ public class Machine {
 
     public JsonObject toJson() {
         JsonObject info = new JsonObject();
-        if (type != null) {
+        if(type != null) {
             info.addProperty("type", type.name());
         }
-        if (joystick != null) {
+        if(joystick != null) {
             info.addProperty("joystick", joystick.value);
         }
-        if (angle != null) {
+        if(angle != null) {
             info.addProperty("angle", angle.value);
         }
-        if (rotationMotor != null) {
+        if(rotationMotor != null) {
             info.addProperty("rotationMotor", rotationMotor.getState().name());
         }
-        if (motorSwitch != null) {
+        if(motorSwitch != null) {
             info.addProperty("motorSwitch", motorSwitch.getState().name());
         }
-        if (holdStopwatch != null) {
-            info.addProperty("holdTime", holdStopwatch.elapsed(TimeUnit.SECONDS));
-        }
-        if (sessionStopwatch != null) {
-            info.addProperty("sessionTime", sessionStopwatch.elapsed(TimeUnit.SECONDS));
+        if(currentSession != null) {
+            info.add("session", currentSession.toJson());
         }
         return info;
     }

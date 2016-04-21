@@ -1,10 +1,12 @@
 package com.spriton.therapypi.database;
 
+import com.google.common.base.Stopwatch;
 import com.google.gson.JsonObject;
 
 import javax.persistence.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 @Entity
 @Table(name="patient_session")
@@ -41,7 +43,39 @@ public class PatientSession {
     @Column(name="deleted")
     private Date deleted;
 
+    @Transient
+    private Patient patient;
+    @Transient
+    private Stopwatch sessionStopwatch = Stopwatch.createUnstarted();
+    @Transient
+    private Stopwatch holdStopwatch = Stopwatch.createUnstarted();
+
     public PatientSession() {}
+
+    public void start() {
+        startTime = new Date();
+        sessionStopwatch.start();
+    }
+
+    public void stop() {
+        sessionStopwatch.stop();
+        holdStopwatch.stop();
+    }
+
+    public void reset() {
+        sessionStopwatch = Stopwatch.createUnstarted();
+        holdStopwatch = Stopwatch.createStarted();
+        repetitions = 0;
+    }
+
+    public void addAngleReading(int angle) {
+        if(lowAngle == null) {
+            lowAngle = angle;
+        }
+        if(highAngle == null) {
+            highAngle = angle;
+        }
+    }
 
     public JsonObject toJson() {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss a");
@@ -53,6 +87,9 @@ public class PatientSession {
         result.addProperty("highHoldSeconds", highHoldSeconds);
         result.addProperty("lowHoldSeconds", lowHoldSeconds);
         result.addProperty("repetitions", repetitions);
+        result.addProperty("sessionTime", sessionStopwatch.elapsed(TimeUnit.SECONDS));
+        result.addProperty("holdTime", sessionStopwatch.elapsed(TimeUnit.SECONDS));
+
         if(startTime != null) {
             result.addProperty("startTime", dateFormat.format(startTime));
         }
@@ -60,6 +97,11 @@ public class PatientSession {
             result.addProperty("endTime", dateFormat.format(endTime));
         }
         result.addProperty("totalSeconds", totalSeconds);
+
+        if(patient != null) {
+            result.add("patient", patient.toJson());
+        }
+
         return result;
     }
 
@@ -149,5 +191,29 @@ public class PatientSession {
 
     public void setDeleted(Date deleted) {
         this.deleted = deleted;
+    }
+
+    public Patient getPatient() {
+        return patient;
+    }
+
+    public void setPatient(Patient patient) {
+        this.patient = patient;
+    }
+
+    public Stopwatch getSessionStopwatch() {
+        return sessionStopwatch;
+    }
+
+    public void setSessionStopwatch(Stopwatch sessionStopwatch) {
+        this.sessionStopwatch = sessionStopwatch;
+    }
+
+    public Stopwatch getHoldStopwatch() {
+        return holdStopwatch;
+    }
+
+    public void setHoldStopwatch(Stopwatch holdStopwatch) {
+        this.holdStopwatch = holdStopwatch;
     }
 }

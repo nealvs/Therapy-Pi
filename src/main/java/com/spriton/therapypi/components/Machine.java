@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.spriton.therapypi.Config;
 import com.spriton.therapypi.components.hardware.*;
 import com.spriton.therapypi.components.software.*;
+import com.spriton.therapypi.database.AngleReading;
 import com.spriton.therapypi.database.PatientSession;
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.server.session.JDBCSessionManager;
@@ -59,7 +60,7 @@ public class Machine {
                         rotationMotor.applyState();
 
                         if(currentSession != null) {
-                            currentSession.addAngleReading((int) angle.value);
+                            currentSession.addAngleReading(new AngleReading((int)angle.value));
                         }
 
                         Thread.sleep(Config.values.getInt("MACHINE_LOOP_DELAY_MS", 100));

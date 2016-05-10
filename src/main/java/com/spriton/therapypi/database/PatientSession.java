@@ -2,10 +2,13 @@ package com.spriton.therapypi.database;
 
 import com.google.common.base.Stopwatch;
 import com.google.gson.JsonObject;
+import com.spriton.therapypi.Config;
 
 import javax.persistence.*;
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @Entity
@@ -50,6 +53,10 @@ public class PatientSession {
     @Transient
     private Stopwatch holdStopwatch = Stopwatch.createUnstarted();
 
+    private List<AngleReading> readings = new LinkedList<>();
+    private AngleReading lastHold = null;
+    private boolean angleGoingUp = true;
+
     public PatientSession() {}
 
     public void start() {
@@ -63,17 +70,85 @@ public class PatientSession {
     }
 
     public void reset() {
-        sessionStopwatch = Stopwatch.createUnstarted();
+        sessionStopwatch = Stopwatch.createStarted();
         holdStopwatch = Stopwatch.createStarted();
         repetitions = 0;
+        highAngle = null;
+        lowAngle = null;
     }
 
-    public void addAngleReading(int angle) {
-        if(lowAngle == null) {
-            lowAngle = angle;
+    public void addAngleReading(AngleReading reading) {
+        if(lowAngle == null || reading.angle < lowAngle) {
+            lowAngle = reading.angle;
         }
-        if(highAngle == null) {
-            highAngle = angle;
+        if(highAngle == null || reading.angle > highAngle) {
+            highAngle = reading.angle;
+        }
+
+        readings.add(reading);
+        cleanUpReadings(reading.timestamp);
+
+        LocalDateTime firstReading = readings.get(0).timestamp;
+        LocalDateTime lastReading = readings.get(readings.size() - 1).timestamp;
+        Duration duration = Duration.between(firstReading, lastReading);
+
+        if(duration.toMillis() >= Config.values.getInt("READING_SPAN", 3000) - 1000) {
+            determineHold(reading);
+        }
+    }
+
+    private void determineHold(AngleReading newReading) {
+        if(readings.size() > 0) {
+            int min = Integer.MAX_VALUE;
+            int max = -1;
+            int total = 0;
+
+            int firstAngle = readings.get(0).angle;
+            int lastAngle = readings.get(readings.size() - 1).angle;
+            if(firstAngle != lastAngle) {
+                reportDirection(firstAngle > lastAngle);
+            }
+
+            for (AngleReading reading : readings) {
+                if(reading.angle > max) {
+                    max = reading.angle;
+                }
+                if(reading.angle < min) {
+                    min = reading.angle;
+                }
+                total += reading.angle;
+            }
+            int avg = total / readings.size();
+
+            if(max - min < Config.values.getInt("HOLD_RANGE", 3)) {
+                AngleReading avgReading = new AngleReading(avg);
+                avgReading.timestamp = newReading.timestamp;
+                lastHold = avgReading;
+                holdStopwatch = Stopwatch.createStarted();
+            } else {
+                holdStopwatch = Stopwatch.createUnstarted();
+            }
+        }
+    }
+
+    private void reportDirection(boolean goingUp) {
+        if(angleGoingUp != goingUp) {
+            // Direction has changed
+            angleGoingUp = goingUp;
+            if(angleGoingUp) {
+                repetitions++;
+            }
+        }
+    }
+
+    private void cleanUpReadings(LocalDateTime current) {
+        Iterator<AngleReading> iter = readings.iterator();
+        while(iter.hasNext()) {
+            AngleReading reading = iter.next();
+            Duration duration = Duration.between(reading.timestamp, current);
+            if(duration.toMillis() > Config.values.getInt("READING_SPAN", 3000)) {
+                iter.remove();
+            }
         }
     }
 
@@ -215,5 +290,9 @@ public class PatientSession {
 
     public void setHoldStopwatch(Stopwatch holdStopwatch) {
         this.holdStopwatch = holdStopwatch;
+    }
+
+    public AngleReading getLastHold() {
+        return lastHold;
     }
 }

@@ -1,7 +1,7 @@
 package com.spriton.therapypi;
 
 
-import com.spriton.therapypi.database.AngleReading;
+import com.spriton.therapypi.components.AngleReading;
 import com.spriton.therapypi.database.PatientSession;
 import org.junit.Assert;
 import org.junit.Test;

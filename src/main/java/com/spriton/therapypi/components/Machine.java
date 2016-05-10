@@ -1,16 +1,11 @@
 package com.spriton.therapypi.components;
 
-import com.google.common.base.Stopwatch;
 import com.google.gson.JsonObject;
 import com.spriton.therapypi.Config;
 import com.spriton.therapypi.components.hardware.*;
 import com.spriton.therapypi.components.software.*;
-import com.spriton.therapypi.database.AngleReading;
 import com.spriton.therapypi.database.PatientSession;
 import org.apache.log4j.Logger;
-import org.eclipse.jetty.server.session.JDBCSessionManager;
-
-import java.util.concurrent.TimeUnit;
 
 public class Machine {
 
@@ -46,7 +41,10 @@ public class Machine {
                         // For software only.  Uses the motor state to update the angle virtually.
                         angle.update(joystickMotorState);
 
-                        if(angle.isMaxAngle() || angle.isMinAngle()) {
+                        if(angle.isMaxAngle() && (joystickMotorState.equals(Motor.State.DOWN_SLOW) || joystickMotorState.equals(Motor.State.DOWN_FAST))) {
+                            motorSwitch.setState(Switch.State.OFF);
+                            rotationMotor.setState(Motor.State.STOPPED);
+                        } else if(angle.isMinAngle() && (joystickMotorState.equals(Motor.State.UP_SLOW) || joystickMotorState.equals(Motor.State.UP_FAST))) {
                             motorSwitch.setState(Switch.State.OFF);
                             rotationMotor.setState(Motor.State.STOPPED);
                         } else {

@@ -1,4 +1,4 @@
-package com.spriton.therapypi.database;
+package com.spriton.therapypi.components;
 
 import java.time.LocalDateTime;
 

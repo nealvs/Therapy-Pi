@@ -3,6 +3,7 @@ package com.spriton.therapypi.database;
 import com.google.common.base.Stopwatch;
 import com.google.gson.JsonObject;
 import com.spriton.therapypi.Config;
+import com.spriton.therapypi.components.AngleReading;
 
 import javax.persistence.*;
 import java.text.SimpleDateFormat;
@@ -53,8 +54,11 @@ public class PatientSession {
     @Transient
     private Stopwatch holdStopwatch = Stopwatch.createUnstarted();
 
+    @Transient
     private List<AngleReading> readings = new LinkedList<>();
+    @Transient
     private AngleReading lastHold = null;
+    @Transient
     private boolean angleGoingUp = true;
 
     public PatientSession() {}
@@ -124,7 +128,9 @@ public class PatientSession {
                 AngleReading avgReading = new AngleReading(avg);
                 avgReading.timestamp = newReading.timestamp;
                 lastHold = avgReading;
-                holdStopwatch = Stopwatch.createStarted();
+                if(!holdStopwatch.isRunning()) {
+                    holdStopwatch = Stopwatch.createStarted();
+                }
             } else {
                 holdStopwatch = Stopwatch.createUnstarted();
             }
@@ -163,7 +169,7 @@ public class PatientSession {
         result.addProperty("lowHoldSeconds", lowHoldSeconds);
         result.addProperty("repetitions", repetitions);
         result.addProperty("sessionTime", sessionStopwatch.elapsed(TimeUnit.SECONDS));
-        result.addProperty("holdTime", sessionStopwatch.elapsed(TimeUnit.SECONDS));
+        result.addProperty("holdTime", holdStopwatch.elapsed(TimeUnit.SECONDS));
 
         if(startTime != null) {
             result.addProperty("startTime", dateFormat.format(startTime));

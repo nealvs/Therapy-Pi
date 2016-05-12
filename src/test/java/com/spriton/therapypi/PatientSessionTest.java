@@ -2,6 +2,7 @@ package com.spriton.therapypi;
 
 
 import com.spriton.therapypi.components.AngleReading;
+import com.spriton.therapypi.components.Motor;
 import com.spriton.therapypi.database.PatientSession;
 import org.junit.Assert;
 import org.junit.Test;
@@ -18,37 +19,11 @@ public class PatientSessionTest {
         AngleReading maxReading = new AngleReading(120);
         AngleReading minReading = new AngleReading(1);
 
-        session.addAngleReading(maxReading);
-        session.addAngleReading(minReading);
+        session.addAngleReading(maxReading, Motor.State.STOPPED);
+        session.addAngleReading(minReading, Motor.State.STOPPED);
 
         Assert.assertEquals(maxReading.angle, session.getHighAngle().intValue());
         Assert.assertEquals(minReading.angle, session.getLowAngle().intValue());
-    }
-
-    @Test
-    public void testNoHold() throws Exception {
-        Config.init(null, "therapypi.properties");
-
-        AngleReading firstReading = new AngleReading(100);
-        firstReading.timestamp = LocalDateTime.now();
-        AngleReading secondReading = new AngleReading(101);
-        secondReading.timestamp = firstReading.timestamp.plusSeconds(1);
-        AngleReading thirdReading = new AngleReading(103);
-        thirdReading.timestamp = secondReading.timestamp.plusSeconds(1);
-        AngleReading fourthReading = new AngleReading(103);
-        fourthReading.timestamp = thirdReading.timestamp.plusSeconds(1);
-        AngleReading fifthReading = new AngleReading(103);
-        fifthReading.timestamp = fourthReading.timestamp.plusSeconds(1);
-
-        PatientSession session = new PatientSession();
-        session.addAngleReading(firstReading);
-        session.addAngleReading(secondReading);
-        session.addAngleReading(thirdReading);
-        Assert.assertEquals(false, session.getHoldStopwatch().isRunning());
-
-        session.addAngleReading(fourthReading);
-        session.addAngleReading(fifthReading);
-        Assert.assertEquals(true, session.getHoldStopwatch().isRunning());
     }
 
     @Test
@@ -57,48 +32,47 @@ public class PatientSessionTest {
 
         AngleReading firstReading = new AngleReading(100);
         firstReading.timestamp = LocalDateTime.now();
-        AngleReading secondReading = new AngleReading(101);
-        secondReading.timestamp = firstReading.timestamp.plusSeconds(1);
-        AngleReading thirdReading = new AngleReading(102);
-        thirdReading.timestamp = secondReading.timestamp.plusSeconds(1);
-
         PatientSession session = new PatientSession();
-        session.addAngleReading(firstReading);
-        session.addAngleReading(secondReading);
-        session.addAngleReading(thirdReading);
-
-        Assert.assertEquals(thirdReading.angle, session.getHighAngle().intValue());
-        Assert.assertEquals(firstReading.angle, session.getLowAngle().intValue());
-
-        Assert.assertEquals(101, session.getLastHold().angle);
+        session.addAngleReading(firstReading, Motor.State.UP_FAST);
+        Assert.assertEquals(false, session.getHoldStopwatch().isRunning());
+        session.addAngleReading(firstReading, Motor.State.STOPPED);
+        Assert.assertEquals(true, session.getHoldStopwatch().isRunning());
+        session.addAngleReading(firstReading, Motor.State.UP_SLOW);
+        Assert.assertEquals(false, session.getHoldStopwatch().isRunning());
+        session.addAngleReading(firstReading, Motor.State.STOPPED);
+        session.addAngleReading(firstReading, Motor.State.DOWN_SLOW);
+        Assert.assertEquals(false, session.getHoldStopwatch().isRunning());
+        session.addAngleReading(firstReading, Motor.State.DOWN_FAST);
+        Assert.assertEquals(false, session.getHoldStopwatch().isRunning());
+        session.addAngleReading(firstReading, Motor.State.STOPPED);
         Assert.assertEquals(true, session.getHoldStopwatch().isRunning());
     }
 
     @Test
-    public void testRepitition() throws Exception {
+    public void testRepetition() throws Exception {
         Config.init(null, "therapypi.properties");
 
-        AngleReading firstReading = new AngleReading(100);
+        AngleReading firstReading = new AngleReading(103);
         firstReading.timestamp = LocalDateTime.now();
         AngleReading secondReading = new AngleReading(101);
         secondReading.timestamp = firstReading.timestamp.plusSeconds(1);
-        AngleReading thirdReading = new AngleReading(103);
+        AngleReading thirdReading = new AngleReading(100);
         thirdReading.timestamp = secondReading.timestamp.plusSeconds(1);
 
-        AngleReading fourthReading = new AngleReading(102);
+        AngleReading fourthReading = new AngleReading(100);
         fourthReading.timestamp = thirdReading.timestamp.plusSeconds(1);
         AngleReading fifthReading = new AngleReading(101);
         fifthReading.timestamp = fourthReading.timestamp.plusSeconds(1);
-        AngleReading sixthReading = new AngleReading(100);
+        AngleReading sixthReading = new AngleReading(103);
         sixthReading.timestamp = fifthReading.timestamp.plusSeconds(1);
 
         PatientSession session = new PatientSession();
-        session.addAngleReading(firstReading);
-        session.addAngleReading(secondReading);
-        session.addAngleReading(thirdReading);
-        session.addAngleReading(fourthReading);
-        session.addAngleReading(fifthReading);
-        session.addAngleReading(sixthReading);
+        session.addAngleReading(firstReading, Motor.State.STOPPED);
+        session.addAngleReading(secondReading, Motor.State.STOPPED);
+        session.addAngleReading(thirdReading, Motor.State.STOPPED);
+        session.addAngleReading(fourthReading, Motor.State.STOPPED);
+        session.addAngleReading(fifthReading, Motor.State.STOPPED);
+        session.addAngleReading(sixthReading, Motor.State.STOPPED);
         Assert.assertEquals(1, session.getRepetitions());
     }
 

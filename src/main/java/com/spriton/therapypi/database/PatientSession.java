@@ -4,6 +4,8 @@ import com.google.common.base.Stopwatch;
 import com.google.gson.JsonObject;
 import com.spriton.therapypi.Config;
 import com.spriton.therapypi.components.AngleReading;
+import com.spriton.therapypi.components.Motor;
+import org.apache.log4j.Logger;
 
 import javax.persistence.*;
 import java.text.SimpleDateFormat;
@@ -15,6 +17,8 @@ import java.util.concurrent.TimeUnit;
 @Entity
 @Table(name="patient_session")
 public class PatientSession {
+
+    private static Logger log = Logger.getLogger(PatientSession.class);
 
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
@@ -81,7 +85,7 @@ public class PatientSession {
         lowAngle = null;
     }
 
-    public void addAngleReading(AngleReading reading) {
+    public void addAngleReading(AngleReading reading, Motor.State state) {
         if(lowAngle == null || reading.angle < lowAngle) {
             lowAngle = reading.angle;
         }
@@ -96,56 +100,69 @@ public class PatientSession {
         LocalDateTime lastReading = readings.get(readings.size() - 1).timestamp;
         Duration duration = Duration.between(firstReading, lastReading);
 
-        if(duration.toMillis() >= Config.values.getInt("READING_SPAN", 3000) - 1000) {
-            determineHold(reading);
+        updateRepetitions();
+
+        if(state == Motor.State.STOPPED) {
+            if (!holdStopwatch.isRunning()) {
+                holdStopwatch = Stopwatch.createStarted();
+            }
+        } else {
+            holdStopwatch = Stopwatch.createUnstarted();
         }
+
+//        if(duration.toMillis() >= Config.values.getInt("READING_SPAN", 3000) - 1000) {
+//            determineHold(reading);
+//        }
     }
 
-    private void determineHold(AngleReading newReading) {
+    private void updateRepetitions() {
         if(readings.size() > 0) {
-            int min = Integer.MAX_VALUE;
-            int max = -1;
-            int total = 0;
-
             int firstAngle = readings.get(0).angle;
             int lastAngle = readings.get(readings.size() - 1).angle;
-            if(firstAngle != lastAngle) {
-                reportDirection(firstAngle > lastAngle);
-            }
-
-            for (AngleReading reading : readings) {
-                if(reading.angle > max) {
-                    max = reading.angle;
+            boolean goingUp = firstAngle < lastAngle;
+            if (firstAngle != lastAngle) {
+                if(angleGoingUp != goingUp) {
+                    // Direction has changed
+                    angleGoingUp = goingUp;
+                    if(angleGoingUp) {
+                        repetitions++;
+                    }
                 }
-                if(reading.angle < min) {
-                    min = reading.angle;
-                }
-                total += reading.angle;
-            }
-            int avg = total / readings.size();
-
-            if(max - min < Config.values.getInt("HOLD_RANGE", 3)) {
-                AngleReading avgReading = new AngleReading(avg);
-                avgReading.timestamp = newReading.timestamp;
-                lastHold = avgReading;
-                if(!holdStopwatch.isRunning()) {
-                    holdStopwatch = Stopwatch.createStarted();
-                }
-            } else {
-                holdStopwatch = Stopwatch.createUnstarted();
             }
         }
     }
 
-    private void reportDirection(boolean goingUp) {
-        if(angleGoingUp != goingUp) {
-            // Direction has changed
-            angleGoingUp = goingUp;
-            if(angleGoingUp) {
-                repetitions++;
-            }
-        }
-    }
+//    private void determineHold(AngleReading newReading) {
+//        if(readings.size() > 0) {
+//            int min = Integer.MAX_VALUE;
+//            int max = -Integer.MAX_VALUE;
+//            int total = 0;
+//
+//            for (AngleReading reading : readings) {
+//                if(reading.angle > max) {
+//                    max = reading.angle;
+//                }
+//                if(reading.angle < min) {
+//                    min = reading.angle;
+//                }
+//                total += reading.angle;
+//            }
+//            int avg = total / readings.size();
+//
+//            if(max - min < Config.values.getInt("HOLD_RANGE", 3)) {
+//                AngleReading avgReading = new AngleReading(avg);
+//                avgReading.timestamp = newReading.timestamp;
+//                lastHold = avgReading;
+//                if(!holdStopwatch.isRunning()) {
+//                    log.info("Hold Stopwatch Created. Started.");
+//                    holdStopwatch = Stopwatch.createStarted();
+//                }
+//            } else {
+//                log.info("Hold Stopwatch Stopped.");
+//                holdStopwatch = Stopwatch.createUnstarted();
+//            }
+//        }
+//    }
 
     private void cleanUpReadings(LocalDateTime current) {
         Iterator<AngleReading> iter = readings.iterator();

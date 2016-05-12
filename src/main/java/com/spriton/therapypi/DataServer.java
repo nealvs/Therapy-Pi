@@ -100,7 +100,9 @@ public class DataServer {
     public static void stopSession() {
         post("/stopSession",  "application/json", (req, res) -> {
             JsonObject result = new JsonObject();
-
+            Machine.instance().currentSession.stop();
+            // Record
+            Machine.instance().currentSession = null;
             return result.toString();
         });
     }

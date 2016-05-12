@@ -86,11 +86,17 @@ public class PatientSession {
     }
 
     public void addAngleReading(AngleReading reading, Motor.State state) {
-        if(lowAngle == null || reading.angle < lowAngle) {
+        if(lowAngle == null || reading.angle <= lowAngle) {
             lowAngle = reading.angle;
+            if(lowHoldSeconds < holdStopwatch.elapsed(TimeUnit.SECONDS)) {
+                lowHoldSeconds = (int) holdStopwatch.elapsed(TimeUnit.SECONDS);
+            }
         }
-        if(highAngle == null || reading.angle > highAngle) {
+        if(highAngle == null || reading.angle >= highAngle) {
             highAngle = reading.angle;
+            if(highHoldSeconds > holdStopwatch.elapsed(TimeUnit.SECONDS)) {
+                highHoldSeconds = (int) holdStopwatch.elapsed(TimeUnit.SECONDS);
+            }
         }
 
         readings.add(reading);
@@ -102,7 +108,7 @@ public class PatientSession {
 
         updateRepetitions();
 
-        if(state == Motor.State.STOPPED) {
+        if(state != null && state == Motor.State.STOPPED) {
             if (!holdStopwatch.isRunning()) {
                 holdStopwatch = Stopwatch.createStarted();
             }

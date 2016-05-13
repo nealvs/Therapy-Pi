@@ -14,6 +14,11 @@ public class PotAngle extends Angle {
     }
 
     @Override
+    public void calculateAndSetAverage() {
+        setAveragedValue(this.value);
+    }
+
+    @Override
     public void read() {
 
     }

@@ -2,6 +2,7 @@ package com.spriton.therapypi.components.hardware;
 
 import com.spriton.therapypi.Config;
 import com.spriton.therapypi.components.Angle;
+import com.spriton.therapypi.components.AngleReading;
 import org.apache.log4j.Logger;
 
 import java.io.*;
@@ -45,6 +46,23 @@ public class HardEncoder extends Angle {
             this.rawValue = Double.parseDouble(response);
             this.value = getAngleFromRawVoltage(this.rawValue, ANGLE_CALIBRATION_VOLTAGE, ANGLE_CALIBRATION_DEGREE);
             log.debug("Encoder Angle: " + this.value);
+
+            AngleReading reading = new AngleReading((int)this.value);
+            readings.add(reading);
+            cleanUpReadings(reading.timestamp);
+        }
+    }
+
+    @Override
+    public void calculateAndSetAverage() {
+        if(readings.size() > 0) {
+            double total = 0.0;
+            for(AngleReading reading : readings) {
+                total += reading.angle;
+            }
+            setAveragedValue(total / readings.size());
+        } else {
+            setAveragedValue(this.value);
         }
     }
 

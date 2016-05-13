@@ -32,6 +32,7 @@ public class Machine {
                     try {
                         joystick.read();
                         angle.read();
+                        angle.calculateAndSetAverage();
 
                         Motor.State originalMotorState = rotationMotor.getState();
 
@@ -58,7 +59,7 @@ public class Machine {
                         rotationMotor.applyState();
 
                         if(currentSession != null) {
-                            currentSession.addAngleReading(new AngleReading((int)angle.value), rotationMotor.getState());
+                            currentSession.update(new AngleReading((int) angle.getAveragedValue()), rotationMotor.getState());
                         }
 
                         Thread.sleep(Config.values.getInt("MACHINE_LOOP_DELAY_MS", 100));

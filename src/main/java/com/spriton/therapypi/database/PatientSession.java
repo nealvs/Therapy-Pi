@@ -3,6 +3,7 @@ package com.spriton.therapypi.database;
 import com.google.common.base.Stopwatch;
 import com.google.gson.JsonObject;
 import com.spriton.therapypi.Config;
+import com.spriton.therapypi.components.Angle;
 import com.spriton.therapypi.components.AngleReading;
 import com.spriton.therapypi.components.Motor;
 import org.apache.log4j.Logger;
@@ -60,6 +61,7 @@ public class PatientSession {
 
     @Transient
     private List<AngleReading> readings = new LinkedList<>();
+
     @Transient
     private AngleReading lastHold = null;
     @Transient
@@ -85,27 +87,23 @@ public class PatientSession {
         lowAngle = null;
     }
 
-    public void addAngleReading(AngleReading reading, Motor.State state) {
-        if(lowAngle == null || reading.angle <= lowAngle) {
-            lowAngle = reading.angle;
+    public void update(AngleReading angleReading, Motor.State state) {
+        int angleValue = angleReading.angle;
+        if(lowAngle == null || angleValue <= lowAngle) {
+            lowAngle = angleValue;
             if(lowHoldSeconds < holdStopwatch.elapsed(TimeUnit.SECONDS)) {
                 lowHoldSeconds = (int) holdStopwatch.elapsed(TimeUnit.SECONDS);
             }
         }
-        if(highAngle == null || reading.angle >= highAngle) {
-            highAngle = reading.angle;
+        if(highAngle == null || angleValue >= highAngle) {
+            highAngle = angleValue;
             if(highHoldSeconds > holdStopwatch.elapsed(TimeUnit.SECONDS)) {
                 highHoldSeconds = (int) holdStopwatch.elapsed(TimeUnit.SECONDS);
             }
         }
 
-        readings.add(reading);
-        cleanUpReadings(reading.timestamp);
-
-        LocalDateTime firstReading = readings.get(0).timestamp;
-        LocalDateTime lastReading = readings.get(readings.size() - 1).timestamp;
-        Duration duration = Duration.between(firstReading, lastReading);
-
+        readings.add(angleReading);
+        cleanUpReadings(angleReading.timestamp);
         updateRepetitions();
 
         if(state != null && state == Motor.State.STOPPED) {
@@ -134,6 +132,17 @@ public class PatientSession {
                         repetitions++;
                     }
                 }
+            }
+        }
+    }
+
+    public void cleanUpReadings(LocalDateTime current) {
+        Iterator<AngleReading> iter = readings.iterator();
+        while(iter.hasNext()) {
+            AngleReading reading = iter.next();
+            Duration duration = Duration.between(reading.timestamp, current);
+            if(duration.toMillis() > Config.values.getInt("SESSION_READING_SPAN", 3000)) {
+                iter.remove();
             }
         }
     }
@@ -170,16 +179,6 @@ public class PatientSession {
 //        }
 //    }
 
-    private void cleanUpReadings(LocalDateTime current) {
-        Iterator<AngleReading> iter = readings.iterator();
-        while(iter.hasNext()) {
-            AngleReading reading = iter.next();
-            Duration duration = Duration.between(reading.timestamp, current);
-            if(duration.toMillis() > Config.values.getInt("READING_SPAN", 3000)) {
-                iter.remove();
-            }
-        }
-    }
 
     public JsonObject toJson() {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss a");

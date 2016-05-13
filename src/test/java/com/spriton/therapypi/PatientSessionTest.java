@@ -19,8 +19,8 @@ public class PatientSessionTest {
         AngleReading maxReading = new AngleReading(120);
         AngleReading minReading = new AngleReading(1);
 
-        session.addAngleReading(maxReading, Motor.State.STOPPED);
-        session.addAngleReading(minReading, Motor.State.STOPPED);
+        session.update(maxReading, Motor.State.STOPPED);
+        session.update(minReading, Motor.State.STOPPED);
 
         Assert.assertEquals(maxReading.angle, session.getHighAngle().intValue());
         Assert.assertEquals(minReading.angle, session.getLowAngle().intValue());
@@ -33,18 +33,18 @@ public class PatientSessionTest {
         AngleReading firstReading = new AngleReading(100);
         firstReading.timestamp = LocalDateTime.now();
         PatientSession session = new PatientSession();
-        session.addAngleReading(firstReading, Motor.State.UP_FAST);
+        session.update(firstReading, Motor.State.UP_FAST);
         Assert.assertEquals(false, session.getHoldStopwatch().isRunning());
-        session.addAngleReading(firstReading, Motor.State.STOPPED);
+        session.update(firstReading, Motor.State.STOPPED);
         Assert.assertEquals(true, session.getHoldStopwatch().isRunning());
-        session.addAngleReading(firstReading, Motor.State.UP_SLOW);
+        session.update(firstReading, Motor.State.UP_SLOW);
         Assert.assertEquals(false, session.getHoldStopwatch().isRunning());
-        session.addAngleReading(firstReading, Motor.State.STOPPED);
-        session.addAngleReading(firstReading, Motor.State.DOWN_SLOW);
+        session.update(firstReading, Motor.State.STOPPED);
+        session.update(firstReading, Motor.State.DOWN_SLOW);
         Assert.assertEquals(false, session.getHoldStopwatch().isRunning());
-        session.addAngleReading(firstReading, Motor.State.DOWN_FAST);
+        session.update(firstReading, Motor.State.DOWN_FAST);
         Assert.assertEquals(false, session.getHoldStopwatch().isRunning());
-        session.addAngleReading(firstReading, Motor.State.STOPPED);
+        session.update(firstReading, Motor.State.STOPPED);
         Assert.assertEquals(true, session.getHoldStopwatch().isRunning());
     }
 
@@ -67,12 +67,12 @@ public class PatientSessionTest {
         sixthReading.timestamp = fifthReading.timestamp.plusSeconds(1);
 
         PatientSession session = new PatientSession();
-        session.addAngleReading(firstReading, Motor.State.STOPPED);
-        session.addAngleReading(secondReading, Motor.State.STOPPED);
-        session.addAngleReading(thirdReading, Motor.State.STOPPED);
-        session.addAngleReading(fourthReading, Motor.State.STOPPED);
-        session.addAngleReading(fifthReading, Motor.State.STOPPED);
-        session.addAngleReading(sixthReading, Motor.State.STOPPED);
+        session.update(firstReading, Motor.State.STOPPED);
+        session.update(secondReading, Motor.State.STOPPED);
+        session.update(thirdReading, Motor.State.STOPPED);
+        session.update(fourthReading, Motor.State.STOPPED);
+        session.update(fifthReading, Motor.State.STOPPED);
+        session.update(sixthReading, Motor.State.STOPPED);
         Assert.assertEquals(1, session.getRepetitions());
     }
 

@@ -2,14 +2,24 @@ package com.spriton.therapypi.components;
 
 import com.spriton.therapypi.Config;
 
+import javax.persistence.Transient;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+
 public abstract class Angle {
 
     public double rawValue = 0.0;
     public double value = DEFAULT_ANGLE;
+    private double averagedValue = DEFAULT_ANGLE;
 
     public static double DEFAULT_ANGLE = 90;
     public static double MAX_ANGLE = 170;
     public static double MIN_ANGLE = -10;
+
+    protected List<AngleReading> readings = new LinkedList<>();
 
     public Angle() {
         DEFAULT_ANGLE = Config.values.getDouble("DEFAULT_ANGLE", DEFAULT_ANGLE);
@@ -21,6 +31,19 @@ public abstract class Angle {
         rawValue = 0.0;
         value = DEFAULT_ANGLE;
     }
+
+    public void cleanUpReadings(LocalDateTime current) {
+        Iterator<AngleReading> iter = readings.iterator();
+        while(iter.hasNext()) {
+            AngleReading reading = iter.next();
+            Duration duration = Duration.between(reading.timestamp, current);
+            if(duration.toMillis() > Config.values.getInt("RAW_READING_SPAN", 1000)) {
+                iter.remove();
+            }
+        }
+    }
+
+    public abstract void calculateAndSetAverage();
 
     public void update(Motor.State motorState) {
         if(motorState == Motor.State.UP_SLOW) {
@@ -37,12 +60,20 @@ public abstract class Angle {
     }
 
     public boolean isMaxAngle() {
-        return value >= MAX_ANGLE;
+        return getAveragedValue() >= MAX_ANGLE;
     }
 
     public boolean isMinAngle() {
-        return value <= MIN_ANGLE;
+        return getAveragedValue() <= MIN_ANGLE;
     }
 
     public abstract void read() throws Exception;
+
+    public double getAveragedValue() {
+        return averagedValue;
+    }
+
+    public void setAveragedValue(double averagedValue) {
+        this.averagedValue = averagedValue;
+    }
 }

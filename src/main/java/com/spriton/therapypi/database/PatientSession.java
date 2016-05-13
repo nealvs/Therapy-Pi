@@ -124,7 +124,7 @@ public class PatientSession {
             int firstAngle = readings.get(0).angle;
             int lastAngle = readings.get(readings.size() - 1).angle;
             boolean goingUp = firstAngle < lastAngle;
-            if (firstAngle != lastAngle) {
+            if (firstAngle != lastAngle && Math.abs(firstAngle - lastAngle) > Config.values.getInt("DIRECTION_CHANGE_MINIMUM", 5)) {
                 if(angleGoingUp != goingUp) {
                     // Direction has changed
                     angleGoingUp = goingUp;
@@ -132,6 +132,7 @@ public class PatientSession {
                         repetitions++;
                     }
                 }
+                holdStopwatch = Stopwatch.createStarted();
             }
         }
     }

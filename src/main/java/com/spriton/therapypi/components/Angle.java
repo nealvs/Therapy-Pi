@@ -37,7 +37,7 @@ public abstract class Angle {
         while(iter.hasNext()) {
             AngleReading reading = iter.next();
             Duration duration = Duration.between(reading.timestamp, current);
-            if(duration.toMillis() > Config.values.getInt("RAW_READING_SPAN", 1000)) {
+            if(duration.toMillis() > Config.values.getInt("RAW_READING_SPAN", 5000)) {
                 iter.remove();
             }
         }

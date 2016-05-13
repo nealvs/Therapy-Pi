@@ -15,7 +15,7 @@ public class HardEncoder extends Angle {
     private static double MAX_RAW = 5.0;
     private static double MIN_RAW = 0.0;
     private static double DEGREE_RANGE = 365;
-    private double ANGLE_CALIBRATION_VOLTAGE = 2.5;
+    private double ANGLE_CALIBRATION_VOLTAGE = 2.0;
     private double ANGLE_CALIBRATION_DEGREE = 1.0;
 
     public HardEncoder() {

@@ -5,6 +5,7 @@ import org.apache.commons.configuration2.builder.fluent.Configurations;
 import org.apache.log4j.Logger;
 
 import java.io.File;
+import java.util.Iterator;
 
 public class Config  {
 
@@ -20,6 +21,11 @@ public class Config  {
         log.info("Loading properties: " + file.getAbsolutePath());
         values = configs.properties(file);
 
+        Iterator<String> keys = values.getKeys();
+        while(keys.hasNext()) {
+            String key = keys.next();
+            log.info(key + ": " + values.getString(key));
+        }
     }
 
 }

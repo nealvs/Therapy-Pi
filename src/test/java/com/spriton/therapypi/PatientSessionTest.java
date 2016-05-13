@@ -63,7 +63,7 @@ public class PatientSessionTest {
         fourthReading.timestamp = thirdReading.timestamp.plusSeconds(1);
         AngleReading fifthReading = new AngleReading(101);
         fifthReading.timestamp = fourthReading.timestamp.plusSeconds(1);
-        AngleReading sixthReading = new AngleReading(103);
+        AngleReading sixthReading = new AngleReading(110);
         sixthReading.timestamp = fifthReading.timestamp.plusSeconds(1);
 
         PatientSession session = new PatientSession();

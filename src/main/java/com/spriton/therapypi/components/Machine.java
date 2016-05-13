@@ -107,7 +107,7 @@ public class Machine {
             info.addProperty("joystick", joystick.value);
         }
         if(angle != null) {
-            info.addProperty("angle", angle.value);
+            info.addProperty("angle", angle.getAveragedValue());
         }
         if(rotationMotor != null) {
             info.addProperty("rotationMotor", rotationMotor.getState().name());

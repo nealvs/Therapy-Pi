@@ -98,6 +98,11 @@ public class Machine {
         }
     }
 
+    public void calibrate() {
+        angle.ANGLE_CALIBRATION_VOLTAGE = angle.rawValue;
+        // Todo: Persist to db or config file
+    }
+
     public JsonObject toJson() {
         JsonObject info = new JsonObject();
         if(type != null) {
@@ -109,6 +114,10 @@ public class Machine {
         if(angle != null) {
             info.addProperty("angle", angle.getAveragedValue());
         }
+        if(angle != null) {
+            info.addProperty("rawAngle", angle.rawValue);
+            info.addProperty("angleCalibrationVoltage", angle.ANGLE_CALIBRATION_VOLTAGE);
+        }
         if(rotationMotor != null) {
             info.addProperty("rotationMotor", rotationMotor.getState().name());
         }
@@ -118,6 +127,7 @@ public class Machine {
         if(currentSession != null) {
             info.add("session", currentSession.toJson());
         }
+
         return info;
     }
 

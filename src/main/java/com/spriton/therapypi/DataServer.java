@@ -37,6 +37,7 @@ public class DataServer {
         patientList();
         patient();
         session();
+        settings();
         createPatient();
         deletePatient();
     }
@@ -152,6 +153,13 @@ public class DataServer {
                 result.add("patient", patient.toJson());
             }
             return result.toString();
+        });
+    }
+
+    public static void settings() {
+        post("/settings/calibrate",  "application/json", (req, res) -> {
+            Machine.instance().calibrate();
+            return Machine.instance().toJson();
         });
     }
 

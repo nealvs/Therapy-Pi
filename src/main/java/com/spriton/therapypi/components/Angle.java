@@ -11,7 +11,7 @@ import java.util.List;
 
 public abstract class Angle {
 
-    public double rawValue = 0.0;
+    public double rawValue = 2.0;
     public double value = DEFAULT_ANGLE;
     private double averagedValue = DEFAULT_ANGLE;
 
@@ -19,12 +19,18 @@ public abstract class Angle {
     public static double MAX_ANGLE = 170;
     public static double MIN_ANGLE = -10;
 
+    public double ANGLE_CALIBRATION_VOLTAGE = 2.0;
+    public double ANGLE_CALIBRATION_DEGREE = 1.0;
+
     protected List<AngleReading> readings = new LinkedList<>();
 
     public Angle() {
         DEFAULT_ANGLE = Config.values.getDouble("DEFAULT_ANGLE", DEFAULT_ANGLE);
         MAX_ANGLE = Config.values.getDouble("MAX_ANGLE", MAX_ANGLE);
         MIN_ANGLE = Config.values.getDouble("MIN_ANGLE", MIN_ANGLE);
+
+        ANGLE_CALIBRATION_DEGREE = Config.values.getDouble("ANGLE_CALIBRATION_DEGREE", ANGLE_CALIBRATION_DEGREE);
+        ANGLE_CALIBRATION_VOLTAGE = Config.values.getDouble("ANGLE_CALIBRATION_VOLTAGE", ANGLE_CALIBRATION_VOLTAGE);
     }
 
     public void reset() {

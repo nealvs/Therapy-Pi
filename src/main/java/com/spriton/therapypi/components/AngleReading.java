@@ -11,4 +11,7 @@ public class AngleReading {
         this.angle = angle;
     }
 
+    public AngleReading(int angle, LocalDateTime timestamp) {
+        this.angle = angle;
+    }
 }

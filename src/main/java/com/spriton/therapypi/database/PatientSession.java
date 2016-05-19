@@ -103,8 +103,8 @@ public class PatientSession {
         }
 
         readings.add(angleReading);
-        cleanUpReadings(angleReading.timestamp);
-        updateRepetitions();
+        cleanUpReadingsAndUpdateRepetitions(angleReading.timestamp);
+        //updateRepetitions();
 
         if(state != null && state == Motor.State.STOPPED) {
             if (!holdStopwatch.isRunning()) {
@@ -137,14 +137,49 @@ public class PatientSession {
         }
     }
 
-    public void cleanUpReadings(LocalDateTime current) {
-        Iterator<AngleReading> iter = readings.iterator();
-        while(iter.hasNext()) {
-            AngleReading reading = iter.next();
-            Duration duration = Duration.between(reading.timestamp, current);
-            if(duration.toMillis() > Config.values.getInt("SESSION_READING_SPAN", 3000)) {
-                iter.remove();
+    public void cleanUpReadingsAndUpdateRepetitions(LocalDateTime current) {
+        if(readings.size() > 1) {
+            Iterator<AngleReading> iter = readings.iterator();
+            int minAngle = Integer.MAX_VALUE;
+            int maxAngle = -Integer.MAX_VALUE;
+            AngleReading minReading = null;
+            AngleReading maxReading = null;
+            boolean goingUp = true;
+            while (iter.hasNext()) {
+                AngleReading reading = iter.next();
+                Duration duration = Duration.between(reading.timestamp, current);
+                if (duration.toMillis() > Config.values.getInt("SESSION_READING_SPAN", 300_000)) { // 5 min of readings max
+                    iter.remove();
+                }
+                if(reading.angle > maxAngle) {
+                    maxAngle = reading.angle;
+                    maxReading = reading;
+                    goingUp = true;
+                }
+                if(reading.angle < minAngle) {
+                    minAngle = reading.angle;
+                    minReading = reading;
+                    goingUp = false;
+                }
             }
+
+            if (Math.abs(maxAngle - minAngle) >= Config.values.getInt("DIRECTION_CHANGE_MINIMUM", 10)) {
+                readings.clear();
+                // Keep around the last extreme reading
+                if(goingUp) {
+                    readings.add(maxReading);
+                } else {
+                    readings.add(minReading);
+                }
+                if(angleGoingUp != goingUp) {
+                    // Direction has changed
+                    angleGoingUp = goingUp;
+                    if(angleGoingUp) {
+                        repetitions++;
+                    }
+                }
+            }
+
         }
     }
 

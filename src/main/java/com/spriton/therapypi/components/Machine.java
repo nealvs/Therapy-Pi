@@ -102,10 +102,10 @@ public class Machine {
 
     public void calibrate() {
         angle.ANGLE_CALIBRATION_VOLTAGE = angle.rawValue;
-        ConfigValue value = DataAccess.getConfigValue("ANGLE_CALIBRATION_DEGREE");
+        ConfigValue value = DataAccess.getConfigValue("ANGLE_CALIBRATION_VOLTAGE");
         if(value == null) {
             value = new ConfigValue();
-            value.setConfigKey("ANGLE_CALIBRATION_DEGREE");
+            value.setConfigKey("ANGLE_CALIBRATION_VOLTAGE");
             value.setConfigValue(Double.toString(angle.ANGLE_CALIBRATION_VOLTAGE));
             DataAccess.saveConfigValue(value);
         } else {

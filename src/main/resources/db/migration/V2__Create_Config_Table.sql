@@ -8,4 +8,4 @@ CREATE TABLE config_value (
     deleted DATETIME
 );
 
-INSERT INTO config_values ( config_key, config_value) VALUES ('ANGLE_CALIBRATION_VOLTAGE', '2.1');
+INSERT INTO config_value (config_key, config_value) VALUES ('ANGLE_CALIBRATION_VOLTAGE', '2.1');

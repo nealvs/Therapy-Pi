@@ -39,6 +39,7 @@ public class DataAccess {
             Configuration config = new Configuration().configure();
             config.addAnnotatedClass(Patient.class);
             config.addAnnotatedClass(PatientSession.class);
+            config.addAnnotatedClass(ConfigValue.class);
             config.setProperty("hibernate.connection.driver_class", "org.h2.Driver");
             config.setProperty("hibernate.connection.url", Config.values.getString("DATABASE_URL", DEFAULT_DATABASE_URL));
             config.setProperty("hibernate.dialect", "org.hibernate.dialect.H2Dialect");

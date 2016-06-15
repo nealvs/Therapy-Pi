@@ -86,14 +86,14 @@ public class Machine {
                     .type(type)
                     .angle(new HardEncoder())
                     .joystick(new HardJoystick())
-                    .motorSwitch(new MotorRelaySwitch(Switch.State.OFF))
+                    .motorSwitch(new MotorRelaySwitch(Switch.State.ON))
                     .rotationMotor(new HardRotationMotor()));
         } else if(type == Type.SOFTWARE) {
             Machine.setInstance(Machine.create()
                     .type(type)
                     .angle(new SoftAngle())
                     .joystick(new SoftJoystick())
-                    .motorSwitch(new SoftSwitch(Switch.State.OFF))
+                    .motorSwitch(new SoftSwitch(Switch.State.ON))
                     .rotationMotor(new SoftRotationMotor()));
         }
     }

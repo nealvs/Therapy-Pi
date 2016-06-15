@@ -17,9 +17,9 @@ public class MotorRelaySwitch extends Switch {
     @Override
     public void applyState() throws Exception {
         if(switchPin != null) {
-            if (getState() == State.OFF) {
+            if (getState() == State.ON) {
                 switchPin.high();
-            } else if (getState() == State.ON) {
+            } else if (getState() == State.OFF) {
                 switchPin.low();
             }
         }

@@ -80,6 +80,7 @@ public class DataAccess {
         try(Session session = getSessionFactory().openSession()) {
             patient.setCreated(new Date());
             session.save(patient);
+            session.flush();
             return patient;
         }
     }
@@ -115,6 +116,8 @@ public class DataAccess {
         try(Session session = getSessionFactory().openSession()) {
             value.setUpdated(new Date());
             session.update(value);
+            session.flush();
+            log.info("Updated ConfigValue. " + value.getConfigKey() + ": " + value.getConfigValue());
             return value;
         }
     }
@@ -123,6 +126,8 @@ public class DataAccess {
         try(Session session = getSessionFactory().openSession()) {
             value.setCreated(new Date());
             session.save(value);
+            session.flush();
+            log.info("Saved ConfigValue. " + value.getConfigKey() + ": " + value.getConfigValue());
             return value;
         }
     }

@@ -100,6 +100,44 @@ public class DataAccess {
         }
     }
 
+    public static ConfigValue getConfigValue(String key) {
+        try(Session session = getSessionFactory().openSession()) {
+            ConfigValue value = session.get(ConfigValue.class, key);
+            return value;
+        } catch(Exception ex) {
+            log.error("Unable to get config from db: " + key, ex);
+        }
+        return null;
+    }
+
+    public static ConfigValue updateConfigValue(ConfigValue value) {
+        try(Session session = getSessionFactory().openSession()) {
+            value.setUpdated(new Date());
+            session.update(value);
+            return value;
+        }
+    }
+
+    public static ConfigValue saveConfigValue(ConfigValue value) {
+        try(Session session = getSessionFactory().openSession()) {
+            value.setCreated(new Date());
+            session.save(value);
+            return value;
+        }
+    }
+
+    public static Double getDoubleConfig(String key) {
+        try(Session session = getSessionFactory().openSession()) {
+            ConfigValue value = session.get(ConfigValue.class, key);
+            if(value != null && value.getConfigValue() != null) {
+                return Double.parseDouble(value.getConfigValue());
+            }
+        } catch(Exception ex) {
+            log.error("Unable to get config from db: " + key, ex);
+        }
+        return null;
+    }
+
     public static List<PatientSession> getPatientSessions(int id) {
         try(Session session = getSessionFactory().openSession()) {
             List<PatientSession> sessions = session

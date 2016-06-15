@@ -15,7 +15,7 @@ public class MotorRelaySwitch extends Switch {
         super(state);
         gpio = GpioFactory.getInstance();
         Pin pin = RaspiPin.GPIO_00;
-        switch(Config.values.getInt("MOTOR_SWITCH_PIN", 1)) {
+        switch(Config.values.getInt("MOTOR_SWITCH_PIN", 6)) {
             case 0:
                 pin = RaspiPin.GPIO_00;
                 break;

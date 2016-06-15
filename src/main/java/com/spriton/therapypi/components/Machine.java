@@ -4,6 +4,8 @@ import com.google.gson.JsonObject;
 import com.spriton.therapypi.Config;
 import com.spriton.therapypi.components.hardware.*;
 import com.spriton.therapypi.components.software.*;
+import com.spriton.therapypi.database.ConfigValue;
+import com.spriton.therapypi.database.DataAccess;
 import com.spriton.therapypi.database.PatientSession;
 import org.apache.log4j.Logger;
 
@@ -100,7 +102,16 @@ public class Machine {
 
     public void calibrate() {
         angle.ANGLE_CALIBRATION_VOLTAGE = angle.rawValue;
-        // Todo: Persist to db or config file
+        ConfigValue value = DataAccess.getConfigValue("ANGLE_CALIBRATION_DEGREE");
+        if(value != null) {
+            value = new ConfigValue();
+            value.setConfigKey("ANGLE_CALIBRATION_DEGREE");
+            value.setConfigValue(Double.toString(angle.ANGLE_CALIBRATION_VOLTAGE));
+            DataAccess.saveConfigValue(value);
+        } else {
+            value.setConfigValue(Double.toString(angle.ANGLE_CALIBRATION_VOLTAGE));
+            DataAccess.updateConfigValue(value);
+        }
     }
 
     public JsonObject toJson() {

@@ -1,6 +1,7 @@
 package com.spriton.therapypi.components;
 
 import com.spriton.therapypi.Config;
+import com.spriton.therapypi.database.DataAccess;
 
 import javax.persistence.Transient;
 import java.time.Duration;
@@ -29,8 +30,9 @@ public abstract class Angle {
         MAX_ANGLE = Config.values.getDouble("MAX_ANGLE", MAX_ANGLE);
         MIN_ANGLE = Config.values.getDouble("MIN_ANGLE", MIN_ANGLE);
 
+        Double angleCalibrationVoltage = DataAccess.getDoubleConfig("ANGLE_CALIBRATION_VOLTAGE");
         ANGLE_CALIBRATION_DEGREE = Config.values.getDouble("ANGLE_CALIBRATION_DEGREE", ANGLE_CALIBRATION_DEGREE);
-        ANGLE_CALIBRATION_VOLTAGE = Config.values.getDouble("ANGLE_CALIBRATION_VOLTAGE", ANGLE_CALIBRATION_VOLTAGE);
+        ANGLE_CALIBRATION_VOLTAGE = angleCalibrationVoltage != null ? angleCalibrationVoltage : Config.values.getDouble("ANGLE_CALIBRATION_VOLTAGE", ANGLE_CALIBRATION_VOLTAGE);
     }
 
     public void reset() {

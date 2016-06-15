@@ -136,6 +136,7 @@ public class DataAccess {
         try(Session session = getSessionFactory().openSession()) {
             ConfigValue value = session.get(ConfigValue.class, key);
             if(value != null && value.getConfigValue() != null) {
+                log.info("Config from database. " + key + ": " + value.getConfigValue());
                 return Double.parseDouble(value.getConfigValue());
             }
         } catch(Exception ex) {

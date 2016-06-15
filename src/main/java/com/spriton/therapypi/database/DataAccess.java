@@ -105,6 +105,9 @@ public class DataAccess {
     public static ConfigValue getConfigValue(String key) {
         try(Session session = getSessionFactory().openSession()) {
             ConfigValue value = session.get(ConfigValue.class, key);
+            if(value != null) {
+                log.info("Loaded ConfigValue. " + value.getConfigKey() + ": " + value.getConfigValue() + " - " + value.getUpdated());
+            }
             return value;
         } catch(Exception ex) {
             log.error("Unable to get config from db: " + key, ex);
@@ -117,7 +120,7 @@ public class DataAccess {
             value.setUpdated(new Date());
             session.update(value);
             session.flush();
-            log.info("Updated ConfigValue. " + value.getConfigKey() + ": " + value.getConfigValue());
+            log.info("Updated ConfigValue. " + value.getConfigKey() + ": " + value.getConfigValue() + " - " + value.getUpdated());
             return value;
         }
     }
@@ -136,7 +139,7 @@ public class DataAccess {
         try(Session session = getSessionFactory().openSession()) {
             ConfigValue value = session.get(ConfigValue.class, key);
             if(value != null && value.getConfigValue() != null) {
-                log.info("Config from database. " + key + ": " + value.getConfigValue());
+                log.info("Double Config from database. " + key + ": " + value.getConfigValue() + " - " + value.getUpdated());
                 return Double.parseDouble(value.getConfigValue());
             }
         } catch(Exception ex) {

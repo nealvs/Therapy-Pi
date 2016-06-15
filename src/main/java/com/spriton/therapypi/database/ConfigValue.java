@@ -10,7 +10,7 @@ public class ConfigValue {
     @Id
     @Column(name="config_key")
     private String configKey;
-    @Column(name="configValue")
+    @Column(name="config_value")
     private String configValue;
 
     @Column(name="created")

@@ -41,15 +41,15 @@ public class Machine {
                         Motor.State joystickMotorState = Motor.getStateFromJoystickValue(joystick.value);
                         rotationMotor.setState(joystickMotorState);
 
-                        log.info("Joystick State: " + joystickMotorState + " - " + joystick.value + " - " + angle.isMaxAngle() + ":" + angle.isMinAngle() + " - " + angle.getAveragedValue());
+                        //log.info("Joystick State: " + joystickMotorState + " - " + joystick.value + " - " + angle.isMaxAngle() + ":" + angle.isMinAngle() + " - " + angle.getAveragedValue());
 
                         // For software only.  Uses the motor state to update the angle virtually.
                         angle.update(joystickMotorState);
 
-                        if(angle.isMaxAngle() && !(joystickMotorState.equals(Motor.State.UP_SLOW) || joystickMotorState.equals(Motor.State.UP_FAST))) {
+                        if(angle.isMinAngle() && !(joystickMotorState.equals(Motor.State.UP_SLOW) || joystickMotorState.equals(Motor.State.UP_FAST))) {
                             motorSwitch.setState(Switch.State.OFF);
                             rotationMotor.setState(Motor.State.STOPPED);
-                        } else if(angle.isMinAngle() && !(joystickMotorState.equals(Motor.State.DOWN_SLOW) || joystickMotorState.equals(Motor.State.DOWN_FAST))) {
+                        } else if(angle.isMaxAngle() && !(joystickMotorState.equals(Motor.State.DOWN_SLOW) || joystickMotorState.equals(Motor.State.DOWN_FAST))) {
                             motorSwitch.setState(Switch.State.OFF);
                             rotationMotor.setState(Motor.State.STOPPED);
                         } else {

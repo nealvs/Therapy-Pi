@@ -13,7 +13,7 @@ public abstract class Motor {
             state = Motor.State.UP_FAST;
         } else if(value >= Config.values.getInt("JOYSTICK_VOLTAGE_MOTOR_UP_SLOW", 3)) {
             state = Motor.State.UP_SLOW;
-        } else if (value < Config.values.getInt("JOYSTICK_VOLTAGE_MOTOR_DOWN_SLOW", 2) && value > Config.values.getInt("JOYSTICK_VOLTAGE_MOTOR_DOWN_FAST", 1)) {
+        } else if (value <= Config.values.getInt("JOYSTICK_VOLTAGE_MOTOR_DOWN_SLOW", 2) && value > Config.values.getInt("JOYSTICK_VOLTAGE_MOTOR_DOWN_FAST", 1)) {
             state = Motor.State.DOWN_SLOW;
         } else if(value <= Config.values.getInt("JOYSTICK_VOLTAGE_MOTOR_DOWN_FAST", 1)) {
             state = Motor.State.DOWN_FAST;

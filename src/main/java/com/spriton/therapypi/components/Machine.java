@@ -44,10 +44,10 @@ public class Machine {
                         // For software only.  Uses the motor state to update the angle virtually.
                         angle.update(joystickMotorState);
 
-                        if(angle.isMinAngle() && !(joystickMotorState.equals(Motor.State.UP_SLOW) || joystickMotorState.equals(Motor.State.UP_FAST))) {
+                        if(angle.isMaxAngle() && !(joystickMotorState.equals(Motor.State.UP_SLOW) || joystickMotorState.equals(Motor.State.UP_FAST))) {
                             motorSwitch.setState(Switch.State.OFF);
                             rotationMotor.setState(Motor.State.STOPPED);
-                        } else if(angle.isMaxAngle() && !(joystickMotorState.equals(Motor.State.DOWN_SLOW) || joystickMotorState.equals(Motor.State.DOWN_FAST))) {
+                        } else if(angle.isMinAngle() && !(joystickMotorState.equals(Motor.State.DOWN_SLOW) || joystickMotorState.equals(Motor.State.DOWN_FAST))) {
                             motorSwitch.setState(Switch.State.OFF);
                             rotationMotor.setState(Motor.State.STOPPED);
                         } else {

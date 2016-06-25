@@ -9,13 +9,13 @@ public abstract class Motor {
 
     public static State getStateFromJoystickValue(double value) {
         State state = Motor.State.STOPPED;
-        if (value < Config.values.getInt("JOYSTICK_VOLTAGE_MOTOR_UP_FAST", 1)) {
+        if (value > Config.values.getInt("JOYSTICK_VOLTAGE_MOTOR_UP_FAST", 4)) {
             state = Motor.State.UP_FAST;
-        } else if(value <= Config.values.getInt("JOYSTICK_VOLTAGE_MOTOR_UP_SLOW", 2)) {
+        } else if(value >= Config.values.getInt("JOYSTICK_VOLTAGE_MOTOR_UP_SLOW", 3)) {
             state = Motor.State.UP_SLOW;
-        } else if (value > Config.values.getInt("JOYSTICK_VOLTAGE_MOTOR_DOWN_SLOW", 3) && value < Config.values.getInt("JOYSTICK_VOLTAGE_MOTOR_DOWN_FAST", 4)) {
+        } else if (value < Config.values.getInt("JOYSTICK_VOLTAGE_MOTOR_DOWN_SLOW", 2) && value > Config.values.getInt("JOYSTICK_VOLTAGE_MOTOR_DOWN_FAST", 1)) {
             state = Motor.State.DOWN_SLOW;
-        } else if(value >= Config.values.getInt("JOYSTICK_VOLTAGE_MOTOR_DOWN_FAST", 4)) {
+        } else if(value <= Config.values.getInt("JOYSTICK_VOLTAGE_MOTOR_DOWN_FAST", 1)) {
             state = Motor.State.DOWN_FAST;
         }
         return state;

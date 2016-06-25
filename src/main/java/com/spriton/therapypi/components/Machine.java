@@ -41,7 +41,7 @@ public class Machine {
                         Motor.State joystickMotorState = Motor.getStateFromJoystickValue(joystick.value);
                         rotationMotor.setState(joystickMotorState);
 
-                        log.info("Joystick State: " + joystickMotorState + " - " + joystick.value + " - " + angle.isMaxAngle() + " - " + angle.isMinAngle());
+                        //log.info("Joystick State: " + joystickMotorState + " - " + joystick.value + " - " + angle.isMaxAngle() + " - " + angle.isMinAngle());
 
                         // For software only.  Uses the motor state to update the angle virtually.
                         angle.update(joystickMotorState);

@@ -18,7 +18,7 @@ public class MotorRelaySwitch extends Switch {
         Pin pin = getPin(Config.values.getInt("MOTOR_SWITCH_PIN", 6));
         switchPin = gpio.provisionDigitalOutputPin(pin, "Motor Relay Control", PinState.HIGH);
 
-        Pin pin2 = getPin(Config.values.getInt("MOTOR_SWITCH_PIN", 7));
+        Pin pin2 = getPin(Config.values.getInt("MOTOR_SWITCH_PIN2", 7));
         switchPin2 = gpio.provisionDigitalOutputPin(pin2, "Motor Relay Control 2", PinState.HIGH);
     }
 

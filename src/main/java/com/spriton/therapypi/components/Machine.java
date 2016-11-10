@@ -15,6 +15,8 @@ public class Machine {
     private static Machine instance;
     public static enum Type { HARDWARE, SOFTWARE };
 
+    public int holdTimeConfig = 30;
+    public String password = "knee";
     public boolean running = true;
     public Type type = Type.HARDWARE;
     public Angle angle;
@@ -23,6 +25,17 @@ public class Machine {
     public Switch motorSwitch;
 
     public PatientSession currentSession = new PatientSession();
+
+    public Machine() {
+        ConfigValue holdTime = DataAccess.getConfigValue("HOLD_TIME_SECONDS");
+        if(holdTime != null) {
+            holdTimeConfig = Integer.parseInt(holdTime.getConfigValue());
+        }
+        ConfigValue passwd = DataAccess.getConfigValue("PASSWORD");
+        if(passwd != null) {
+            password = passwd.getConfigValue();
+        }
+    }
 
     public void run() {
         running = true;
@@ -140,6 +153,9 @@ public class Machine {
         if(currentSession != null) {
             info.add("session", currentSession.toJson());
         }
+
+        info.addProperty("holdTimeConfig", holdTimeConfig);
+        info.addProperty("password", password);
 
         return info;
     }

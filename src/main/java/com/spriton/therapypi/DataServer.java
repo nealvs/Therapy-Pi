@@ -9,6 +9,8 @@ import com.spriton.therapypi.database.Patient;
 import com.spriton.therapypi.database.PatientSession;
 import org.apache.log4j.Logger;
 
+import java.util.List;
+
 import static spark.Spark.*;
 
 public class DataServer {
@@ -16,7 +18,7 @@ public class DataServer {
     private static Logger log = Logger.getLogger(DataServer.class);
 
     public static void init() {
-        int port = Config.values.getInt("server_port", 8686);
+        int port = Config.values.getInt("SERVER_PORT", 8686);
         log.info("Starting Data Server on port: " + port);
         port(port);
 
@@ -137,7 +139,15 @@ public class DataServer {
         get("/patientList",  "application/json", (req, res) -> {
             JsonObject result = new JsonObject();
             JsonArray patients = new JsonArray();
-            for(Patient patient : DataAccess.getAllPatients()) {
+            List<Patient> patientList = null;
+            String all = req.queryParams("all");
+            if(all != null && all.equalsIgnoreCase("true")) {
+                patientList = DataAccess.getAllPatients();
+            } else {
+                patientList = DataAccess.getRecentPatients();
+            }
+
+            for(Patient patient : patientList) {
                 patients.add(patient.toJson());
             }
             result.add("patients", patients);

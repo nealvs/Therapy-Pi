@@ -10,7 +10,9 @@ import org.hibernate.cfg.Configuration;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 public class DataAccess {
@@ -62,6 +64,23 @@ public class DataAccess {
     public static List<Patient> getAllPatients() {
         try(Session session = getSessionFactory().openSession()) {
             List<Patient> patients = session.createQuery("FROM Patient WHERE deleted IS NULL ORDER BY lastName, firstName").list();
+            return patients;
+        }
+    }
+
+    public static List<Patient> getRecentPatients() {
+        try(Session session = getSessionFactory().openSession()) {
+            Date today = new Date();
+            Calendar cal = new GregorianCalendar();
+            cal.setTime(today);
+            cal.add(Calendar.DAY_OF_MONTH, -30);
+            List<Patient> patients = session.createQuery(
+                    "SELECT DISTINCT p, s.startTime FROM Patient p, PatientSession s " +
+                    "WHERE s.patientId = p.id AND p.deleted IS NULL AND s.deleted IS NULL " +
+                    "AND s.startTime > :date " +
+                    "ORDER BY s.startTime DESC")
+                    .setDate("date", cal.getTime())
+                    .list();
             return patients;
         }
     }

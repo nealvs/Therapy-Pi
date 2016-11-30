@@ -10,10 +10,7 @@ import org.hibernate.cfg.Configuration;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
+import java.util.*;
 
 public class DataAccess {
 
@@ -75,12 +72,28 @@ public class DataAccess {
             cal.setTime(today);
             cal.add(Calendar.DAY_OF_MONTH, -30);
             List<Patient> patients = session.createQuery(
-                    "SELECT DISTINCT p, s.startTime FROM Patient p, PatientSession s " +
+                    "SELECT DISTINCT p FROM Patient p, PatientSession s " +
                     "WHERE s.patientId = p.id AND p.deleted IS NULL AND s.deleted IS NULL " +
-                    "AND s.startTime > :date " +
-                    "ORDER BY s.startTime DESC")
+                    "AND s.startTime > :date ")
                     .setDate("date", cal.getTime())
                     .list();
+
+            for(Patient patient : patients) {
+                patient.setSessions(getPatientSessions(patient.getId()));
+            }
+
+            Collections.sort(patients, new Comparator<Patient>() {
+                @Override
+                public int compare(Patient patient, Patient patient2) {
+                    if(patient.getSessions() != null && !patient.getSessions().isEmpty() && patient.getSessions().get(0).getStartTime() != null) {
+                        if(patient2.getSessions() != null && !patient2.getSessions().isEmpty() && patient2.getSessions().get(0).getStartTime() != null) {
+                            patient.getSessions().get(0).getStartTime().compareTo(patient2.getSessions().get(0).getStartTime());
+                        }
+                    }
+                    return 0;
+                }
+            });
+
             return patients;
         }
     }
@@ -174,6 +187,18 @@ public class DataAccess {
                     .setInteger("id", id)
                     .list();
             return sessions;
+        }
+    }
+
+    public static PatientSession createOrUpdateSession(PatientSession patientSession) {
+        try(Session session = getSessionFactory().openSession()) {
+            if(patientSession.getId() == null) {
+                session.save(patientSession);
+            } else {
+                session.update(patientSession);
+            }
+            session.flush();
+            return patientSession;
         }
     }
 

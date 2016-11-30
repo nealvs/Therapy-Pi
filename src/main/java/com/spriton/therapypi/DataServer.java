@@ -33,6 +33,7 @@ public class DataServer {
         status();
         reset();
         startSession();
+        resetSession();
         stopSession();
         updateJoystick();
         login();
@@ -100,12 +101,32 @@ public class DataServer {
         });
     }
 
+    public static void resetSession() {
+        post("/resetSession",  "application/json", (req, res) -> {
+            JsonObject result = new JsonObject();
+            if(Machine.instance().currentSession != null) {
+                Machine.instance().currentSession.reset();
+                result = Machine.instance().toJson();
+            }
+            return result.toString();
+        });
+    }
+
     public static void stopSession() {
         post("/stopSession",  "application/json", (req, res) -> {
             JsonObject result = new JsonObject();
-            Machine.instance().currentSession.stop();
-            // Record
-            Machine.instance().currentSession = null;
+            if(Machine.instance().currentSession != null) {
+                Machine.instance().currentSession.stop();
+                if(Machine.instance().currentSession.getPatient() != null) {
+                    Machine.instance().currentSession.setPatientId(Machine.instance().currentSession.getPatient().getId());
+                }
+                if(Machine.instance().currentSession.getPatientId() != null) {
+                    DataAccess.createOrUpdateSession(Machine.instance().currentSession);
+                } else {
+                    log.warn("Session doesn't have a patientId.  Not saving.");
+                }
+                Machine.instance().currentSession = null;
+            }
             return result.toString();
         });
     }
@@ -147,9 +168,14 @@ public class DataServer {
                 patientList = DataAccess.getRecentPatients();
             }
 
-            for(Patient patient : patientList) {
-                patients.add(patient.toJson());
+            if(patientList != null) {
+                for (Patient patient : patientList) {
+                    patients.add(patient.toJson());
+                }
+            } else {
+                log.warn("No patient list received from database.");
             }
+
             result.add("patients", patients);
             return result.toString();
         });
@@ -178,6 +204,9 @@ public class DataServer {
             JsonObject result = new JsonObject();
             PatientSession session = DataAccess.getSession(Integer.parseInt(req.params("id")));
             if(session != null) {
+                if(session.getPatientId() != null) {
+                    session.setPatient(DataAccess.getPatient(session.getPatientId()));
+                }
                 result.add("session", session.toJson());
             }
             return result.toString();

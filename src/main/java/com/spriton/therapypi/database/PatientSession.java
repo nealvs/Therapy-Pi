@@ -12,6 +12,7 @@ import javax.persistence.*;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -22,7 +23,7 @@ public class PatientSession {
     private static Logger log = Logger.getLogger(PatientSession.class);
 
     @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Column(name="id")
     private Integer id;
     @Column(name="patient_id")
@@ -75,11 +76,21 @@ public class PatientSession {
     }
 
     public void stop() {
-        sessionStopwatch.stop();
-        holdStopwatch.stop();
+        if(sessionStopwatch.isRunning()) {
+            sessionStopwatch.stop();
+        }
+        if(holdStopwatch.isRunning()) {
+            holdStopwatch.stop();
+        }
+        endTime = new Date();
+        totalSeconds = (int) sessionStopwatch.elapsed(TimeUnit.SECONDS);
+        //LocalDateTime start = LocalDateTime.ofInstant(startTime.toInstant(), ZoneId.systemDefault());
+        //LocalDateTime end = LocalDateTime.ofInstant(endTime.toInstant(), ZoneId.systemDefault());
+        //totalSeconds = (int) Duration.between(start, end).getSeconds();
     }
 
     public void reset() {
+        startTime = new Date();
         sessionStopwatch = Stopwatch.createStarted();
         holdStopwatch = Stopwatch.createStarted();
         repetitions = 0;

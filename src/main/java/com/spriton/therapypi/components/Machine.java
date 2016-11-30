@@ -9,6 +9,9 @@ import com.spriton.therapypi.database.DataAccess;
 import com.spriton.therapypi.database.PatientSession;
 import org.apache.log4j.Logger;
 
+import java.time.ZoneId;
+import java.util.TimeZone;
+
 public class Machine {
 
     private static Logger log = Logger.getLogger(Machine.class);
@@ -17,6 +20,7 @@ public class Machine {
 
     public int holdTimeConfig = 30;
     public String password = "knee";
+    public TimeZone timeZone = TimeZone.getTimeZone(ZoneId.of("America/Denver"));
     public boolean running = true;
     public Type type = Type.HARDWARE;
     public Angle angle;
@@ -34,6 +38,10 @@ public class Machine {
         ConfigValue passwd = DataAccess.getConfigValue("PASSWORD");
         if(passwd != null) {
             password = passwd.getConfigValue();
+        }
+        ConfigValue timeZ = DataAccess.getConfigValue("TIMEZONE");
+        if(timeZ != null) {
+            timeZone = TimeZone.getTimeZone(ZoneId.of(timeZ.getConfigValue()));
         }
     }
 
@@ -156,6 +164,9 @@ public class Machine {
 
         info.addProperty("holdTimeConfig", holdTimeConfig);
         info.addProperty("password", password);
+        if(timeZone != null) {
+            info.addProperty("timeZone", timeZone.getDisplayName());
+        }
 
         return info;
     }

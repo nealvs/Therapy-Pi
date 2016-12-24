@@ -1,6 +1,7 @@
 package com.spriton.therapypi.components;
 
 import com.spriton.therapypi.Config;
+import com.spriton.therapypi.components.software.SoftEncoder;
 import com.spriton.therapypi.database.DataAccess;
 
 import javax.persistence.Transient;
@@ -21,7 +22,7 @@ public abstract class Angle {
     public static double MIN_ANGLE = -10;
 
     public double ANGLE_CALIBRATION_VOLTAGE = 2.0;
-    public double ANGLE_CALIBRATION_DEGREE = 1.0;
+    public double ANGLE_CALIBRATION_DEGREE = 90.0;
 
     protected List<AngleReading> readings = new LinkedList<>();
 
@@ -55,16 +56,16 @@ public abstract class Angle {
 
     public void update(Motor.State motorState) {
         if(motorState == Motor.State.UP_SLOW) {
-            value -= 0.5;
+            rawValue += 0.005;
         } else if(motorState == Motor.State.UP_FAST) {
-            value -= 1;
+            rawValue += 0.01;
         } else if(motorState == Motor.State.DOWN_SLOW) {
-            value += 0.5;
+            rawValue -= 0.01;
         } else if(motorState == Motor.State.DOWN_FAST) {
-            value += 1;
+            rawValue -= 0.005;
         }
         // Keep within bounds
-        value = Math.max(MIN_ANGLE, Math.min(MAX_ANGLE, value));
+        rawValue = Math.max(SoftEncoder.MIN_RAW, Math.min(SoftEncoder.MAX_RAW, rawValue));
     }
 
     public boolean isMaxAngle() {

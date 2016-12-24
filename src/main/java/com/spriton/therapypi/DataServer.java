@@ -35,6 +35,9 @@ public class DataServer {
         startSession();
         resetSession();
         stopSession();
+        joystickUp();
+        joystickStop();
+        joystickDown();
         updateJoystick();
         login();
         patientList();
@@ -131,6 +134,43 @@ public class DataServer {
         });
     }
 
+    // Software Only
+    public static void joystickUp() {
+        post("/joystickUp",  "application/json", (req, res) -> {
+            JsonObject result = new JsonObject();
+            if (Machine.instance() != null) {
+                Machine.instance().joystick.value = 5;
+                result = Machine.instance().toJson();
+            }
+            return result.toString();
+        });
+    }
+
+    // Software Only
+    public static void joystickStop() {
+        post("/joystickStop",  "application/json", (req, res) -> {
+            JsonObject result = new JsonObject();
+            if (Machine.instance() != null) {
+                Machine.instance().joystick.value = 2.5;
+                result = Machine.instance().toJson();
+            }
+            return result.toString();
+        });
+    }
+
+    // Software Only
+    public static void joystickDown() {
+        post("/joystickDown",  "application/json", (req, res) -> {
+            JsonObject result = new JsonObject();
+            if (Machine.instance() != null) {
+                Machine.instance().joystick.value = 0;
+                result = Machine.instance().toJson();
+            }
+            return result.toString();
+        });
+    }
+
+    // Software Only
     public static void updateJoystick() {
         post("/updateJoystick",  "application/json", (req, res) -> {
             JsonObject result = new JsonObject();

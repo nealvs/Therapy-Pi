@@ -116,7 +116,7 @@ public class Machine {
         } else if(type == Type.SOFTWARE) {
             Machine.setInstance(Machine.create()
                     .type(type)
-                    .angle(new SoftAngle())
+                    .angle(new SoftEncoder())
                     .joystick(new SoftJoystick())
                     .motorSwitch(new SoftSwitch(Switch.State.ON))
                     .rotationMotor(new SoftRotationMotor()));
@@ -125,6 +125,7 @@ public class Machine {
 
     public void calibrate() {
         angle.ANGLE_CALIBRATION_VOLTAGE = angle.rawValue;
+        angle.ANGLE_CALIBRATION_VOLTAGE = 3.2;
         ConfigValue value = DataAccess.getConfigValue("ANGLE_CALIBRATION_VOLTAGE");
         if(value == null) {
             value = new ConfigValue();
@@ -151,6 +152,7 @@ public class Machine {
         if(angle != null) {
             info.addProperty("rawAngle", angle.rawValue);
             info.addProperty("angleCalibrationVoltage", angle.ANGLE_CALIBRATION_VOLTAGE);
+            info.addProperty("angleCalibrationDegree", angle.ANGLE_CALIBRATION_DEGREE);
         }
         if(rotationMotor != null) {
             info.addProperty("rotationMotor", rotationMotor.getState().name());

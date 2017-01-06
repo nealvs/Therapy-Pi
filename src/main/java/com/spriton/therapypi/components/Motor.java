@@ -9,6 +9,8 @@ public abstract class Motor {
 
     public static State getStateFromJoystickValue(double value) {
         State state = Motor.State.STOPPED;
+        // Todo: Add scenarios where the voltage indicates that the joystick has been disconnected (ex: > 4.9 or < 0.1)
+        // Wild and random joystick movements on a disconnect need to be figured out
         if (value > Config.values.getInt("JOYSTICK_VOLTAGE_MOTOR_UP_FAST", 4)) {
             state = Motor.State.UP_FAST;
         } else if(value >= Config.values.getInt("JOYSTICK_VOLTAGE_MOTOR_UP_SLOW", 3)) {

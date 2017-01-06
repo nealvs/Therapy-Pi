@@ -65,7 +65,7 @@ public class HardEncoder extends Angle {
 
     public static double getAngleFromRawVoltage(double voltage, double angleCalibrationVoltage, double angleCalibrationDegree) {
         voltage = MAX_RAW - Math.max(MIN_RAW, Math.min(MAX_RAW, voltage));
-        double voltageDifference = voltage - angleCalibrationVoltage;
+        double voltageDifference = voltage - (MAX_RAW - angleCalibrationVoltage);
         double degreePerVoltage = DEGREE_RANGE / MAX_RAW;
         double result = voltageDifference * degreePerVoltage + angleCalibrationDegree;
         return result;

@@ -35,6 +35,8 @@ public class DataServer {
         startSession();
         resetSession();
         stopSession();
+        removeAngleLimits();
+        applyAngleLimits();
         joystickUp();
         joystickStop();
         joystickDown();
@@ -129,6 +131,28 @@ public class DataServer {
                     log.warn("Session doesn't have a patientId.  Not saving.");
                 }
                 Machine.instance().currentSession = null;
+            }
+            return result.toString();
+        });
+    }
+
+    public static void removeAngleLimits() {
+        post("/removeAngleLimits",  "application/json", (req, res) -> {
+            JsonObject result = new JsonObject();
+            if (Machine.instance() != null) {
+                Machine.instance().applyLimits = false;
+                result = Machine.instance().toJson();
+            }
+            return result.toString();
+        });
+    }
+
+    public static void applyAngleLimits() {
+        post("/applyAngleLimits",  "application/json", (req, res) -> {
+            JsonObject result = new JsonObject();
+            if (Machine.instance() != null) {
+                Machine.instance().applyLimits = true;
+                result = Machine.instance().toJson();
             }
             return result.toString();
         });

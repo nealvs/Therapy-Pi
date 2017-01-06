@@ -22,6 +22,7 @@ public class Machine {
     public String password = "knee";
     public TimeZone timeZone = TimeZone.getTimeZone(ZoneId.of("America/Denver"));
     public boolean running = true;
+    public boolean applyLimits = true;
     public Type type = Type.HARDWARE;
     public Angle angle;
     public Joystick joystick;
@@ -67,10 +68,13 @@ public class Machine {
                         // For software only.  Uses the motor state to update the angle virtually.
                         angle.update(joystickMotorState);
 
-                        if(angle.isMinAngle() && !(joystickMotorState.equals(Motor.State.UP_SLOW) || joystickMotorState.equals(Motor.State.UP_FAST))) {
+                        if(applyLimits && angle.isMinAngle() && !(joystickMotorState.equals(Motor.State.UP_SLOW) || joystickMotorState.equals(Motor.State.UP_FAST))) {
                             motorSwitch.setState(Switch.State.OFF);
                             rotationMotor.setState(Motor.State.STOPPED);
-                        } else if(angle.isMaxAngle() && !(joystickMotorState.equals(Motor.State.DOWN_SLOW) || joystickMotorState.equals(Motor.State.DOWN_FAST))) {
+                        } else if(applyLimits && angle.isMaxAngle() && !(joystickMotorState.equals(Motor.State.DOWN_SLOW) || joystickMotorState.equals(Motor.State.DOWN_FAST))) {
+                            motorSwitch.setState(Switch.State.OFF);
+                            rotationMotor.setState(Motor.State.STOPPED);
+                        } else if(joystickMotorState.equals(Motor.State.STOPPED)) {
                             motorSwitch.setState(Switch.State.OFF);
                             rotationMotor.setState(Motor.State.STOPPED);
                         } else {
@@ -164,6 +168,7 @@ public class Machine {
             info.add("session", currentSession.toJson());
         }
 
+        info.addProperty("applyAngleLimits", applyLimits);
         info.addProperty("holdTimeConfig", holdTimeConfig);
         info.addProperty("password", password);
         if(timeZone != null) {

@@ -19,7 +19,7 @@ public abstract class Angle {
 
     public static double DEFAULT_ANGLE = 90;
     public static double MAX_ANGLE = 170;
-    public static double MIN_ANGLE = -10;
+    public static double MIN_ANGLE = -5;
 
     public double ANGLE_CALIBRATION_VOLTAGE = 2.0;
     public double ANGLE_CALIBRATION_DEGREE = 90.0;

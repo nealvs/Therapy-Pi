@@ -10,6 +10,7 @@ import com.spriton.therapypi.database.PatientSession;
 import org.apache.log4j.Logger;
 
 import java.util.List;
+import java.util.TimeZone;
 
 import static spark.Spark.*;
 
@@ -259,6 +260,32 @@ public class DataServer {
     public static void settings() {
         post("/settings/calibrate",  "application/json", (req, res) -> {
             Machine.instance().calibrate();
+            return Machine.instance().toJson();
+        });
+        post("/settings/setTimeZone",  "application/json", (req, res) -> {
+            if(req.body() != null) {
+                JsonParser parser = new JsonParser();
+                JsonObject request = (JsonObject) parser.parse(req.body());
+                if (request.has("value")) {
+                    String timeZone = request.get("value").getAsString();
+                    if (timeZone != null) {
+                        Machine.instance().timeZone = TimeZone.getTimeZone(timeZone);
+                    }
+                }
+            }
+            return Machine.instance().toJson();
+        });
+        post("/settings/setHoldTime",  "application/json", (req, res) -> {
+            if(req.body() != null) {
+                JsonParser parser = new JsonParser();
+                JsonObject request = (JsonObject) parser.parse(req.body());
+                if (request.has("value")) {
+                    String holdTime = request.get("value").getAsString();
+                    if(holdTime != null) {
+                        Machine.instance().setHoldTimeConfig(Integer.parseInt(holdTime));
+                    }
+                }
+            }
             return Machine.instance().toJson();
         });
     }

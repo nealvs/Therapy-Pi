@@ -6,6 +6,7 @@ import com.spriton.therapypi.Config;
 import com.spriton.therapypi.components.Angle;
 import com.spriton.therapypi.components.AngleReading;
 import com.spriton.therapypi.components.Motor;
+import com.spriton.therapypi.components.Repetition;
 import org.apache.log4j.Logger;
 
 import javax.persistence.*;
@@ -62,6 +63,9 @@ public class PatientSession {
 
     @Transient
     private List<AngleReading> readings = new LinkedList<>();
+
+    @Transient
+    private List<Repetition> repetitionList = new LinkedList<>();
 
     @Transient
     private AngleReading lastHold = null;

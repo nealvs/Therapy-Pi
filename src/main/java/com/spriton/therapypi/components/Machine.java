@@ -9,7 +9,9 @@ import com.spriton.therapypi.database.DataAccess;
 import com.spriton.therapypi.database.PatientSession;
 import org.apache.log4j.Logger;
 
+import java.text.SimpleDateFormat;
 import java.time.ZoneId;
+import java.util.Date;
 import java.util.TimeZone;
 
 public class Machine {
@@ -43,6 +45,23 @@ public class Machine {
         ConfigValue timeZ = DataAccess.getConfigValue("TIMEZONE");
         if(timeZ != null) {
             timeZone = TimeZone.getTimeZone(ZoneId.of(timeZ.getConfigValue()));
+        }
+    }
+
+    public void setHoldTimeConfig(int holdTime) {
+        if(holdTime > 0) {
+            holdTimeConfig = holdTime;
+            // Save into the database
+            ConfigValue config = DataAccess.getConfigValue("HOLD_TIME_SECONDS");
+            if(config == null) {
+                config = new ConfigValue();
+                config.setConfigKey("HOLD_TIME_SECONDS");
+                config.setConfigValue(Integer.toString(holdTime));
+                DataAccess.saveConfigValue(config);
+            } else {
+                config.setConfigValue(Integer.toString(holdTime));
+                DataAccess.updateConfigValue(config);
+            }
         }
     }
 
@@ -172,8 +191,15 @@ public class Machine {
         info.addProperty("holdTimeConfig", holdTimeConfig);
         info.addProperty("password", password);
         if(timeZone != null) {
-            info.addProperty("timeZone", timeZone.getDisplayName());
+            info.addProperty("timeZone", timeZone.getID());
         }
+        info.addProperty("timestamp", new Date().getTime());
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm - MMM d, yyyy");
+        if(timeZone != null) {
+            dateFormat.setTimeZone(timeZone);
+        }
+        info.addProperty("dateTime", dateFormat.format(new Date()));
 
         return info;
     }

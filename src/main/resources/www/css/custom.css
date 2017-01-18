@@ -1,0 +1,61 @@
+
+
+.session-number {
+    font-size: 120px;
+    color: white;
+    text-align: center;
+    clear: both;
+    margin: 0px;
+}
+
+.session-title {
+    margin-top: 2px;
+    margin-bottom: 0px;
+    float: left;
+}
+
+table.calibration {
+    width: 100%;
+}
+
+.large-text {
+    font-size: 25px;
+}
+
+.white {
+    color: white;
+}
+
+.one-height {
+  line-height: 1;
+}
+
+.red {
+    color: red;
+}
+.orange {
+    color: orange;
+}
+.green {
+    color: #09FE01;
+}
+.gray {
+    color: #c8c8c8;
+}
+
+.right-icon {
+    float: right;
+    font-size: 25px;
+    line-height: 2;
+}
+
+.clear {
+    clear: both;
+}
+
+.bigger {
+    font-size: 25px;
+}
+.ui-keyboard-preview-wrapper input.bigger {
+    font-size: 25px !important;
+}

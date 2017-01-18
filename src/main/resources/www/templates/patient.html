@@ -1,0 +1,46 @@
+<div view-title="Patient">
+  <div>
+    <div class="list-group" class="clear">
+      <div class="list-group-item">
+        <a href="#/app/patients">
+          <button class="btn btn-primary bigger">
+            <span class="glyphicon glyphicon-arrow-left"></span>
+            Go Back
+          </button>
+        </a>
+        <button class="btn btn-primary bigger" style="float: right" ng-click="startNewSession();">
+          Start Session
+          <span class="glyphicon glyphicon-play-circle"></span>
+        </button>
+      </div>
+      <div class="list-group-item bigger">
+          <span class="bigger">
+              First Name:
+              <span class="white">{{ patient.firstName }}</span>
+          </span> <br/>
+          <span class="bigger">
+              Last Name:
+              <span class="white">{{ patient.lastName }}</span>
+          </span> <br/>
+      </div>
+      <div class="list-group-item">
+        <span class="bigger">Sessions</span>
+        <br/>
+        <br/>
+        <ul class="list-group" style="max-height: 500px; overflow-y: auto">
+          <li ng-repeat="session in patient.sessions track by $index" class="list-group-item">
+            <a href="#/app/session/{{session.id}}">
+              <span class="glyphicon glyphicon-chevron-right right-icon"></span>
+              <h3>{{ session.startTime }}</h3>
+            </a>
+          </li>
+        </ul>
+        <div id="sessionsChart" ng-if="!patient.sessions || patient.sessions.length == 0">
+            <center><span>No Sessions</span></center>
+        </div>
+      </div>
+    </div>
+
+
+  </div>
+</div>

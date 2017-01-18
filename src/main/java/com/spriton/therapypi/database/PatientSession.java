@@ -1,6 +1,7 @@
 package com.spriton.therapypi.database;
 
 import com.google.common.base.Stopwatch;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.spriton.therapypi.Config;
 import com.spriton.therapypi.components.Angle;
@@ -118,7 +119,14 @@ public class PatientSession {
         }
 
         readings.add(angleReading);
-        cleanUpReadingsAndUpdateRepetitions(angleReading.timestamp);
+
+        if(repetitionList.isEmpty()) {
+            Repetition newRepetition = new Repetition(angleReading.angle);
+            repetitionList.add(newRepetition);
+        }
+        repetitionList.get(repetitionList.size() - 1).updateAngle(angleReading.angle);
+
+        cleanUpReadingsAndUpdateRepetitions(angleReading);
         //updateRepetitions();
 
         if(state != null && state == Motor.State.STOPPED) {
@@ -152,7 +160,7 @@ public class PatientSession {
         }
     }
 
-    public void cleanUpReadingsAndUpdateRepetitions(LocalDateTime current) {
+    public void cleanUpReadingsAndUpdateRepetitions(AngleReading currentReading) {
         if(readings.size() > 1) {
             Iterator<AngleReading> iter = readings.iterator();
             int minAngle = Integer.MAX_VALUE;
@@ -162,7 +170,7 @@ public class PatientSession {
             boolean goingUp = true;
             while (iter.hasNext()) {
                 AngleReading reading = iter.next();
-                Duration duration = Duration.between(reading.timestamp, current);
+                Duration duration = Duration.between(reading.timestamp, currentReading.timestamp);
                 if (duration.toMillis() > Config.values.getInt("SESSION_READING_SPAN", 300_000)) { // 5 min of readings max
                     iter.remove();
                 }
@@ -191,6 +199,8 @@ public class PatientSession {
                     angleGoingUp = goingUp;
                     if(angleGoingUp) {
                         repetitions++;
+                        Repetition newRepetition = new Repetition(currentReading.angle);
+                        repetitionList.add(newRepetition);
                     }
                 }
             }
@@ -243,6 +253,12 @@ public class PatientSession {
         result.addProperty("repetitions", repetitions);
         result.addProperty("sessionTime", sessionStopwatch.elapsed(TimeUnit.SECONDS));
         result.addProperty("holdTime", holdStopwatch.elapsed(TimeUnit.SECONDS));
+
+        JsonArray repList = new JsonArray();
+        for(Repetition repetition : repetitionList) {
+            repList.add(repetition.toJson());
+        }
+        result.add("repetitionList", repList);
 
         if(startTime != null) {
             result.addProperty("startTime", dateFormat.format(startTime));

@@ -185,6 +185,8 @@ public class Machine {
         }
         if(currentSession != null) {
             info.add("session", currentSession.toJson());
+        } else {
+            info.add("session", new PatientSession().toJson());
         }
 
         info.addProperty("applyAngleLimits", applyLimits);

@@ -1,0 +1,56 @@
+<ion-view view-title="Select Patient">
+
+  <ion-header-bar class="bar-subheader" style="height: 60px; border-bottom: 0px; top: 37px;">
+    <button style="height: 50px;" class="button button-large button-block button-positive" ng-if="!showNewPatientForm" ng-click="addPatient()">New Patient</button>
+  </ion-header-bar>
+
+  <ion-content padding="true" style="top: 110px;">
+
+    <div class="list" ng-if="showNewPatientForm">
+        <label class="item item-input item-stacked-label">
+          <span class="input-label">First Name</span>
+          <input type="text" ng-model="newPatient.firstName" placeholder="First Name" ng-virtual-keyboard />
+        </label>
+        <label class="item item-input item-stacked-label">
+          <span class="input-label">Last Name</span>
+          <input type="text" ng-model="newPatient.lastName" placeholder="Last Name" ng-virtual-keyboard />
+        </label>
+        <div class="row">
+          <div class="col">
+            <button class="button button-full button-balanced" ng-click="createPatient()">
+               Add Patient
+            </button>
+          </div>
+          <div class="col">
+            <button class="button button-full button-dark" ng-click="cancel()">
+               Cancel
+            </button>
+          </div>
+        </div>
+    </div>
+
+
+    <div ng-if="!showNewPatientForm">
+      <center ng-if="!patients.list || patients.list.length == 0" style="margin-top: 40px;">
+        No Patients Found
+      </center>
+      <ion-list ng-if="patients.list && patients.list.length > 0" style="margin-bottom: 10px;">
+        <label class="item item-input">
+          <input type="text" placeholder="Search" ng-model="form.search" ng-virtual-keyboard/>
+        </label>
+        <button ng-if="form.search.length" class="input-button button button-icon ion-android-close" ng-click="clearSearch()"></button>
+      </ion-list>
+      <br/>
+      <ion-list>
+        <ion-item ng-repeat="patient in patients.list track by $index" ng-if="showPatient(patient)" ng-click="patientSelected()" class="item-remove-animate item-icon-right" href="#/app/patient/{{patient.id}}">
+          <p>{{ patient.lastName }}, {{ patient.firstName }}</p>
+
+          <i class="icon ion-chevron-right icon-accessory"></i>
+          <ion-option-button class="ion-trash-b icon-right button-assertive" ng-click="deletePatient(patient)">
+            &nbsp; Delete
+          </ion-option-button>
+        </ion-item>
+      </ion-list>
+    </div>
+  </ion-content>
+</ion-view>

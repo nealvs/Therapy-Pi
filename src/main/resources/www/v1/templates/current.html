@@ -1,0 +1,103 @@
+<ion-view view-title="">
+
+  <ion-content>
+    <div class="list">
+
+      <div class="item item-divider">
+        Session Info: {{ machine.session.patient.firstName }} {{ machine.session.patient.lastName }}
+      </div>
+      <div class="row">
+        <div class="col">
+          <div class="card">
+            <div class="item item-text-wrap center">
+                <h1>{{ machine.angle | number : 0 }}&deg;</h1>
+                <span>Angle</span>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card">
+            <div class="item item-text-wrap center">
+              <h1>{{ machine.session.holdTime | number : 0 }}</h1>
+              <span>Hold Time</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <div class="card">
+            <div class="item item-text-wrap center">
+              <h1>{{ machine.session.lowAngle | number : 0 }}&deg;</h1>
+              <span>Low Angle</span>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card">
+            <div class="item item-text-wrap center">
+              <h1>{{ machine.session.highAngle | number : 0 }}&deg;</h1>
+              <span>High Angle</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <div class="card">
+            <div class="item item-text-wrap center">
+              <h1>{{ machine.session.repetitions | number : 0 }}</h1>
+              <span>Repetitions</span>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card">
+            <div class="item item-text-wrap center">
+              <h1>{{ machine.session.sessionTime | number : 0 | secondsToDateTime | date:'mm:ss'}}</h1>
+              <span>Session Time</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="item">
+        <button class="button button-balanced" ng-click="stopSession();">Stop Session</button>
+      </div>
+
+      <div class="item item-divider">
+          Machine State
+      </div>
+      <div class="card">
+        <div class="item item-text-wrap">
+          Motor Switch: {{ machine.motorSwitch }}
+        </div>
+        <div class="item item-text-wrap">
+          Rotation Motor: {{ machine.rotationMotor }}
+        </div>
+      </div>
+
+      <div class="item item-divider">
+        Joystick: {{ machine.joystick | number : 2 }} V
+      </div>
+      <div class="item">
+        <div class="item range">
+          <i class="icon ion-ios-rewind"></i>
+          <input type="range" ng-model="machine.joystickSlider" min="0" max="500" value="250" ng-change="updateJoystick()">
+          <i class="icon ion-ios-fastforward"></i>
+        </div>
+      </div>
+
+      <div class="item">
+        <!--<button class="button icon-left button-calm" ng-click="stop()">-->
+          <!--<i class="icon ion-stop"></i>-->
+          <!--Stop Session-->
+        <!--</button>-->
+        <button class="button icon-left button-calm" style="float: right;" ng-click="reset()">
+          <i class="icon ion-ios-reload"></i>
+          Reset
+        </button>
+      </div>
+    </div>
+  </ion-content>
+</ion-view>

@@ -1,0 +1,38 @@
+<ion-view view-title="Settings">
+
+  <ion-content>
+    <div class="list">
+
+      <div class="item">
+        <div class="row">
+          <div class="col">
+            <div class="card">
+              <div class="item item-text-wrap center">
+                  <h1>{{ machine.rawAngle | number : 2 }}</h1>
+                  <span>Encoder Voltage</span>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card">
+              <div class="item item-text-wrap center">
+                <h1>{{ machine.angle | number : 0 }}&deg;</h1>
+                <span>Angle Reading</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+              <h2>Current Calibrated Voltage at 90&deg;: {{ machine.angleCalibrationVoltage | number : 2 }}</h2>
+          </div>
+        </div>
+      </div>
+
+      <div class="item">
+        <button class="button button-balanced" ng-click="calibrate();">Calibrate Now</button>
+      </div>
+
+    </div>
+  </ion-content>
+</ion-view>

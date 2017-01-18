@@ -1,0 +1,31 @@
+<ion-view view-title="Patient">
+  <ion-content>
+
+    <div class="list">
+      <div class="item item-divider">
+          Information
+      </div>
+      <div class="item">
+          First Name: {{ patient.firstName }} <br/>
+          Last Name: {{ patient.lastName }} <br/>
+      </div>
+      <div class="item">
+          <button class="button button-balanced" ng-click="startNewSession();">Start New Session</button>
+      </div>
+      <div class="item item-divider">
+          Sessions
+      </div>
+      <ion-list class="item">
+        <ion-item ng-repeat="session in patient.sessions track by $index" class="item-remove-animate item-icon-right" href="#/app/session/{{session.id}}">
+          <p>{{ session.startTime }}</p>
+          <i class="icon ion-chevron-right icon-accessory"></i>
+          <ion-option-button class="ion-trash-b icon-right button-assertive" ng-click="delete(patient)">
+            &nbsp; Delete
+          </ion-option-button>
+        </ion-item>
+      </ion-list>
+    </div>
+
+
+  </ion-content>
+</ion-view>

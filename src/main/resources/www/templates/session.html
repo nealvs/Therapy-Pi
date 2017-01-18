@@ -1,0 +1,32 @@
+<div view-title="Session">
+  <div>
+    <div class="list-group" class="clear">
+      <div class="list-group-item">
+        <a href="#/app/patient/{{session.patientId}}">
+          <button class="btn btn-primary bigger">Go Back</button>
+        </a>
+      </div>
+      <div class="list-group-item">
+         <span class="bigger">{{ session.patient.firstName }} {{ session.patient.lastName }}</span>
+      </div>
+      <div class="list-group-item">
+          <span class="bigger">Start Time: {{ session.startTime }}</span> <br/>
+          <span class="bigger">Total Time: {{ session.totalSeconds | secondsToDateTime | date:'mm:ss' }}</span> <br/>
+      </div>
+      <div class="list-group-item">
+        <span class="bigger">Repetitions: {{ session.repetitions }}</span> 
+      </div>
+      <div class="list-group-item bigger">
+          <span>High Angle:</span>
+          <span>{{ session.highAngle }}&deg;</span> 
+          <span>({{ session.highHoldSeconds}} s)</span>
+          <br/>
+          <span>Low Angle:</span>
+          <span>{{ session.lowAngle }}&deg;</span> 
+          <span>({{ session.lowHoldSeconds}} s)</span>
+          <br/>
+      </div>
+    </div>
+
+  </div>
+</div>

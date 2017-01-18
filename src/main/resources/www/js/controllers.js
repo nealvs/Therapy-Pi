@@ -317,6 +317,7 @@ angular.module('therapyui.controllers', [])
                 if($scope.chart) {
                     $scope.chart.series[0].yAxis.removePlotLine(1);
                     $scope.chart.series[0].yAxis.addPlotLine({id: 1, value: $scope.machine.angle, color: 'green', width: 2 });
+                    $scope.chart.series[0].update({data: $scope.machine.session.repetitionList});
                 }
             });
           }

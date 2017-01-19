@@ -46,7 +46,7 @@ public abstract class Angle {
         while(iter.hasNext()) {
             AngleReading reading = iter.next();
             Duration duration = Duration.between(reading.timestamp, current);
-            if(duration.toMillis() > Config.values.getInt("RAW_READING_SPAN", 5000)) {
+            if(duration.toMillis() > Config.values.getInt("RAW_READING_SPAN", 200)) {
                 iter.remove();
             }
         }
@@ -60,9 +60,9 @@ public abstract class Angle {
         } else if(motorState == Motor.State.UP_FAST) {
             rawValue += 0.01;
         } else if(motorState == Motor.State.DOWN_SLOW) {
-            rawValue -= 0.01;
+            rawValue -= 0.02;
         } else if(motorState == Motor.State.DOWN_FAST) {
-            rawValue -= 0.005;
+            rawValue -= 0.01;
         }
         // Keep within bounds
         rawValue = Math.max(SoftEncoder.MIN_RAW, Math.min(SoftEncoder.MAX_RAW, rawValue));

@@ -98,6 +98,7 @@ public class PatientSession {
         startTime = new Date();
         sessionStopwatch = Stopwatch.createStarted();
         holdStopwatch = Stopwatch.createStarted();
+        repetitionList = new ArrayList<>();
         repetitions = 0;
         highAngle = null;
         lowAngle = null;
@@ -254,11 +255,23 @@ public class PatientSession {
         result.addProperty("sessionTime", sessionStopwatch.elapsed(TimeUnit.SECONDS));
         result.addProperty("holdTime", holdStopwatch.elapsed(TimeUnit.SECONDS));
 
+        int MAX_REPS = 10;
+        JsonArray repetitionNumbers = new JsonArray();
         JsonArray repList = new JsonArray();
-        for(Repetition repetition : repetitionList) {
-            repList.add(repetition.toJson());
+        if(repetitionList.size() <= MAX_REPS) {
+            int count = 1;
+            for (Repetition repetition : repetitionList) {
+                repetitionNumbers.add(count++);
+                repList.add(repetition.toJson());
+            }
+        } else {
+            for(int i=repetitionList.size() - MAX_REPS; i < repetitionList.size(); i++) {
+                repetitionNumbers.add(i + 1);
+                repList.add(repetitionList.get(i).toJson());
+            }
         }
         result.add("repetitionList", repList);
+        result.add("repetitionNumbers", repetitionNumbers);
 
         if(startTime != null) {
             result.addProperty("startTime", dateFormat.format(startTime));

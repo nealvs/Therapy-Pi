@@ -314,9 +314,14 @@ angular.module('therapyui.controllers', [])
                   response.data.joystickSlider = $scope.machine.joystickSlider;
                 }
                 $scope.machine = response.data;
+
                 if($scope.chart) {
+                    // Redraw current angle line
                     $scope.chart.series[0].yAxis.removePlotLine(1);
-                    $scope.chart.series[0].yAxis.addPlotLine({id: 1, value: $scope.machine.angle, color: 'green', width: 2 });
+                    $scope.chart.series[0].yAxis.addPlotLine({id: 1, value: $scope.machine.angle, color: 'green', width: 4 });
+                    // Redraw X Axis Numbers
+                    $scope.chart.series[0].xAxis.update({categories: $scope.machine.session.repetitionNumbers}, true);
+                    // Redraw repetition boxes
                     $scope.chart.series[0].update({data: $scope.machine.session.repetitionList});
                 }
             });
@@ -393,14 +398,17 @@ angular.module('therapyui.controllers', [])
         legend: {
             enabled: false
         },
+        tooltip: {
+            enabled: false
+        },
         xAxis: {
-            categories: ['1', '2', '3', '4', '5']
+            categories: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
         },
         yAxis: {
-            min: -10,
-            max: 180,
-            tickInterval: 10,
-
+            min: -5,
+            max: 170,
+            tickInterval: 5,
+            tickPositions: [-10, 0, 20, 40, 60, 80, 100, 120, 140, 160, 180],
             title: {
               text: ''
             },
@@ -409,13 +417,22 @@ angular.module('therapyui.controllers', [])
                 id: 1,
                 value: $scope.machine.angle,
                 color: 'green',
-                width: 2
+                width: 4
             }]
         },
         series: [{
             name: 'Repetitions',
             data: $scope.machine.session.repetitionList
-        }]
+        }],
+        plotOptions: {
+            boxplot: {
+                //fillColor: '#F0F0E0',
+                //lineWidth: 2,
+                medianWidth: 0,
+                stemWidth: 0,
+                whiskerWidth: 0
+            }
+        }
     });
   };
 

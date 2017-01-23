@@ -214,6 +214,7 @@ angular.module('therapyui.controllers', [])
       $scope.submitPassword = function() {
           if($scope.settings.submittedPassword) {
             if($scope.validatePassword()) {
+                $('#password').getkeyboard().close();
                 $scope.settings.passwordError = "";
                 $scope.settings.mode = "all";
                 $scope.loadAll();

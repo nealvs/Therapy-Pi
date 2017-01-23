@@ -117,13 +117,19 @@
           </div>
         </div>
         <br/>
-        <div class="form-group">
-          <label for="password">
-            <span class="input-label bigger">Password</span>
-          </label>
-          <input id="password" type="password" class="form-control input-lg bigger" ng-change="passwordChanged()" ng-model="settings.submittedPassword" ng-virtual-keyboard />
-        </div>
-        <button class="btn btn-block btn-lg btn-primary bigger" ng-click="submitPassword()">Submit</button>
+          <form ng-submit="submitPassword()">
+            <div class="form-group">
+              <label for="password">
+                <span class="input-label bigger">Password</span>
+              </label>
+              <input id="password" type="password" class="form-control input-lg bigger" ng-change="passwordChanged()" ng-model="settings.submittedPassword" ng-virtual-keyboard />
+            </div>
+            <button class="btn btn-block btn-lg btn-primary bigger" ng-click="submitPassword()">Submit</button>
+          </form>
+          <br/>
+          <br/>
+          <br/>
+          <br/>
       </div>
 
       <div ng-if="settings.mode == 'changePassword'">
@@ -148,6 +154,11 @@
           <input id="password" type="password" class="form-control input-lg bigger" ng-change="passwordChanged()" ng-model="settings.newPassword" ng-virtual-keyboard />
         </div>
         <button class="btn btn-block btn-lg btn-primary bigger" ng-click="submitChangePassword()">Submit</button>
+
+          <br/>
+          <br/>
+          <br/>
+          <br/>
       </div>
 
       <div ng-if="settings.mode == 'clearDatabase'">
@@ -166,6 +177,10 @@
           <input id="password" type="password" class="form-control input-lg bigger" ng-change="passwordChanged()" ng-model="settings.submittedPassword" ng-virtual-keyboard />
         </div>
         <button class="btn btn-block btn-lg btn-primary bigger" ng-click="submitClearDatabase()">Clear Database</button>
+          <br/>
+          <br/>
+          <br/>
+          <br/>
       </div>
 
       <br/>

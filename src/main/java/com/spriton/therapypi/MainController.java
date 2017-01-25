@@ -12,6 +12,8 @@ public class MainController {
     public static void main(String[] args) throws Exception {
         PropertyConfigurator.configure("log4j.properties");
         Config.init(args, "therapypi.properties");
+
+        DataServer.init();
         DataAccess.init();
 
         if(Config.values.getBoolean("HARDWARE_MACHINE", false)) {
@@ -25,8 +27,6 @@ public class MainController {
 
         log.info("Running machine...");
         Machine.instance().run();
-
-        DataServer.init();
 
         //DataAccess.shutdown();
     }

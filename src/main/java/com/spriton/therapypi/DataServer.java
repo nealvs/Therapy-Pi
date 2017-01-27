@@ -19,7 +19,7 @@ public class DataServer {
     private static Logger log = Logger.getLogger(DataServer.class);
 
     public static void init() {
-        int port = Config.values.getInt("SERVER_PORT", 80);
+        int port = Config.values.getInt("SERVER_PORT", 8686);
         log.info("Starting Data Server on port: " + port);
         port(port);
 

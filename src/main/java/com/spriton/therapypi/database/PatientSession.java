@@ -130,7 +130,8 @@ public class PatientSession {
         cleanUpReadingsAndUpdateRepetitions(angleReading);
         //updateRepetitions();
 
-        if(state != null && state == Motor.State.STOPPED) {
+        // Consider it a hold unless in the motor medium or fast states.  Lightly bumping the joystick shouldn't reset the hold timer
+        if(state != null && (state == Motor.State.STOPPED || state == Motor.State.UP_SLOW || state == Motor.State.DOWN_SLOW)) {
             if (!holdStopwatch.isRunning()) {
                 holdStopwatch = Stopwatch.createStarted();
             }

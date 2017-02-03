@@ -57,12 +57,16 @@ public abstract class Angle {
     public void update(Motor.State motorState) {
         if(motorState == Motor.State.UP_SLOW) {
             rawValue += 0.005;
-        } else if(motorState == Motor.State.UP_FAST) {
+        } else if(motorState == Motor.State.UP_MEDIUM) {
             rawValue += 0.01;
+        } else if(motorState == Motor.State.UP_FAST) {
+            rawValue += 0.02;
         } else if(motorState == Motor.State.DOWN_SLOW) {
-            rawValue -= 0.02;
-        } else if(motorState == Motor.State.DOWN_FAST) {
+            rawValue -= 0.005;
+        } else if(motorState == Motor.State.DOWN_MEDIUM) {
             rawValue -= 0.01;
+        } else if(motorState == Motor.State.DOWN_FAST) {
+            rawValue -= 0.02;
         }
         // Keep within bounds
         rawValue = Math.max(SoftEncoder.MIN_RAW, Math.min(SoftEncoder.MAX_RAW, rawValue));

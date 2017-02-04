@@ -183,7 +183,7 @@ public class DataAccess {
     public static List<PatientSession> getPatientSessions(int id) {
         try(Session session = getSessionFactory().openSession()) {
             List<PatientSession> sessions = session
-                    .createQuery("FROM PatientSession WHERE patientId = :id AND deleted IS NULL")
+                    .createQuery("FROM PatientSession WHERE patientId = :id AND deleted IS NULL ORDER BY startTime DESC")
                     .setInteger("id", id)
                     .list();
             return sessions;

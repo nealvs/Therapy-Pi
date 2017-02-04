@@ -123,18 +123,7 @@ public class DataServer {
     public static void stopSession() {
         post("/stopSession",  "application/json", (req, res) -> {
             JsonObject result = new JsonObject();
-            if(Machine.instance().currentSession != null) {
-                Machine.instance().currentSession.stop();
-                if(Machine.instance().currentSession.getPatient() != null) {
-                    Machine.instance().currentSession.setPatientId(Machine.instance().currentSession.getPatient().getId());
-                }
-                if(Machine.instance().currentSession.getPatientId() != null) {
-                    DataAccess.createOrUpdateSession(Machine.instance().currentSession);
-                } else {
-                    log.warn("Session doesn't have a patientId.  Not saving.");
-                }
-                Machine.instance().currentSession = null;
-            }
+            Machine.stopAndSaveSession();
             return result.toString();
         });
     }

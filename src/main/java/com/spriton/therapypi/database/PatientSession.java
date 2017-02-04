@@ -4,10 +4,7 @@ import com.google.common.base.Stopwatch;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.spriton.therapypi.Config;
-import com.spriton.therapypi.components.Angle;
-import com.spriton.therapypi.components.AngleReading;
-import com.spriton.therapypi.components.Motor;
-import com.spriton.therapypi.components.Repetition;
+import com.spriton.therapypi.components.*;
 import org.apache.log4j.Logger;
 
 import javax.persistence.*;
@@ -72,6 +69,9 @@ public class PatientSession {
     private AngleReading lastHold = null;
     @Transient
     private boolean angleGoingUp = true;
+    @Transient
+    private boolean endSession = false;
+
 
     public PatientSession() {}
 
@@ -102,6 +102,7 @@ public class PatientSession {
         repetitions = 0;
         highAngle = null;
         lowAngle = null;
+        endSession = false;
     }
 
     public void update(AngleReading angleReading, Motor.State state) {
@@ -137,6 +138,11 @@ public class PatientSession {
             }
         } else {
             holdStopwatch = Stopwatch.createUnstarted();
+        }
+
+        if(holdStopwatch.elapsed(TimeUnit.SECONDS) >= Config.values.getInt("IDLE_MACHINE_SECONDS", 300)) {
+            endSession = true;
+            Machine.stopAndSaveSession();
         }
 
 //        if(duration.toMillis() >= Config.values.getInt("READING_SPAN", 3000) - 1000) {
@@ -255,6 +261,7 @@ public class PatientSession {
         result.addProperty("repetitions", repetitions);
         result.addProperty("sessionTime", sessionStopwatch.elapsed(TimeUnit.SECONDS));
         result.addProperty("holdTime", holdStopwatch.elapsed(TimeUnit.SECONDS));
+        result.addProperty("endSession", endSession);
 
         int MAX_REPS = 10;
         JsonArray repetitionNumbers = new JsonArray();

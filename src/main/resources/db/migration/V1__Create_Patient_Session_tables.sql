@@ -4,6 +4,8 @@ CREATE TABLE patient (
     id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
+    low_goal INT,
+    high_goal INT,
     created DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated DATETIME,
     deleted DATETIME

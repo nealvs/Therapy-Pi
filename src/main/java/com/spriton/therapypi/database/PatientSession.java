@@ -113,13 +113,13 @@ public class PatientSession {
             if (lowAngle == null || angleValue <= lowAngle) {
                 lowAngle = angleValue;
             }
-            if (lowAngle <= angleValue) {
+            if (lowAngle >= angleValue) {
                 lowHoldSeconds = (int) holdSeconds;
             }
             if (highAngle == null || angleValue >= highAngle) {
                 highAngle = angleValue;
             }
-            if (highAngle >= angleValue) {
+            if (highAngle <= angleValue) {
                 highHoldSeconds = (int) holdSeconds;
             }
         }
@@ -255,6 +255,7 @@ public class PatientSession {
 
     public JsonObject toJson() {
         SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy");
+        SimpleDateFormat dateTimeFormat = new SimpleDateFormat("MMM dd, yyyy hh:mm a");
         JsonObject result = new JsonObject();
         result.addProperty("id", id);
         result.addProperty("patientId", patientId);
@@ -285,11 +286,18 @@ public class PatientSession {
         result.add("repetitionList", repList);
         result.add("repetitionNumbers", repetitionNumbers);
 
+        if(Machine.instance().timeZone != null) {
+            dateFormat.setTimeZone(Machine.instance().timeZone);
+            dateTimeFormat.setTimeZone(Machine.instance().timeZone);
+        }
+
         if(startTime != null) {
-            result.addProperty("startTime", dateFormat.format(startTime));
+            result.addProperty("startDate", dateFormat.format(startTime));
+            result.addProperty("startDateTime", dateTimeFormat.format(startTime));
         }
         if(endTime != null) {
-            result.addProperty("endTime", dateFormat.format(endTime));
+            result.addProperty("endDate", dateFormat.format(endTime));
+            result.addProperty("endDateTime", dateTimeFormat.format(endTime));
         }
         result.addProperty("totalSeconds", totalSeconds);
 

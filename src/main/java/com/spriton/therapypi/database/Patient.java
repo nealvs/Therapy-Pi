@@ -22,6 +22,11 @@ public class Patient {
     @Column(name="last_name")
     private String lastName;
 
+    @Column(name="low_goal")
+    private Integer lowGoal;
+    @Column(name="high_goal")
+    private Integer highGoal;
+
     @Column(name="created")
     private Date created;
     @Column(name="updated")
@@ -47,6 +52,8 @@ public class Patient {
         json.addProperty("id", id);
         json.addProperty("firstName", firstName);
         json.addProperty("lastName", lastName);
+        json.addProperty("lowGoal", lowGoal);
+        json.addProperty("highGoal", highGoal);
         if(created != null) {
             json.addProperty("created", dateFormat.format(created));
         }
@@ -114,5 +121,21 @@ public class Patient {
 
     public void setSessions(List<PatientSession> sessions) {
         this.sessions = sessions;
+    }
+
+    public Integer getLowGoal() {
+        return lowGoal;
+    }
+
+    public void setLowGoal(Integer lowGoal) {
+        this.lowGoal = lowGoal;
+    }
+
+    public Integer getHighGoal() {
+        return highGoal;
+    }
+
+    public void setHighGoal(Integer highGoal) {
+        this.highGoal = highGoal;
     }
 }

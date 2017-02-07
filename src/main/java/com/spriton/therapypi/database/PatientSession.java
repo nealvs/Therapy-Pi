@@ -107,16 +107,20 @@ public class PatientSession {
 
     public void update(AngleReading angleReading, Motor.State state) {
         int angleValue = angleReading.angle;
-        if(lowAngle == null || angleValue <= lowAngle) {
-            lowAngle = angleValue;
-            if(lowHoldSeconds < holdStopwatch.elapsed(TimeUnit.SECONDS)) {
-                lowHoldSeconds = (int) holdStopwatch.elapsed(TimeUnit.SECONDS);
+
+        long holdSeconds = holdStopwatch.elapsed(TimeUnit.SECONDS);
+        if(holdSeconds >= Config.values.getInt("HOLD_MINIMUM_SECONDS", 5)) {
+            if (lowAngle == null || angleValue <= lowAngle) {
+                lowAngle = angleValue;
             }
-        }
-        if(highAngle == null || angleValue >= highAngle) {
-            highAngle = angleValue;
-            if(highHoldSeconds > holdStopwatch.elapsed(TimeUnit.SECONDS)) {
-                highHoldSeconds = (int) holdStopwatch.elapsed(TimeUnit.SECONDS);
+            if (lowAngle <= angleValue) {
+                lowHoldSeconds = (int) holdSeconds;
+            }
+            if (highAngle == null || angleValue >= highAngle) {
+                highAngle = angleValue;
+            }
+            if (highAngle >= angleValue) {
+                highHoldSeconds = (int) holdSeconds;
             }
         }
 
@@ -250,7 +254,7 @@ public class PatientSession {
 
 
     public JsonObject toJson() {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss a");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy");
         JsonObject result = new JsonObject();
         result.addProperty("id", id);
         result.addProperty("patientId", patientId);

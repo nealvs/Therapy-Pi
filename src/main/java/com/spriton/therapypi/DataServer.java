@@ -246,6 +246,42 @@ public class DataServer {
             }
             return result.toString();
         });
+        
+        post("/patient/setGoals",  "application/json", (req, res) -> {
+            JsonObject errorResponse = new JsonObject();
+            try {
+                if (req.body() != null) {
+                    JsonParser parser = new JsonParser();
+                    JsonObject request = (JsonObject) parser.parse(req.body());
+                    if (request.has("patientId")) {
+                        int patientId = Integer.parseInt(request.get("patientId").getAsString());
+                        Patient patient = DataAccess.getPatient(patientId);
+                        if (patient != null) {
+                            if (request.has("lowGoal")) {
+                                String lowGoal = request.get("lowGoal").getAsString();
+                                if (lowGoal != null) {
+                                    patient.setLowGoal(Integer.parseInt(lowGoal));
+                                }
+                            }
+                            if (request.has("highGoal")) {
+                                String highGoal = request.get("highGoal").getAsString();
+                                if (highGoal != null) {
+                                    patient.setHighGoal(Integer.parseInt(highGoal));
+                                }
+                            }
+                        } else {
+                            errorResponse.addProperty("error", "Patient record not found");
+                        }
+                        DataAccess.updatePatient(patient);
+                        return patient.toJson();
+                    }
+                }
+                errorResponse.addProperty("error", "Submission Error");
+            } catch(Exception ex) {
+                errorResponse.addProperty("error", ex.getMessage());
+            }
+            return errorResponse;
+        });
     }
 
     public static void settings() {

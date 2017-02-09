@@ -117,6 +117,15 @@ public class DataAccess {
         }
     }
 
+    public static Patient updatePatient(Patient patient) {
+        try(Session session = getSessionFactory().openSession()) {
+            patient.setUpdated(new Date());
+            session.update(patient);
+            session.flush();
+            return patient;
+        }
+    }
+
     public static void deletePatient(int id) {
         Patient patient = getPatient(id);
         if(patient != null) {

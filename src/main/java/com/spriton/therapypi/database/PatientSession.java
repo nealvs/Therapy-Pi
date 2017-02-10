@@ -53,6 +53,11 @@ public class PatientSession {
     private Date deleted;
 
     @Transient
+    private Integer timerMinutes;
+    @Transient
+    private int timerAlarmTriggeredCount;
+
+    @Transient
     private Patient patient;
     @Transient
     private Stopwatch sessionStopwatch = Stopwatch.createUnstarted();
@@ -105,8 +110,20 @@ public class PatientSession {
         endSession = false;
     }
 
+    public synchronized void updateTimerAlarm() {
+        int minutes = (int) sessionStopwatch.elapsed(TimeUnit.MINUTES);
+        if(timerMinutes != null) {
+            if(minutes == (timerMinutes + (timerAlarmTriggeredCount * 2)) && timerAlarmTriggeredCount == 0) {
+                timerAlarmTriggeredCount++;
+                Sound.playTimerAlarm();
+            }
+        }
+    }
+
     public void update(AngleReading angleReading, Motor.State state) {
         int angleValue = angleReading.angle;
+
+        updateTimerAlarm();
 
         long holdSeconds = holdStopwatch.elapsed(TimeUnit.SECONDS);
         if(holdSeconds >= Config.values.getInt("HOLD_MINIMUM_SECONDS", 5)) {
@@ -267,7 +284,9 @@ public class PatientSession {
         result.addProperty("sessionTime", sessionStopwatch.elapsed(TimeUnit.SECONDS));
         result.addProperty("holdTime", holdStopwatch.elapsed(TimeUnit.SECONDS));
         result.addProperty("endSession", endSession);
-
+        result.addProperty("timerMinutes", timerMinutes);
+        result.addProperty("timerAlarmTriggeredCount", timerAlarmTriggeredCount);
+        
         int MAX_REPS = 10;
         JsonArray repetitionNumbers = new JsonArray();
         JsonArray repList = new JsonArray();
@@ -422,5 +441,21 @@ public class PatientSession {
 
     public AngleReading getLastHold() {
         return lastHold;
+    }
+
+    public Integer getTimerMinutes() {
+        return timerMinutes;
+    }
+
+    public void setTimerMinutes(Integer timerMinutes) {
+        this.timerMinutes = timerMinutes;
+    }
+
+    public int getTimerAlarmTriggeredCount() {
+        return timerAlarmTriggeredCount;
+    }
+
+    public void setTimerAlarmTriggeredCount(int timerAlarmTriggeredCount) {
+        this.timerAlarmTriggeredCount = timerAlarmTriggeredCount;
     }
 }

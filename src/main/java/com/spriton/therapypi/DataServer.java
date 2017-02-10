@@ -99,6 +99,12 @@ public class DataServer {
                 JsonObject request = (JsonObject) parser.parse(req.body());
                 if(request.has("patientId")) {
                     PatientSession session = new PatientSession();
+                    if(request.has("minutes")) {
+                        int minutes = request.get("minutes").getAsInt();
+                        if(minutes >= 1) {
+                            session.setTimerMinutes(minutes);
+                        }
+                    }
                     Patient patient = DataAccess.getPatient(request.get("patientId").getAsInt());
                     session.setPatient(patient);
                     session.start();
@@ -246,7 +252,7 @@ public class DataServer {
             }
             return result.toString();
         });
-        
+
         post("/patient/setGoals",  "application/json", (req, res) -> {
             JsonObject errorResponse = new JsonObject();
             try {

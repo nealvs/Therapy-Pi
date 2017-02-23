@@ -286,7 +286,7 @@ public class PatientSession {
         result.addProperty("endSession", endSession);
         result.addProperty("timerMinutes", timerMinutes);
         result.addProperty("timerAlarmTriggeredCount", timerAlarmTriggeredCount);
-        
+
         int MAX_REPS = 10;
         JsonArray repetitionNumbers = new JsonArray();
         JsonArray repList = new JsonArray();

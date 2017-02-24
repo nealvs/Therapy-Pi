@@ -73,11 +73,11 @@ public abstract class Angle {
     }
 
     public boolean isMaxAngle() {
-        return getAveragedValue() >= MAX_ANGLE;
+        return getAveragedValue() >= MAX_ANGLE || value >= MAX_ANGLE;
     }
 
     public boolean isMinAngle() {
-        return getAveragedValue() <= MIN_ANGLE;
+        return getAveragedValue() <= MIN_ANGLE || value <= MIN_ANGLE;
     }
 
     public abstract void read() throws Exception;

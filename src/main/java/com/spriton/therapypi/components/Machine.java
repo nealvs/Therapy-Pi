@@ -72,6 +72,7 @@ public class Machine {
         new Thread() {
             @Override
             public void run() {
+                Sound.playTimerAlarm();
                 while(running) {
                     try {
                         joystick.read();

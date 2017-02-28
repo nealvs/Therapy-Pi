@@ -52,25 +52,19 @@ public abstract class Angle {
         }
     }
 
-    public abstract void calculateAndSetAverage();
-
-    public void update(Motor.State motorState) {
-        if(motorState == Motor.State.UP_SLOW) {
-            rawValue += 0.005;
-        } else if(motorState == Motor.State.UP_MEDIUM) {
-            rawValue += 0.01;
-        } else if(motorState == Motor.State.UP_FAST) {
-            rawValue += 0.02;
-        } else if(motorState == Motor.State.DOWN_SLOW) {
-            rawValue -= 0.005;
-        } else if(motorState == Motor.State.DOWN_MEDIUM) {
-            rawValue -= 0.01;
-        } else if(motorState == Motor.State.DOWN_FAST) {
-            rawValue -= 0.02;
+    public void calculateAndSetAverage() {
+        if(readings.size() > 0) {
+            double total = 0.0;
+            for(AngleReading reading : readings) {
+                total += reading.angle;
+            }
+            setAveragedValue(total / readings.size());
+        } else {
+            setAveragedValue(this.value);
         }
-        // Keep within bounds
-        rawValue = Math.max(SoftEncoder.MIN_RAW, Math.min(SoftEncoder.MAX_RAW, rawValue));
     }
+
+    public abstract void update(Motor.State motorState);
 
     public boolean isMaxAngle() {
         return getAveragedValue() >= MAX_ANGLE || value >= MAX_ANGLE;

@@ -1,6 +1,7 @@
 package com.spriton.therapypi.components.hardware;
 
 import com.spriton.therapypi.components.Angle;
+import com.spriton.therapypi.components.Motor;
 
 public class PotAngle extends Angle {
 
@@ -8,8 +9,6 @@ public class PotAngle extends Angle {
     public static int TotalDegrees = 300;
 
     public PotAngle() {
-
-
 
     }
 
@@ -20,6 +19,11 @@ public class PotAngle extends Angle {
 
     @Override
     public void read() {
+
+    }
+
+    @Override
+    public void update(Motor.State motorState) {
 
     }
 }

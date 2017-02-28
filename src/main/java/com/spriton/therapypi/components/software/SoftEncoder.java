@@ -3,6 +3,7 @@ package com.spriton.therapypi.components.software;
 import com.spriton.therapypi.Config;
 import com.spriton.therapypi.components.Angle;
 import com.spriton.therapypi.components.AngleReading;
+import com.spriton.therapypi.components.Motor;
 import com.spriton.therapypi.components.hardware.HardJoystick;
 import org.apache.log4j.Logger;
 
@@ -33,16 +34,22 @@ public class SoftEncoder extends Angle {
     }
 
     @Override
-    public void calculateAndSetAverage() {
-        if(readings.size() > 0) {
-            double total = 0.0;
-            for(AngleReading reading : readings) {
-                total += reading.angle;
-            }
-            setAveragedValue(total / readings.size());
-        } else {
-            setAveragedValue(this.value);
+    public void update(Motor.State motorState) {
+        if(motorState == Motor.State.UP_SLOW) {
+            rawValue += 0.005;
+        } else if(motorState == Motor.State.UP_MEDIUM) {
+            rawValue += 0.01;
+        } else if(motorState == Motor.State.UP_FAST) {
+            rawValue += 0.02;
+        } else if(motorState == Motor.State.DOWN_SLOW) {
+            rawValue -= 0.005;
+        } else if(motorState == Motor.State.DOWN_MEDIUM) {
+            rawValue -= 0.01;
+        } else if(motorState == Motor.State.DOWN_FAST) {
+            rawValue -= 0.02;
         }
+        // Keep within bounds
+        rawValue = Math.max(SoftEncoder.MIN_RAW, Math.min(SoftEncoder.MAX_RAW, rawValue));
     }
 
     public static double getAngleFromRawVoltage(double voltage, double angleCalibrationVoltage, double angleCalibrationDegree) {

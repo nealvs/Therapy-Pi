@@ -132,16 +132,18 @@ public class Machine {
 
     public static void setInstance(Type type) {
         if(type == Type.HARDWARE) {
+            Angle angle = Config.values.getBoolean("OPTICAL_ENCODER") ? new OpticalEncoder() : new HardEncoder();
             Machine.setInstance(Machine.create()
                     .type(type)
-                    .angle(new HardEncoder())
+                    .angle(angle)
                     .joystick(new HardJoystick())
                     .motorSwitch(new MotorRelaySwitch(Switch.State.ON))
                     .rotationMotor(new HardRotationMotor()));
         } else if(type == Type.SOFTWARE) {
+            Angle angle = Config.values.getBoolean("OPTICAL_ENCODER") ? new OpticalEncoder() : new SoftEncoder();
             Machine.setInstance(Machine.create()
                     .type(type)
-                    .angle(new SoftEncoder())
+                    .angle(angle)
                     .joystick(new SoftJoystick())
                     .motorSwitch(new SoftSwitch(Switch.State.ON))
                     .rotationMotor(new SoftRotationMotor()));

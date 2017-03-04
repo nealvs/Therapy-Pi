@@ -1,6 +1,8 @@
 package com.spriton.therapypi.components;
 
 import org.apache.log4j.Logger;
+
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,8 +30,8 @@ public class Sound {
     public static class SoundThread implements Runnable {
         @Override
         public void run() {
-            InputStream inputStream = getClass().getClassLoader().getResourceAsStream("beep.wav");
-            try(AudioInputStream audioIn = AudioSystem.getAudioInputStream(inputStream)) {
+            try(InputStream inputStream = new BufferedInputStream(getClass().getClassLoader().getResourceAsStream("beep.wav"));
+                AudioInputStream audioIn = AudioSystem.getAudioInputStream(inputStream)) {
                 Clip clip = AudioSystem.getClip();
                 clip.open(audioIn);
                 clip.start();

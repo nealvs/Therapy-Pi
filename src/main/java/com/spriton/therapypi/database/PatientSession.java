@@ -305,7 +305,7 @@ public class PatientSession {
         result.add("repetitionList", repList);
         result.add("repetitionNumbers", repetitionNumbers);
 
-        if(Machine.instance().timeZone != null) {
+        if(Machine.instance() != null && Machine.instance().timeZone != null) {
             dateFormat.setTimeZone(Machine.instance().timeZone);
             dateTimeFormat.setTimeZone(Machine.instance().timeZone);
         }

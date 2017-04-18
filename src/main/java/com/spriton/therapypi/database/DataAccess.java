@@ -74,25 +74,25 @@ public class DataAccess {
             List<Patient> patients = session.createQuery(
                     "SELECT DISTINCT p FROM Patient p, PatientSession s " +
                     "WHERE s.patientId = p.id AND p.deleted IS NULL AND s.deleted IS NULL " +
-                    "AND s.startTime > :date ")
+                    "AND s.startTime > :date ORDER BY p.lastName, p.firstName ")
                     .setDate("date", cal.getTime())
                     .list();
 
-            for(Patient patient : patients) {
-                patient.setSessions(getPatientSessions(patient.getId()));
-            }
+//            for(Patient patient : patients) {
+//                patient.setSessions(getPatientSessions(patient.getId()));
+//            }
 
-            Collections.sort(patients, new Comparator<Patient>() {
-                @Override
-                public int compare(Patient patient, Patient patient2) {
-                    if(patient.getSessions() != null && !patient.getSessions().isEmpty() && patient.getSessions().get(0).getStartTime() != null) {
-                        if(patient2.getSessions() != null && !patient2.getSessions().isEmpty() && patient2.getSessions().get(0).getStartTime() != null) {
-                            patient.getSessions().get(0).getStartTime().compareTo(patient2.getSessions().get(0).getStartTime());
-                        }
-                    }
-                    return 0;
-                }
-            });
+//            Collections.sort(patients, new Comparator<Patient>() {
+//                @Override
+//                public int compare(Patient patient, Patient patient2) {
+//                    if(patient.getSessions() != null && !patient.getSessions().isEmpty() && patient.getSessions().get(0).getStartTime() != null) {
+//                        if(patient2.getSessions() != null && !patient2.getSessions().isEmpty() && patient2.getSessions().get(0).getStartTime() != null) {
+//                            patient.getSessions().get(0).getStartTime().compareTo(patient2.getSessions().get(0).getStartTime());
+//                        }
+//                    }
+//                    return 0;
+//                }
+//            });
 
             return patients;
         }
@@ -105,6 +105,23 @@ public class DataAccess {
                 patient.setSessions(getPatientSessions(patient.getId()));
             }
             return patient;
+        }
+    }
+
+    public static Patient getPatient(String firstName, String lastName) {
+        try(Session session = getSessionFactory().openSession()) {
+            List<Patient> patients = session.createQuery(
+                    "SELECT p FROM Patient p " +
+                    "WHERE p.firstName = :firstName " +
+                    "AND p.lastName = :lastName " +
+                    "AND p.deleted IS NULL ")
+                    .setString("firstName", firstName)
+                    .setString("lastName", lastName)
+                    .list();
+            if(patients != null && patients.size() > 0) {
+                return patients.get(0);
+            }
+            return null;
         }
     }
 

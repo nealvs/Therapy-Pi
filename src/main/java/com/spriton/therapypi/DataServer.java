@@ -339,10 +339,24 @@ public class DataServer {
 
     public static void createPatient() {
         post("/createPatient",  "application/json", (req, res) -> {
-            JsonObject requestJson = (JsonObject) new JsonParser().parse(req.body());
-            Patient patient = new Patient(requestJson);
-            DataAccess.createPatient(patient);
-            return patient.toJson();
+            try {
+                JsonObject requestJson = (JsonObject) new JsonParser().parse(req.body());
+                Patient patient = new Patient(requestJson);
+                Patient existingPatient = DataAccess.getPatient(patient.getFirstName(), patient.getLastName());
+                if(existingPatient == null) {
+                    DataAccess.createPatient(patient);
+                    return patient.toJson();
+                } else {
+                    JsonObject result = new JsonObject();
+                    result.addProperty("error", "A patient with this name already exists");
+                    return result;
+                }
+            } catch (Exception ex) {
+                log.error("Error creating patient. " + req.body());
+                JsonObject result = new JsonObject();
+                result.addProperty("error", ex.getMessage());
+                return result;
+            }
         });
     }
 

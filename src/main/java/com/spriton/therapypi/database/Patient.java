@@ -42,6 +42,8 @@ public class Patient {
     public Patient(JsonObject obj) {
         if(obj.has("firstName")) {
             this.firstName = obj.get("firstName").getAsString();
+        }
+        if(obj.has("lastName")) {
             this.lastName = obj.get("lastName").getAsString();
         }
     }

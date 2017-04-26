@@ -2,6 +2,7 @@ package com.spriton.therapypi.database;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.spriton.therapypi.components.Repetition;
 
 import javax.persistence.*;
 import java.text.SimpleDateFormat;
@@ -65,6 +66,31 @@ public class Patient {
                 sessionArray.add(session.toJson());
             }
             json.add("sessions", sessionArray);
+
+            SimpleDateFormat format = new SimpleDateFormat("d MMM");
+            int MAX_SESSIONS = 10;
+            JsonArray repetitionNumbers = new JsonArray();
+            JsonArray repList = new JsonArray();
+            for (PatientSession session : sessions) {
+                if(session.getLowAngle() != null && session.getHighAngle() != null) {
+                    repetitionNumbers.add(format.format(session.getStartTime()));
+                    repList.add(session.toChartJson());
+                }
+            }
+
+            JsonArray trimmedList = new JsonArray();
+            JsonArray trimmedNumbers = new JsonArray();
+            if(repList.size() > MAX_SESSIONS) {
+                for (int i = 0; i < repList.size() - MAX_SESSIONS; i++) {
+                    trimmedList.add(repList.get(i));
+                    trimmedNumbers.add(repetitionNumbers.get(i));
+                }
+            } else {
+                trimmedList = repList;
+                trimmedNumbers = repetitionNumbers;
+            }
+            json.add("repetitionList", trimmedList);
+            json.add("repetitionNumbers", trimmedNumbers);
         }
         return json;
     }

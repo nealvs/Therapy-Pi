@@ -458,4 +458,14 @@ public class PatientSession {
     public void setTimerAlarmTriggeredCount(int timerAlarmTriggeredCount) {
         this.timerAlarmTriggeredCount = timerAlarmTriggeredCount;
     }
+
+    public JsonArray toChartJson() {
+        JsonArray array = new JsonArray();
+        array.add(lowAngle);
+        array.add(lowAngle);
+        array.add(lowAngle);
+        array.add(highAngle);
+        array.add(highAngle);
+        return array;
+    }
 }

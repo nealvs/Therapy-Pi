@@ -51,6 +51,7 @@ public class DataServer {
         settings();
         createPatient();
         deletePatient();
+        deleteSession();
     }
 
     public static void setupOptions() {
@@ -366,6 +367,17 @@ public class DataServer {
             JsonObject requestJson = (JsonObject) new JsonParser().parse(req.body());
             if(requestJson.has("id")) {
                 DataAccess.deletePatient(requestJson.get("id").getAsInt());
+            }
+            return result.toString();
+        });
+    }
+
+    public static void deleteSession() {
+        post("/deleteSession",  "application/json", (req, res) -> {
+            JsonObject result = new JsonObject();
+            JsonObject requestJson = (JsonObject) new JsonParser().parse(req.body());
+            if(requestJson.has("id")) {
+                DataAccess.deleteSession(requestJson.get("id").getAsInt());
             }
             return result.toString();
         });

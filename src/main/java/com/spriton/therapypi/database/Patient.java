@@ -6,6 +6,7 @@ import com.spriton.therapypi.components.Repetition;
 
 import javax.persistence.*;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -71,6 +72,7 @@ public class Patient {
             int MAX_SESSIONS = 10;
             JsonArray repetitionNumbers = new JsonArray();
             JsonArray repList = new JsonArray();
+            Collections.reverse(sessions);
             for (PatientSession session : sessions) {
                 if(session.getLowAngle() != null && session.getHighAngle() != null) {
                     repetitionNumbers.add(format.format(session.getStartTime()));

@@ -160,6 +160,17 @@ public class DataAccess {
         }
     }
 
+    public static void deleteSession(int id) {
+        PatientSession patientSession = getSession(id);
+        if(patientSession != null) {
+            patientSession.setDeleted(new Date());
+            try(Session session = getSessionFactory().openSession()) {
+                session.update(patientSession);
+                session.flush();
+            }
+        }
+    }
+
     public static ConfigValue getConfigValue(String key) {
         try(Session session = getSessionFactory().openSession()) {
             ConfigValue value = session.get(ConfigValue.class, key);

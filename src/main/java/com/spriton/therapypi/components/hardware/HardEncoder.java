@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 
 public class HardEncoder extends Angle {
 
-    private static Logger log = Logger.getLogger(HardJoystick.class);
+    private static Logger log = Logger.getLogger(HardEncoder.class);
 
     private static double MAX_RAW = 5.0;
     private static double MIN_RAW = 0.0;

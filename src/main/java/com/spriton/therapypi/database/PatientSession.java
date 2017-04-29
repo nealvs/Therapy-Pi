@@ -152,16 +152,28 @@ public class PatientSession {
         cleanUpReadingsAndUpdateRepetitions(angleReading);
         //updateRepetitions();
 
-        // Consider it a hold unless in the motor medium or fast states.  Lightly bumping the joystick shouldn't reset the hold timer
-        if(state != null && (state == Motor.State.STOPPED || state == Motor.State.UP_SLOW || state == Motor.State.DOWN_SLOW)) {
-            if (!holdStopwatch.isRunning()) {
-                holdStopwatch = Stopwatch.createStarted();
+        if(state != null) {
+            // Consider it a hold unless in the motor medium or fast states.  Lightly bumping the joystick shouldn't reset the hold timer
+            if ((state == Motor.State.STOPPED || state == Motor.State.UP_SLOW || state == Motor.State.DOWN_SLOW)) {
+                if (!holdStopwatch.isRunning()) {
+                    holdStopwatch = Stopwatch.createStarted();
+                }
+            } else {
+                holdStopwatch = Stopwatch.createUnstarted();
             }
         } else {
-            holdStopwatch = Stopwatch.createUnstarted();
+            // On a machine that doesn't have a joystick/motor, so detect an angle change
+            if(readings.size() > 1) {
+                AngleReading previousReading = readings.get(readings.size() - 2);
+                if(previousReading.angle != angleReading.angle) {
+                    holdStopwatch = Stopwatch.createUnstarted();
+                } else if (!holdStopwatch.isRunning()) {
+                    holdStopwatch = Stopwatch.createStarted();
+                }
+            }
         }
 
-        if(holdStopwatch.elapsed(TimeUnit.SECONDS) >= Config.values.getInt("IDLE_MACHINE_SECONDS", 300)) {
+        if(holdStopwatch.elapsed(TimeUnit.SECONDS) >= Config.values.getInt("IDLE_MACHINE_SECONDS", 600)) {
             endSession = true;
             Machine.stopAndSaveSession();
         }
@@ -237,37 +249,37 @@ public class PatientSession {
         }
     }
 
-//    private void determineHold(AngleReading newReading) {
-//        if(readings.size() > 0) {
-//            int min = Integer.MAX_VALUE;
-//            int max = -Integer.MAX_VALUE;
-//            int total = 0;
-//
-//            for (AngleReading reading : readings) {
-//                if(reading.angle > max) {
-//                    max = reading.angle;
-//                }
-//                if(reading.angle < min) {
-//                    min = reading.angle;
-//                }
-//                total += reading.angle;
-//            }
-//            int avg = total / readings.size();
-//
-//            if(max - min < Config.values.getInt("HOLD_RANGE", 3)) {
-//                AngleReading avgReading = new AngleReading(avg);
-//                avgReading.timestamp = newReading.timestamp;
-//                lastHold = avgReading;
-//                if(!holdStopwatch.isRunning()) {
-//                    log.info("Hold Stopwatch Created. Started.");
-//                    holdStopwatch = Stopwatch.createStarted();
-//                }
-//            } else {
-//                log.info("Hold Stopwatch Stopped.");
-//                holdStopwatch = Stopwatch.createUnstarted();
-//            }
-//        }
-//    }
+    private void determineHold(AngleReading newReading) {
+        if(readings.size() > 0) {
+            int min = Integer.MAX_VALUE;
+            int max = -Integer.MAX_VALUE;
+            int total = 0;
+
+            for (AngleReading reading : readings) {
+                if(reading.angle > max) {
+                    max = reading.angle;
+                }
+                if(reading.angle < min) {
+                    min = reading.angle;
+                }
+                total += reading.angle;
+            }
+            int avg = total / readings.size();
+
+            if(max - min < Config.values.getInt("HOLD_RANGE", 3)) {
+                AngleReading avgReading = new AngleReading(avg);
+                avgReading.timestamp = newReading.timestamp;
+                lastHold = avgReading;
+                if(!holdStopwatch.isRunning()) {
+                    log.info("Hold Stopwatch Created. Started.");
+                    holdStopwatch = Stopwatch.createStarted();
+                }
+            } else {
+                log.info("Hold Stopwatch Stopped.");
+                holdStopwatch = Stopwatch.createUnstarted();
+            }
+        }
+    }
 
 
     public JsonObject toJson() {

@@ -9,7 +9,7 @@ import org.apache.log4j.Logger;
 
 public class OpticalEncoder extends Angle {
 
-    private static Logger log = Logger.getLogger(HardJoystick.class);
+    private static Logger log = Logger.getLogger(OpticalEncoder.class);
 
     private EncoderPhidget encoder;
     private double startPosition;
@@ -18,12 +18,13 @@ public class OpticalEncoder extends Angle {
 
     public OpticalEncoder() {
         try {
-            log.info("Loading Phidget Optical Encoder Libray: " + Phidget.getLibraryVersion());
+            log.info("Loading Phidget Optical Encoder Library: " + Phidget.getLibraryVersion());
             encoder = new EncoderPhidget();
             setupEncoderListeners();
 
             encoder.openAny();
             log.info("Waiting for Optical Encoder attachment...");
+            log.info("OPTICAL_CLICKS_PER_DEGREE=" + OPTICAL_CLICKS_PER_DEGREE);
             encoder.waitForAttachment();
             log.info("Optical Encoder: deviceName=" + encoder.getDeviceName() +
                     " deviceType=" + encoder.getDeviceType() +
@@ -34,6 +35,7 @@ public class OpticalEncoder extends Angle {
 
             this.startPosition = encoder.getPosition(0);
             this.startAngle = Config.values.getInt("OPTICAL_START_ANGLE", 90);
+            log.info("OPTICAL_START_ANGLE=" + startAngle);
         } catch(Exception ex) {
             log.error("Error loading optical encoder", ex);
         }
@@ -42,9 +44,9 @@ public class OpticalEncoder extends Angle {
     @Override
     public void read() throws Exception {
 
-        log.debug("Optical Encoder Raw Value: " + this.rawValue);
+        log.debug("Optical Encoder Raw Value=" + this.rawValue);
         this.value = getAngleFromRawPosition(this.rawValue, this.startPosition, this.startAngle);
-        log.debug("Optical Encoder Angle: " + this.value);
+        log.debug("Optical Encoder Angle=" + this.value);
 
         AngleReading reading = new AngleReading((int)this.value);
         cleanUpReadings(reading.timestamp);

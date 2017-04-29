@@ -75,41 +75,42 @@ public class Machine {
                 Sound.playTimerAlarm();
                 while(running) {
                     try {
-                        joystick.read();
                         angle.read();
                         angle.calculateAndSetAverage();
 
-                        Motor.State originalMotorState = rotationMotor.getState();
+                        Motor.State joystickMotorState = null;
+                        if(joystick != null) {
+                            joystick.read();
+                            Motor.State originalMotorState = rotationMotor.getState();
 
-                        Motor.State joystickMotorState = Motor.getStateFromJoystickValue(joystick.value);
-                        rotationMotor.setState(joystickMotorState);
+                            joystickMotorState = Motor.getStateFromJoystickValue(joystick.value);
+                            rotationMotor.setState(joystickMotorState);
 
-                        //log.info("Joystick State: " + joystickMotorState + " - " + joystick.value + " - " + angle.isMaxAngle() + ":" + angle.isMinAngle() + " - " + angle.getAveragedValue());
+                            // For software only.  Uses the motor state to update the angle virtually.
+                            angle.update(joystickMotorState);
 
-                        // For software only.  Uses the motor state to update the angle virtually.
-                        angle.update(joystickMotorState);
+                            if (applyLimits && angle.isMinAngle() && !(joystickMotorState.equals(Motor.State.UP_SLOW) || joystickMotorState.equals(Motor.State.UP_MEDIUM) || joystickMotorState.equals(Motor.State.UP_FAST))) {
+                                motorSwitch.setState(Switch.State.OFF);
+                                rotationMotor.setState(Motor.State.STOPPED);
+                            } else if (applyLimits && angle.isMaxAngle() && !(joystickMotorState.equals(Motor.State.DOWN_SLOW) || joystickMotorState.equals(Motor.State.DOWN_MEDIUM) || joystickMotorState.equals(Motor.State.DOWN_FAST))) {
+                                motorSwitch.setState(Switch.State.OFF);
+                                rotationMotor.setState(Motor.State.STOPPED);
+                            } else if (joystickMotorState.equals(Motor.State.STOPPED)) {
+                                motorSwitch.setState(Switch.State.OFF);
+                                rotationMotor.setState(Motor.State.STOPPED);
+                            } else {
+                                motorSwitch.setState(Switch.State.ON);
+                            }
+                            motorSwitch.applyState();
 
-                        if(applyLimits && angle.isMinAngle() && !(joystickMotorState.equals(Motor.State.UP_SLOW) || joystickMotorState.equals(Motor.State.UP_MEDIUM) || joystickMotorState.equals(Motor.State.UP_FAST))) {
-                            motorSwitch.setState(Switch.State.OFF);
-                            rotationMotor.setState(Motor.State.STOPPED);
-                        } else if(applyLimits && angle.isMaxAngle() && !(joystickMotorState.equals(Motor.State.DOWN_SLOW) || joystickMotorState.equals(Motor.State.DOWN_MEDIUM) || joystickMotorState.equals(Motor.State.DOWN_FAST))) {
-                            motorSwitch.setState(Switch.State.OFF);
-                            rotationMotor.setState(Motor.State.STOPPED);
-                        } else if(joystickMotorState.equals(Motor.State.STOPPED)) {
-                            motorSwitch.setState(Switch.State.OFF);
-                            rotationMotor.setState(Motor.State.STOPPED);
-                        } else {
-                            motorSwitch.setState(Switch.State.ON);
+                            if (rotationMotor.getState() != originalMotorState) {
+                                log.debug("Changing motor state to: " + joystickMotorState.name());
+                            }
+                            rotationMotor.applyState();
                         }
-                        motorSwitch.applyState();
-
-                        if (rotationMotor.getState() != originalMotorState) {
-                            log.debug("Changing motor state to: " + joystickMotorState.name());
-                        }
-                        rotationMotor.applyState();
 
                         if(currentSession != null) {
-                            currentSession.update(new AngleReading((int) angle.getAveragedValue()), rotationMotor.getState());
+                            currentSession.update(new AngleReading((int) angle.getAveragedValue()), joystickMotorState);
                         }
 
                         Thread.sleep(Config.values.getInt("MACHINE_LOOP_DELAY_MS", 100));
@@ -131,20 +132,23 @@ public class Machine {
     }
 
     public static void setInstance(Type type) {
+        boolean opticalEncoder = Config.values.getBoolean("OPTICAL_ENCODER", false);
+        boolean hasJoystick = Config.values.getBoolean("HAS_JOYSTICK", true);
+        log.info("Encoder type=" + (opticalEncoder ? "optical" : "absolute"));
         if(type == Type.HARDWARE) {
-            Angle angle = Config.values.getBoolean("OPTICAL_ENCODER", false) ? new OpticalEncoder() : new HardEncoder();
+            Angle angle = opticalEncoder ? new OpticalEncoder() : new HardEncoder();
             Machine.setInstance(Machine.create()
                     .type(type)
                     .angle(angle)
-                    .joystick(new HardJoystick())
+                    .joystick(hasJoystick ? new HardJoystick() : null)
                     .motorSwitch(new MotorRelaySwitch(Switch.State.ON))
                     .rotationMotor(new HardRotationMotor()));
         } else if(type == Type.SOFTWARE) {
-            Angle angle = Config.values.getBoolean("OPTICAL_ENCODER", false) ? new OpticalEncoder() : new SoftEncoder();
+            Angle angle = opticalEncoder ? new OpticalEncoder() : new SoftEncoder();
             Machine.setInstance(Machine.create()
                     .type(type)
                     .angle(angle)
-                    .joystick(new SoftJoystick())
+                    .joystick(hasJoystick ? new SoftJoystick() : null)
                     .motorSwitch(new SoftSwitch(Switch.State.ON))
                     .rotationMotor(new SoftRotationMotor()));
         }

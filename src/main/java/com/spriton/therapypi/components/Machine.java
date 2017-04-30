@@ -158,6 +158,7 @@ public class Machine {
         if(Config.values.getBoolean("OPTICAL_ENCODER", false)) {
             OpticalEncoder opticalEncoder = (OpticalEncoder) angle;
             opticalEncoder.setStartPosition(opticalEncoder.rawValue);
+            log.info("Optical Calibrate. startPosition=" + opticalEncoder.getStartPosition());
             // Need to continuously store current position to a file to keep state between power cycles
 
         } else {

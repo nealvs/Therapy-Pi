@@ -132,8 +132,8 @@ public class DataAccess {
             Transaction transaction = session.beginTransaction();
             patient.setCreated(new Date());
             session.save(patient);
-            transaction.commit();
             session.flush();
+            transaction.commit();
             return patient;
         }
     }
@@ -143,8 +143,8 @@ public class DataAccess {
             Transaction transaction = session.beginTransaction();
             patient.setUpdated(new Date());
             session.update(patient);
-            transaction.commit();
             session.flush();
+            transaction.commit();
             return patient;
         }
     }
@@ -156,8 +156,8 @@ public class DataAccess {
             try(Session session = getSessionFactory().openSession()) {
                 Transaction transaction = session.beginTransaction();
                 session.update(patient);
-                transaction.commit();
                 session.flush();
+                transaction.commit();
             }
         }
     }
@@ -175,8 +175,8 @@ public class DataAccess {
             try(Session session = getSessionFactory().openSession()) {
                 Transaction transaction = session.beginTransaction();
                 session.update(patientSession);
-                transaction.commit();
                 session.flush();
+                transaction.commit();
             }
         }
     }
@@ -199,8 +199,8 @@ public class DataAccess {
             Transaction transaction = session.beginTransaction();
             value.setUpdated(new Date());
             session.update(value);
-            transaction.commit();
             session.flush();
+            transaction.commit();
             log.info("Updated ConfigValue. " + value.getConfigKey() + ": " + value.getConfigValue() + " - " + value.getUpdated());
             return value;
         }
@@ -211,8 +211,8 @@ public class DataAccess {
             Transaction transaction = session.beginTransaction();
             value.setCreated(new Date());
             session.save(value);
-            transaction.commit();
             session.flush();
+            transaction.commit();
             log.info("Saved ConfigValue. " + value.getConfigKey() + ": " + value.getConfigValue());
             return value;
         }
@@ -249,8 +249,8 @@ public class DataAccess {
             } else {
                 session.update(patientSession);
             }
-            transaction.commit();
             session.flush();
+            transaction.commit();
             return patientSession;
         }
     }

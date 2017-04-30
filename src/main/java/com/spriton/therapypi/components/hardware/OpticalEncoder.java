@@ -38,18 +38,18 @@ public class OpticalEncoder extends Angle {
             );
 
             this.setStartPosition(encoder.getPosition(0));
-            this.startAngle = Config.values.getInt("OPTICAL_START_ANGLE", 90);
+            this.setStartAngle(Config.values.getInt("OPTICAL_START_ANGLE", 90));
 
             if(angleStorageFile.exists()) {
                 String fileContents = FileUtils.fileRead(angleStorageFile);
                 if(fileContents != null && !fileContents.isEmpty()) {
                     log.info("Reading optical start angle from file=" + angleStorageFile.getAbsolutePath() + " contents=" + fileContents);
                     if(tryParseInt(fileContents)) {
-                        this.startAngle = Integer.parseInt(fileContents);
+                        this.setStartAngle(Integer.parseInt(fileContents));
                     }
                 }
             }
-            log.info("OPTICAL_START_ANGLE=" + startAngle);
+            log.info("OPTICAL_START_ANGLE=" + getStartAngle());
         } catch(Exception ex) {
             log.error("Error loading optical encoder", ex);
         }
@@ -69,7 +69,7 @@ public class OpticalEncoder extends Angle {
 
         log.debug("Optical Encoder Raw Value=" + this.rawValue);
         int oldValue = (int) value;
-        this.value = getAngleFromRawPosition(this.rawValue, this.getStartPosition(), this.startAngle);
+        this.value = getAngleFromRawPosition(this.rawValue, this.getStartPosition(), this.getStartAngle());
         log.debug("Optical Encoder Angle=" + this.value);
 
         if(oldValue != (int) value) {
@@ -124,7 +124,7 @@ public class OpticalEncoder extends Angle {
                 try {
                     EncoderPhidget source = (EncoderPhidget) oe.getSource();
                     rawValue = source.getPosition(oe.getIndex());
-                    log.debug("rawValue=" + rawValue + " angle=" + getAngleFromRawPosition(rawValue, getStartPosition(), startAngle));
+                    log.debug("rawValue=" + rawValue + " angle=" + getAngleFromRawPosition(rawValue, getStartPosition(), getStartAngle()));
                 } catch(Exception ex) {
                     log.error("Error reading optical encoder position.", ex);
                 }
@@ -138,5 +138,13 @@ public class OpticalEncoder extends Angle {
 
     public void setStartPosition(double startPosition) {
         this.startPosition = startPosition;
+    }
+
+    public double getStartAngle() {
+        return startAngle;
+    }
+
+    public void setStartAngle(double startAngle) {
+        this.startAngle = startAngle;
     }
 }

@@ -5,6 +5,10 @@ import com.phidgets.event.*;
 import com.spriton.therapypi.Config;
 import com.spriton.therapypi.components.*;
 import org.apache.log4j.Logger;
+import org.codehaus.plexus.util.FileUtils;
+
+import java.io.File;
+import java.io.FileOutputStream;
 
 public class OpticalEncoder extends Angle {
 
@@ -14,6 +18,7 @@ public class OpticalEncoder extends Angle {
     private double startPosition;
     private double startAngle;
     private static double OPTICAL_CLICKS_PER_DEGREE = Config.values.getDouble("OPTICAL_CLICKS_PER_DEGREE", 30);
+    private File angleStorageFile = new File("angleStorageFile.data");
 
     public OpticalEncoder() {
         try {
@@ -34,9 +39,28 @@ public class OpticalEncoder extends Angle {
 
             this.setStartPosition(encoder.getPosition(0));
             this.startAngle = Config.values.getInt("OPTICAL_START_ANGLE", 90);
+
+            if(angleStorageFile.exists()) {
+                String fileContents = FileUtils.fileRead(angleStorageFile);
+                if(fileContents != null && !fileContents.isEmpty()) {
+                    log.info("Reading optical start angle from file=" + angleStorageFile.getAbsolutePath() + " contents=" + fileContents);
+                    if(tryParseInt(fileContents)) {
+                        this.startAngle = Integer.parseInt(fileContents);
+                    }
+                }
+            }
             log.info("OPTICAL_START_ANGLE=" + startAngle);
         } catch(Exception ex) {
             log.error("Error loading optical encoder", ex);
+        }
+    }
+
+    boolean tryParseInt(String value) {
+        try {
+            Integer.parseInt(value);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
         }
     }
 
@@ -44,8 +68,16 @@ public class OpticalEncoder extends Angle {
     public void read() throws Exception {
 
         log.debug("Optical Encoder Raw Value=" + this.rawValue);
+        int oldValue = (int) value;
         this.value = getAngleFromRawPosition(this.rawValue, this.getStartPosition(), this.startAngle);
         log.debug("Optical Encoder Angle=" + this.value);
+
+        if(oldValue != (int) value) {
+            log.debug("Writing angle to storage file value=" + (int) value);
+            FileOutputStream angleStorage = new FileOutputStream(angleStorageFile, false);
+            angleStorage.write(Integer.toString((int) value).getBytes());
+            angleStorage.close();
+        }
 
         AngleReading reading = new AngleReading((int)this.value);
         cleanUpReadings(reading.timestamp);

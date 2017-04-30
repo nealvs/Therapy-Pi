@@ -5,12 +5,14 @@ import org.apache.log4j.Logger;
 import org.flywaydb.core.Flyway;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.*;
+import java.util.concurrent.TransferQueue;
 
 public class DataAccess {
 
@@ -127,8 +129,10 @@ public class DataAccess {
 
     public static Patient createPatient(Patient patient) {
         try(Session session = getSessionFactory().openSession()) {
+            Transaction transaction = session.beginTransaction();
             patient.setCreated(new Date());
             session.save(patient);
+            transaction.commit();
             session.flush();
             return patient;
         }
@@ -136,8 +140,10 @@ public class DataAccess {
 
     public static Patient updatePatient(Patient patient) {
         try(Session session = getSessionFactory().openSession()) {
+            Transaction transaction = session.beginTransaction();
             patient.setUpdated(new Date());
             session.update(patient);
+            transaction.commit();
             session.flush();
             return patient;
         }
@@ -148,7 +154,9 @@ public class DataAccess {
         if(patient != null) {
             patient.setDeleted(new Date());
             try(Session session = getSessionFactory().openSession()) {
+                Transaction transaction = session.beginTransaction();
                 session.update(patient);
+                transaction.commit();
                 session.flush();
             }
         }
@@ -165,7 +173,9 @@ public class DataAccess {
         if(patientSession != null) {
             patientSession.setDeleted(new Date());
             try(Session session = getSessionFactory().openSession()) {
+                Transaction transaction = session.beginTransaction();
                 session.update(patientSession);
+                transaction.commit();
                 session.flush();
             }
         }
@@ -186,8 +196,10 @@ public class DataAccess {
 
     public static ConfigValue updateConfigValue(ConfigValue value) {
         try(Session session = getSessionFactory().openSession()) {
+            Transaction transaction = session.beginTransaction();
             value.setUpdated(new Date());
             session.update(value);
+            transaction.commit();
             session.flush();
             log.info("Updated ConfigValue. " + value.getConfigKey() + ": " + value.getConfigValue() + " - " + value.getUpdated());
             return value;
@@ -196,8 +208,10 @@ public class DataAccess {
 
     public static ConfigValue saveConfigValue(ConfigValue value) {
         try(Session session = getSessionFactory().openSession()) {
+            Transaction transaction = session.beginTransaction();
             value.setCreated(new Date());
             session.save(value);
+            transaction.commit();
             session.flush();
             log.info("Saved ConfigValue. " + value.getConfigKey() + ": " + value.getConfigValue());
             return value;
@@ -229,11 +243,13 @@ public class DataAccess {
 
     public static PatientSession createOrUpdateSession(PatientSession patientSession) {
         try(Session session = getSessionFactory().openSession()) {
+            Transaction transaction = session.beginTransaction();
             if(patientSession.getId() == null) {
                 session.save(patientSession);
             } else {
                 session.update(patientSession);
             }
+            transaction.commit();
             session.flush();
             return patientSession;
         }

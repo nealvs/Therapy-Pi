@@ -155,17 +155,24 @@ public class Machine {
     }
 
     public void calibrate() {
-        angle.ANGLE_CALIBRATION_VOLTAGE = angle.rawValue;
-        angle.ANGLE_CALIBRATION_VOLTAGE = 3.2;
-        ConfigValue value = DataAccess.getConfigValue("ANGLE_CALIBRATION_VOLTAGE");
-        if(value == null) {
-            value = new ConfigValue();
-            value.setConfigKey("ANGLE_CALIBRATION_VOLTAGE");
-            value.setConfigValue(Double.toString(angle.ANGLE_CALIBRATION_VOLTAGE));
-            DataAccess.saveConfigValue(value);
+        if(Config.values.getBoolean("OPTICAL_ENCODER", false)) {
+            OpticalEncoder opticalEncoder = (OpticalEncoder) angle;
+            opticalEncoder.setStartPosition(opticalEncoder.rawValue);
+            // Need to continuously store current position to a file to keep state between power cycles
+
         } else {
-            value.setConfigValue(Double.toString(angle.ANGLE_CALIBRATION_VOLTAGE));
-            DataAccess.updateConfigValue(value);
+            angle.ANGLE_CALIBRATION_VOLTAGE = angle.rawValue;
+            angle.ANGLE_CALIBRATION_VOLTAGE = 3.2;
+            ConfigValue value = DataAccess.getConfigValue("ANGLE_CALIBRATION_VOLTAGE");
+            if (value == null) {
+                value = new ConfigValue();
+                value.setConfigKey("ANGLE_CALIBRATION_VOLTAGE");
+                value.setConfigValue(Double.toString(angle.ANGLE_CALIBRATION_VOLTAGE));
+                DataAccess.saveConfigValue(value);
+            } else {
+                value.setConfigValue(Double.toString(angle.ANGLE_CALIBRATION_VOLTAGE));
+                DataAccess.updateConfigValue(value);
+            }
         }
     }
 
@@ -181,9 +188,13 @@ public class Machine {
             info.addProperty("angle", angle.getAveragedValue());
         }
         if(angle != null) {
-            info.addProperty("rawAngle", angle.rawValue);
-            info.addProperty("angleCalibrationVoltage", angle.ANGLE_CALIBRATION_VOLTAGE);
-            info.addProperty("angleCalibrationDegree", angle.ANGLE_CALIBRATION_DEGREE);
+            if(Config.values.getBoolean("OPTICAL_ENCODER", false)) {
+                info.addProperty("startPosition", ((OpticalEncoder) angle).getStartPosition());
+            } else {
+                info.addProperty("rawAngle", angle.rawValue);
+                info.addProperty("angleCalibrationVoltage", angle.ANGLE_CALIBRATION_VOLTAGE);
+                info.addProperty("angleCalibrationDegree", angle.ANGLE_CALIBRATION_DEGREE);
+            }
         }
         if(rotationMotor != null) {
             info.addProperty("rotationMotor", rotationMotor.getState().name());
@@ -210,6 +221,8 @@ public class Machine {
             dateFormat.setTimeZone(timeZone);
         }
         info.addProperty("dateTime", dateFormat.format(new Date()));
+        info.addProperty("hasJoystick", Config.values.getBoolean("HAS_JOYSTICK", true));
+        info.addProperty("opticalEncoder", Config.values.getBoolean("OPTICAL_ENCODER", false));
 
         return info;
     }

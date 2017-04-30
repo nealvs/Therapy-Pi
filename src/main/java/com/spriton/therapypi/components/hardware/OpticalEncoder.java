@@ -4,7 +4,6 @@ import com.phidgets.*;
 import com.phidgets.event.*;
 import com.spriton.therapypi.Config;
 import com.spriton.therapypi.components.*;
-import com.spriton.therapypi.components.software.SoftEncoder;
 import org.apache.log4j.Logger;
 
 public class OpticalEncoder extends Angle {
@@ -33,7 +32,7 @@ public class OpticalEncoder extends Angle {
                     " inputCount=" + encoder.getInputCount()
             );
 
-            this.startPosition = encoder.getPosition(0);
+            this.setStartPosition(encoder.getPosition(0));
             this.startAngle = Config.values.getInt("OPTICAL_START_ANGLE", 90);
             log.info("OPTICAL_START_ANGLE=" + startAngle);
         } catch(Exception ex) {
@@ -45,7 +44,7 @@ public class OpticalEncoder extends Angle {
     public void read() throws Exception {
 
         log.debug("Optical Encoder Raw Value=" + this.rawValue);
-        this.value = getAngleFromRawPosition(this.rawValue, this.startPosition, this.startAngle);
+        this.value = getAngleFromRawPosition(this.rawValue, this.getStartPosition(), this.startAngle);
         log.debug("Optical Encoder Angle=" + this.value);
 
         AngleReading reading = new AngleReading((int)this.value);
@@ -59,7 +58,10 @@ public class OpticalEncoder extends Angle {
     }
 
     public static double getAngleFromRawPosition(double rawValue, double startPosition, double startAngle) {
-        double positionDifference = rawValue - startPosition;
+        double positionDifference = rawValue + startPosition;
+        if(Config.values.getBoolean("INVERT_ANGLE_DIRECTION", false)) {
+            positionDifference = -positionDifference;
+        }
         double result = startAngle + (positionDifference / OPTICAL_CLICKS_PER_DEGREE);
         return result;
     }
@@ -90,7 +92,7 @@ public class OpticalEncoder extends Angle {
                 try {
                     EncoderPhidget source = (EncoderPhidget) oe.getSource();
                     rawValue = source.getPosition(oe.getIndex());
-                    log.debug("rawValue=" + rawValue + " angle=" + getAngleFromRawPosition(rawValue, startPosition, startAngle));
+                    log.debug("rawValue=" + rawValue + " angle=" + getAngleFromRawPosition(rawValue, getStartPosition(), startAngle));
                 } catch(Exception ex) {
                     log.error("Error reading optical encoder position.", ex);
                 }
@@ -98,4 +100,11 @@ public class OpticalEncoder extends Angle {
         });
     }
 
+    public double getStartPosition() {
+        return startPosition;
+    }
+
+    public void setStartPosition(double startPosition) {
+        this.startPosition = startPosition;
+    }
 }

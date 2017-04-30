@@ -62,7 +62,7 @@ public class OpticalEncoder extends Angle {
         if(Config.values.getBoolean("INVERT_ANGLE_DIRECTION", false)) {
             positionDifference = -positionDifference;
         }
-        double result = startAngle + (positionDifference / OPTICAL_CLICKS_PER_DEGREE);
+        double result = startAngle - (positionDifference / OPTICAL_CLICKS_PER_DEGREE);
         return result;
     }
 

@@ -189,12 +189,14 @@ public class Machine {
         }
         if(angle != null) {
             if(Config.values.getBoolean("OPTICAL_ENCODER", false)) {
-                info.addProperty("startPosition", ((OpticalEncoder) angle).getStartPosition());
+                OpticalEncoder opticalEncoder = (OpticalEncoder) angle;
+                info.addProperty("startPosition", opticalEncoder.getStartPosition());
+                info.addProperty("currentPosition", opticalEncoder.rawValue);
             } else {
                 info.addProperty("rawAngle", angle.rawValue);
                 info.addProperty("angleCalibrationVoltage", angle.ANGLE_CALIBRATION_VOLTAGE);
-                info.addProperty("angleCalibrationDegree", angle.ANGLE_CALIBRATION_DEGREE);
             }
+            info.addProperty("angleCalibrationDegree", angle.ANGLE_CALIBRATION_DEGREE);
         }
         if(rotationMotor != null) {
             info.addProperty("rotationMotor", rotationMotor.getState().name());

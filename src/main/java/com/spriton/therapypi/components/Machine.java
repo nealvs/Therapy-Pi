@@ -110,7 +110,7 @@ public class Machine {
                         }
 
                         if(currentSession != null) {
-                            currentSession.update(new AngleReading((int) angle.getAveragedValue()), joystickMotorState);
+                            currentSession.update(new AngleReading(angle.getKneeValue()), joystickMotorState);
                         }
 
                         Thread.sleep(Config.values.getInt("MACHINE_LOOP_DELAY_MS", 100));
@@ -185,7 +185,8 @@ public class Machine {
             info.addProperty("joystick", joystick.value);
         }
         if(angle != null) {
-            info.addProperty("angle", angle.getAveragedValue());
+            info.addProperty("shaftAngle", angle.getAveragedValue());
+            info.addProperty("angle", angle.getKneeValue());
         }
         if(angle != null) {
             if(Config.values.getBoolean("OPTICAL_ENCODER", false)) {

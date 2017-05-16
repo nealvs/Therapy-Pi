@@ -4,6 +4,7 @@ import com.google.common.base.Stopwatch;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.spriton.therapypi.Config;
+import com.spriton.therapypi.KneeAngleLookup;
 import com.spriton.therapypi.components.*;
 import org.apache.log4j.Logger;
 
@@ -144,12 +145,12 @@ public class PatientSession {
         readings.add(angleReading);
 
         if(repetitionList.isEmpty()) {
-            Repetition newRepetition = new Repetition(angleReading.angle);
+            Repetition newRepetition = new Repetition(angleValue);
             repetitionList.add(newRepetition);
         }
-        repetitionList.get(repetitionList.size() - 1).updateAngle(angleReading.angle);
+        repetitionList.get(repetitionList.size() - 1).updateAngle(angleValue);
 
-        cleanUpReadingsAndUpdateRepetitions(angleReading);
+        cleanUpReadingsAndUpdateRepetitions(angleReading, angleValue);
         //updateRepetitions();
 
         if(state != null) {
@@ -201,7 +202,7 @@ public class PatientSession {
         }
     }
 
-    public void cleanUpReadingsAndUpdateRepetitions(AngleReading currentReading) {
+    public void cleanUpReadingsAndUpdateRepetitions(AngleReading currentReading, int kneeAngle) {
         if(readings.size() > 1) {
             Iterator<AngleReading> iter = readings.iterator();
             int minAngle = Integer.MAX_VALUE;
@@ -240,7 +241,7 @@ public class PatientSession {
                     angleGoingUp = goingUp;
                     if(angleGoingUp) {
                         repetitions++;
-                        Repetition newRepetition = new Repetition(currentReading.angle);
+                        Repetition newRepetition = new Repetition(kneeAngle);
                         repetitionList.add(newRepetition);
                     }
                 }

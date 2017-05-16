@@ -1,10 +1,9 @@
 package com.spriton.therapypi.components;
 
 import com.spriton.therapypi.Config;
-import com.spriton.therapypi.components.software.SoftEncoder;
+import com.spriton.therapypi.KneeAngleLookup;
 import com.spriton.therapypi.database.DataAccess;
 
-import javax.persistence.Transient;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Iterator;
@@ -13,9 +12,10 @@ import java.util.List;
 
 public abstract class Angle {
 
-    public double rawValue = 2.0;
-    public double value = DEFAULT_ANGLE;
+    protected double rawValue = 2.0;
+    protected double value = DEFAULT_ANGLE;
     private double averagedValue = DEFAULT_ANGLE;
+    private int kneeValue = (int) DEFAULT_ANGLE;
 
     public static double DEFAULT_ANGLE = 90;
     public static double MAX_ANGLE = 170;
@@ -39,6 +39,7 @@ public abstract class Angle {
     public void reset() {
         rawValue = 0.0;
         value = DEFAULT_ANGLE;
+        kneeValue = KneeAngleLookup.getKneeAngle(value);
     }
 
     public void cleanUpReadings(LocalDateTime current) {
@@ -82,5 +83,14 @@ public abstract class Angle {
 
     public void setAveragedValue(double averagedValue) {
         this.averagedValue = averagedValue;
+        this.kneeValue = KneeAngleLookup.getKneeAngle(this.averagedValue);
+    }
+
+    public int getKneeValue() {
+        return kneeValue;
+    }
+
+    public void setKneeValue(int kneeValue) {
+        this.kneeValue = kneeValue;
     }
 }

@@ -28,9 +28,9 @@ public class Sound {
         public void run() {
             try(InputStream inputStream = new BufferedInputStream(getClass().getClassLoader().getResourceAsStream("beep.wav"));
                 AudioInputStream audioIn = AudioSystem.getAudioInputStream(inputStream)) {
-                Line.Info linfo = new Line.Info(Clip.class);
-                Line line = AudioSystem.getLine(linfo);
-                Clip clip = (Clip) line;
+                AudioFormat format = audioIn.getFormat();
+                DataLine.Info info = new DataLine.Info(Clip.class, format);
+                Clip clip = (Clip) AudioSystem.getLine(info);
                 clip.open(audioIn);
                 clip.start();
                 Thread.sleep(clip.getMicrosecondLength() / 1000);

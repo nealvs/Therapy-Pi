@@ -7,11 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.UnsupportedAudioFileException;
+import javax.sound.sampled.*;
 
 public class Sound {
 
@@ -32,7 +28,9 @@ public class Sound {
         public void run() {
             try(InputStream inputStream = new BufferedInputStream(getClass().getClassLoader().getResourceAsStream("beep.wav"));
                 AudioInputStream audioIn = AudioSystem.getAudioInputStream(inputStream)) {
-                Clip clip = AudioSystem.getClip();
+                Line.Info linfo = new Line.Info(Clip.class);
+                Line line = AudioSystem.getLine(linfo);
+                Clip clip = (Clip) line;
                 clip.open(audioIn);
                 clip.start();
                 Thread.sleep(clip.getMicrosecondLength() / 1000);

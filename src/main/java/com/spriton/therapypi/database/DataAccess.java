@@ -8,16 +8,15 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
+import org.hibernate.query.Query;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.util.*;
-import java.util.concurrent.TransferQueue;
 
 public class DataAccess {
 
     private static Logger log = Logger.getLogger(DataAccess.class);
     private static String DEFAULT_DATABASE_URL = "jdbc:h2:file:/data/h2";
+    private static String DEFAULT_DATABASE_FILE = "/data/h2/h2.mv.db";
     private static SessionFactory sessionFactory;
 
     public static void init() {
@@ -27,6 +26,24 @@ public class DataAccess {
         } catch (Exception ex) {
             log.error("Error starting up H2 database and hibernate connection.", ex);
         }
+    }
+
+    public static void clearDatabase() throws Exception {
+        log.info("Clearing database...");
+        int patientCount = 0;
+        // Mark all sessions and patients as deleted
+        try(Session session = getSessionFactory().openSession()) {
+            Transaction transaction = session.beginTransaction();
+            List<Patient> patients = getAllPatients();
+            for(Patient patient : patients) {
+                patient.setDeleted(new Date());
+                session.update(patient);
+                patientCount++;
+            }
+            session.flush();
+            transaction.commit();
+        }
+        log.info("All patients marked as deleted. count=" + patientCount);
     }
 
     public static void ensureDbTables() throws Exception {
@@ -64,6 +81,13 @@ public class DataAccess {
         try(Session session = getSessionFactory().openSession()) {
             List<Patient> patients = session.createQuery("FROM Patient WHERE deleted IS NULL ORDER BY lastName, firstName").list();
             return patients;
+        }
+    }
+
+    public static List<PatientSession> getAllPatientSessions() {
+        try(Session session = getSessionFactory().openSession()) {
+            List<PatientSession> sessions = session.createQuery("FROM PatientSession WHERE deleted IS NULL").list();
+            return sessions;
         }
     }
 
@@ -257,6 +281,7 @@ public class DataAccess {
 
     public static void shutdown() {
         getSessionFactory().close();
+        sessionFactory = null;
     }
 
 }

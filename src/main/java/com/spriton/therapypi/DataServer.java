@@ -322,6 +322,11 @@ public class DataServer {
             }
             return Machine.instance().toJson();
         });
+
+        post("/settings/clearDatabase", "application/json", (req, res) -> {
+            DataAccess.clearDatabase();
+            return Machine.instance().toJson();
+        });
     }
 
     public static void session() {

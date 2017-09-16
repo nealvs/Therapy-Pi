@@ -27,6 +27,10 @@ public class Sound {
         volume = newVolume;
     }
 
+    // Need to max out the Pi's volume
+    // amixer scontrols
+    // amixer sset 'Master' 50%
+
     public static void init() {
         ConfigValue volumeConfig = DataAccess.getConfigValue("VOLUME");
         if(volumeConfig != null) {

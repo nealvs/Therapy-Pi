@@ -1,5 +1,7 @@
 package com.spriton.therapypi.components;
 
+import com.spriton.therapypi.database.ConfigValue;
+import com.spriton.therapypi.database.DataAccess;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedInputStream;
@@ -12,9 +14,31 @@ import javax.sound.sampled.*;
 public class Sound {
 
     private static Logger log = Logger.getLogger(Sound.class);
+    private static Integer volume;
+
+    public static int getVolume() {
+        if(volume == null) {
+            init();
+        }
+        return volume.intValue();
+    }
+
+    public static void setVolume(int newVolume) {
+        volume = newVolume;
+    }
+
+    public static void init() {
+        ConfigValue volumeConfig = DataAccess.getConfigValue("VOLUME");
+        if(volumeConfig != null) {
+            volume = Integer.parseInt(volumeConfig.getConfigValue());
+        } else {
+            volume = 100;
+        }
+    }
 
     public static void playTimerAlarm() {
         try {
+            init();
             log.info("Playing Timer Alarm Sound");
             Thread t = new Thread(new SoundThread());
             t.start();
@@ -32,6 +56,14 @@ public class Sound {
                 DataLine.Info info = new DataLine.Info(Clip.class, format);
                 Clip clip = (Clip) AudioSystem.getLine(info);
                 clip.open(audioIn);
+
+                FloatControl masterGain = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
+                float range = masterGain.getMaximum() - masterGain.getMinimum();
+                float scaledRange = range * volume / 100; // Scale the range 0-100%
+                float value = masterGain.getMinimum() + scaledRange;
+                log.debug("Sound MasterGain=" + value);
+                masterGain.setValue(value);
+
                 clip.start();
                 Thread.sleep(clip.getMicrosecondLength() / 1000);
             } catch (UnsupportedAudioFileException | IOException | LineUnavailableException | InterruptedException  e1) {

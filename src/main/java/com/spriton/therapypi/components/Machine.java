@@ -45,7 +45,7 @@ public class Machine {
         }
         ConfigValue timeZ = DataAccess.getConfigValue("TIMEZONE");
         if(timeZ != null) {
-            timeZone = TimeZone.getTimeZone(ZoneId.of(timeZ.getConfigValue()));
+            timeZone = TimeZone.getTimeZone(timeZ.getConfigValue());
         }
     }
 
@@ -65,6 +65,59 @@ public class Machine {
             }
         }
     }
+
+    public void setVolumeConfig(int newVolume) {
+        newVolume = Math.min(100, newVolume);
+        newVolume = Math.max(0, newVolume);
+        Sound.setVolume(newVolume);
+        // Save into the database
+        ConfigValue config = DataAccess.getConfigValue("VOLUME");
+        if(config == null) {
+            config = new ConfigValue();
+            config.setConfigKey("VOLUME");
+            config.setConfigValue(Integer.toString(newVolume));
+            DataAccess.saveConfigValue(config);
+        } else {
+            config.setConfigValue(Integer.toString(newVolume));
+            DataAccess.updateConfigValue(config);
+        }
+    }
+
+    public void setPassword(String newPassword) {
+        if(newPassword != null && newPassword.length() > 0) {
+            password = newPassword;
+            // Save into the database
+            ConfigValue config = DataAccess.getConfigValue("PASSWORD");
+            if(config == null) {
+                config = new ConfigValue();
+                config.setConfigKey("PASSWORD");
+                config.setConfigValue(newPassword);
+                DataAccess.saveConfigValue(config);
+            } else {
+                config.setConfigValue(newPassword);
+                DataAccess.updateConfigValue(config);
+            }
+        }
+    }
+
+
+    public void setTimeZoneConfig(String newTimeZone) {
+        if(newTimeZone != null && newTimeZone.length() > 0) {
+            timeZone = TimeZone.getTimeZone(newTimeZone);
+            // Save into the database
+            ConfigValue config = DataAccess.getConfigValue("TIMEZONE");
+            if(config == null) {
+                config = new ConfigValue();
+                config.setConfigKey("TIMEZONE");
+                config.setConfigValue(newTimeZone);
+                DataAccess.saveConfigValue(config);
+            } else {
+                config.setConfigValue(newTimeZone);
+                DataAccess.updateConfigValue(config);
+            }
+        }
+    }
+
 
     public void run() {
         running = true;
@@ -220,13 +273,28 @@ public class Machine {
         info.addProperty("timestamp", new Date().getTime());
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm - MMM d, yyyy");
+        SimpleDateFormat dayFormat = new SimpleDateFormat("d");
+        SimpleDateFormat monthFormat = new SimpleDateFormat("M");
+        SimpleDateFormat yearFormat = new SimpleDateFormat("yyyy");
+        SimpleDateFormat hourFormat = new SimpleDateFormat("H");
+        SimpleDateFormat minuteFormat = new SimpleDateFormat("m");
         if(timeZone != null) {
             dateFormat.setTimeZone(timeZone);
+            dayFormat.setTimeZone(timeZone);
+            monthFormat.setTimeZone(timeZone);
+            yearFormat.setTimeZone(timeZone);
+            hourFormat.setTimeZone(timeZone);
+            minuteFormat.setTimeZone(timeZone);
         }
         info.addProperty("dateTime", dateFormat.format(new Date()));
+        info.addProperty("day",     dayFormat.format(new Date()));
+        info.addProperty("month",   monthFormat.format(new Date()));
+        info.addProperty("year",    yearFormat.format(new Date()));
+        info.addProperty("hour",    hourFormat.format(new Date()));
+        info.addProperty("minute",  minuteFormat.format(new Date()));
         info.addProperty("hasJoystick", Config.values.getBoolean("HAS_JOYSTICK", true));
         info.addProperty("opticalEncoder", Config.values.getBoolean("OPTICAL_ENCODER", false));
-
+        info.addProperty("volume", Sound.getVolume());
         return info;
     }
 

@@ -4,13 +4,14 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.spriton.therapypi.components.Machine;
+import com.spriton.therapypi.components.Sound;
 import com.spriton.therapypi.database.DataAccess;
 import com.spriton.therapypi.database.Patient;
 import com.spriton.therapypi.database.PatientSession;
 import org.apache.log4j.Logger;
 
-import java.util.List;
-import java.util.TimeZone;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 import static spark.Spark.*;
 
@@ -52,6 +53,7 @@ public class DataServer {
         createPatient();
         deletePatient();
         deleteSession();
+        power();
     }
 
     public static void setupOptions() {
@@ -303,12 +305,52 @@ public class DataServer {
                 if (request.has("value")) {
                     String timeZone = request.get("value").getAsString();
                     if (timeZone != null) {
-                        Machine.instance().timeZone = TimeZone.getTimeZone(timeZone);
+                        Machine.instance().setTimeZoneConfig(timeZone);
                     }
                 }
             }
             return Machine.instance().toJson();
         });
+
+        post("/settings/setDateTime",  "application/json", (req, res) -> {
+            if(req.body() != null) {
+                JsonParser parser = new JsonParser();
+                JsonObject request = (JsonObject) parser.parse(req.body());
+                log.info("Setting Date/Time json=" + req.body());
+                String timeZone = request.get("timeZone").getAsString();
+                int day = request.get("day").getAsInt();
+                int month = request.get("month").getAsInt() - 1;  // Months are 0 based
+                int year = request.get("year").getAsInt();
+                int hour = request.get("hour").getAsInt();
+                int minute = request.get("minute").getAsInt();
+
+                TimeZone timeZoneObj = TimeZone.getTimeZone(timeZone);
+                Machine.instance().setTimeZoneConfig(timeZone);
+
+                GregorianCalendar cal = new GregorianCalendar();
+                cal.setTimeZone(timeZoneObj);
+                cal.set(year, month, day, hour, minute);
+
+                Date setTime = cal.getTime();
+
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+                dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+                log.info("Calendar date=\"" + dateFormat.format(setTime) + "\"");
+                log.info("Setting system date=\"" + dateFormat.format(setTime) + "\"");
+
+                // How to set the time on the raspberry pi with a hardware clock chip
+                // sudo date -s "2017-08-12 16:36"  (Current UTC timezone time which is our time +6 hours)
+                // sudo hwclock -w
+                if(Config.values.getBoolean("HARDWARE_MACHINE", true)) {
+                    Runtime runtime = Runtime.getRuntime();
+                    runtime.exec("sudo date -s \"" + dateFormat.format(setTime) + "\"");
+                    runtime.exec("sudo hwclock -w");
+                }
+            }
+            return Machine.instance().toJson();
+        });
+
         post("/settings/setHoldTime",  "application/json", (req, res) -> {
             if(req.body() != null) {
                 JsonParser parser = new JsonParser();
@@ -322,7 +364,33 @@ public class DataServer {
             }
             return Machine.instance().toJson();
         });
-
+        post("/settings/setVolume",  "application/json", (req, res) -> {
+            if(req.body() != null) {
+                JsonParser parser = new JsonParser();
+                JsonObject request = (JsonObject) parser.parse(req.body());
+                if (request.has("value")) {
+                    String volume = request.get("value").getAsString();
+                    if(volume != null) {
+                        Machine.instance().setVolumeConfig(Integer.parseInt(volume));
+                        Sound.playTimerAlarm();
+                    }
+                }
+            }
+            return Machine.instance().toJson();
+        });
+        post("/settings/setPassword",  "application/json", (req, res) -> {
+            if(req.body() != null) {
+                JsonParser parser = new JsonParser();
+                JsonObject request = (JsonObject) parser.parse(req.body());
+                if (request.has("value")) {
+                    String password = request.get("value").getAsString();
+                    if (password != null) {
+                        Machine.instance().setPassword(password);
+                    }
+                }
+            }
+            return Machine.instance().toJson();
+        });
         post("/settings/clearDatabase", "application/json", (req, res) -> {
             DataAccess.clearDatabase();
             return Machine.instance().toJson();
@@ -383,6 +451,25 @@ public class DataServer {
             JsonObject requestJson = (JsonObject) new JsonParser().parse(req.body());
             if(requestJson.has("id")) {
                 DataAccess.deleteSession(requestJson.get("id").getAsInt());
+            }
+            return result.toString();
+        });
+    }
+
+    public static void power() {
+        post("/restart",  "application/json", (req, res) -> {
+            JsonObject result = new JsonObject();
+            if(Config.values.getBoolean("HARDWARE_MACHINE", true)) {
+                Runtime runtime = Runtime.getRuntime();
+                runtime.exec("shutdown -r now");
+            }
+            return result.toString();
+        });
+        post("/shutdown",  "application/json", (req, res) -> {
+            JsonObject result = new JsonObject();
+            if(Config.values.getBoolean("HARDWARE_MACHINE", true)) {
+                Runtime runtime = Runtime.getRuntime();
+                runtime.exec("shutdown now");
             }
             return result.toString();
         });

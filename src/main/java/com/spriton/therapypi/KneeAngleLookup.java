@@ -16,6 +16,16 @@ public class KneeAngleLookup {
     }
 
     static {
+        lookupChart.put(-20, -6.4);
+        lookupChart.put(-19, -6.2);
+        lookupChart.put(-18, -6.0);
+        lookupChart.put(-17, -5.9);
+        lookupChart.put(-16, -5.6);
+        lookupChart.put(-15, -5.4);
+        lookupChart.put(-14, -5.3);
+        lookupChart.put(-13, -5.1);
+        lookupChart.put(-12, -4.9);
+        lookupChart.put(-11, -4.7);
         lookupChart.put(-10, -4.6);
         lookupChart.put(-9, -4.5);
         lookupChart.put(-8, -4.2);
@@ -197,6 +207,31 @@ public class KneeAngleLookup {
         lookupChart.put(168, 132.3);
         lookupChart.put(169, 132.9);
         lookupChart.put(170, 133.5);
+        lookupChart.put(171, 134.1);
+        lookupChart.put(172, 134.7);
+        lookupChart.put(173, 135.3);
+        lookupChart.put(174, 135.9);
+        lookupChart.put(175, 136.5);
+        lookupChart.put(176, 137.1);
+        lookupChart.put(177, 137.7);
+        lookupChart.put(178, 137.3);
+        lookupChart.put(179, 137.9);
+        lookupChart.put(180, 138.5);
+        lookupChart.put(181, 139.1);
+        lookupChart.put(182, 139.7);
+        lookupChart.put(183, 140.3);
+        lookupChart.put(184, 141.9);
+        lookupChart.put(185, 142.5);
+        lookupChart.put(186, 143.1);
+        lookupChart.put(187, 143.7);
+        lookupChart.put(188, 144.3);
+        lookupChart.put(189, 144.9);
+        lookupChart.put(190, 145.5);
+        lookupChart.put(191, 146.1);
+        lookupChart.put(192, 146.7);
+        lookupChart.put(193, 147.3);
+        lookupChart.put(194, 147.9);
+        lookupChart.put(195, 148.5);
     }
 
 }

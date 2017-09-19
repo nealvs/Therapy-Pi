@@ -13,12 +13,12 @@ import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.TimeZone;
-import java.util.concurrent.TimeUnit;
 
 public class Machine {
 
     private static Logger log = Logger.getLogger(Machine.class);
     private static Machine instance;
+
     public static enum Type { HARDWARE, SOFTWARE };
 
     public int holdTimeConfig = 30;

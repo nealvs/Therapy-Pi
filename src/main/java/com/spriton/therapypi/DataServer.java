@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.spriton.therapypi.components.Machine;
+import com.spriton.therapypi.components.Network;
 import com.spriton.therapypi.components.Sound;
 import com.spriton.therapypi.database.DataAccess;
 import com.spriton.therapypi.database.Patient;
@@ -35,6 +36,7 @@ public class DataServer {
         // Setup endpoints
         setupOptions();
         status();
+        network();
         reset();
         startSession();
         resetSession();
@@ -76,8 +78,26 @@ public class DataServer {
     public static void status() {
         get("/status", "application/json", (req, res) -> {
             JsonObject info = new JsonObject();
-            if (Machine.instance() != null) {
-                info = Machine.instance().toJson();
+            try {
+                if (Machine.instance() != null) {
+                    info = Machine.instance().toJson();
+                }
+            } catch(Exception ex) {
+                log.error("Error getting machines status toJson", ex);
+            }
+            return info.toString();
+        });
+    }
+
+    public static void network() {
+        get("/network", "application/json", (req, res) -> {
+            JsonObject info = new JsonObject();
+            try {
+                if (Network.instance() != null) {
+                    info = Network.instance().toJson();
+                }
+            } catch(Exception ex) {
+                log.error("Error getting network toJson", ex);
             }
             return info.toString();
         });

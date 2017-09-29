@@ -27,14 +27,19 @@ public class MainController {
 
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
+                log.info("Shutting down...");
+                DataAccess.shutdown();
                 Machine.instance().shutdown();            
             }
         });
 
         log.info("Running machine...");
-        Machine.instance().run();
+        if(Config.values.getBoolean("OPTICAL_ENCODER", true)) {
+            Machine.instance().startEventHandling();
+        } else {
+            Machine.instance().run();
+        }
 
-        //DataAccess.shutdown();
     }
 
 

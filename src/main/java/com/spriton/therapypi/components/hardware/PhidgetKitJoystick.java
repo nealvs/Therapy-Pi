@@ -6,12 +6,14 @@ import com.phidgets.event.SensorChangeEvent;
 import com.phidgets.event.SensorChangeListener;
 import com.spriton.therapypi.Config;
 import com.spriton.therapypi.components.Joystick;
+import com.spriton.therapypi.components.Machine;
 import org.apache.log4j.Logger;
 
 public class PhidgetKitJoystick extends Joystick {
 
     private static Logger log = Logger.getLogger(PhidgetKitJoystick.class);
     private PhidgetsInterfaceBoard phidgetBoard;
+    private Machine machine;
 
     public PhidgetKitJoystick(PhidgetsInterfaceBoard phidgetBoard) {
         this.phidgetBoard = phidgetBoard;
@@ -20,10 +22,19 @@ public class PhidgetKitJoystick extends Joystick {
         phidgetBoard.getKit().addSensorChangeListener(new SensorChangeListener() {
             @Override
             public void sensorChanged(SensorChangeEvent sensorChangeEvent) {
-                int inputIndex = Config.values.getInt("PHIDGET_JOYSTICK_ANALOG_INPUT", 0);
-                if (sensorChangeEvent.getIndex() == inputIndex) {
-                    log.debug("Phidget Sensor " + inputIndex + " value=" + sensorChangeEvent.getValue());
-                    value = sensorChangeEvent.getValue();
+                try {
+                    int inputIndex = Config.values.getInt("PHIDGET_JOYSTICK_ANALOG_INPUT", 0);
+                    if (sensorChangeEvent.getIndex() == inputIndex) {
+                        log.debug("Phidget Sensor " + inputIndex + " value=" + sensorChangeEvent.getValue());
+                        value = sensorChangeEvent.getValue();
+
+                        if(machine != null) {
+                            machine.updateStateBasedOnCurrentInputs();
+                            machine.updateSessionBasedOnInputs();
+                        }
+                    }
+                } catch(Exception ex) {
+                    log.error("Error handling sensor input change", ex);
                 }
             }
         });
@@ -69,4 +80,7 @@ public class PhidgetKitJoystick extends Joystick {
         // Reading is event-based
     }
 
+    public void setMachine(Machine machine) {
+        this.machine = machine;
+    }
 }

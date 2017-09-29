@@ -134,18 +134,25 @@ public class Machine {
     }
 
     // Event driven run
-    public void start() {
+    public void startEventHandling() {
         Sound.playTimerAlarm();
+        if(angle instanceof OpticalEncoder) {
+            ((OpticalEncoder) angle).setMachine(this);
+        }
+        if(joystick instanceof PhidgetKitJoystick) {
+            ((PhidgetKitJoystick) joystick).setMachine(this);
+        }
     }
 
     // Loop driven run
+    // Deprecated
     public void run() {
         running = true;
 
         new Thread() {
             @Override
             public void run() {
-                Sound.playTimerAlarm();
+                startEventHandling();
 
                 // With the Phidget board doing the data rate sampling with events,
                 // we could eliminate this loop and run this on each angle and joystick change
@@ -173,13 +180,13 @@ public class Machine {
         }.start();
     }
 
-    private void updateSessionBasedOnInputs() {
+    public void updateSessionBasedOnInputs() {
         if(currentSession != null) {
             currentSession.update(new AngleReading(angle.getKneeValue()), joystickMotorState);
         }
     }
 
-    private void updateStateBasedOnCurrentInputs() throws Exception {
+    public void updateStateBasedOnCurrentInputs() throws Exception {
         joystickMotorState = Motor.getStateFromJoystick(joystick, joystickCenterOnZero, phidgetKit);
 
         // For software only.  Uses the motor state to update the angle virtually.
@@ -237,25 +244,28 @@ public class Machine {
                     new PhidgetKitMotorRelaySwitch(phidgetBoard, switchPin2, Switch.State.ON) :
                     new MotorRelaySwitch(Switch.State.OFF);
 
-            Machine.setInstance(Machine.create()
+            Machine machine = Machine.create()
                     .type(type)
                     .phidgetKit(phidgetKit)
                     .angle(angle)
                     .joystick(joystick)
                     .motorSwitch1(motorSwitch1)
-                    .motorSwitch2(motorSwitch2));
+                    .motorSwitch2(motorSwitch2);
+            Machine.setInstance(machine);
 
         } else if(type == Type.SOFTWARE) {
 
             Angle angle = opticalEncoder ? new OpticalEncoder() : new SoftEncoder();
-            Machine.setInstance(Machine.create()
+            Machine machine = Machine.create()
                     .type(type)
                     .phidgetKit(phidgetKit)
                     .angle(angle)
                     .joystick(hasJoystick ? new SoftJoystick() : null)
                     .motorSwitch1(new SoftSwitch(Switch.State.ON))
-                    .motorSwitch2(new SoftSwitch(Switch.State.ON)));
+                    .motorSwitch2(new SoftSwitch(Switch.State.ON));
+            Machine.setInstance(machine);
         }
+
     }
 
     public void calibrate() {

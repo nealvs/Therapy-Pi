@@ -15,9 +15,12 @@ public class OpticalEncoder extends Angle {
     private static Logger log = Logger.getLogger(OpticalEncoder.class);
 
     private EncoderPhidget encoder;
+    private Machine machine;
     private double startPosition;
     private double startAngle;
-    private static double OPTICAL_CLICKS_PER_DEGREE = Config.values.getDouble("OPTICAL_CLICKS_PER_DEGREE", 30);
+
+    // 2800 CPR
+    private static double OPTICAL_CLICKS_PER_DEGREE = Config.values.getDouble("OPTICAL_CLICKS_PER_DEGREE", 7.77777777778);
     private File angleStorageFile = new File("angleStorageFile.data");
 
     public OpticalEncoder() {
@@ -125,6 +128,14 @@ public class OpticalEncoder extends Angle {
                     EncoderPhidget source = (EncoderPhidget) oe.getSource();
                     rawValue = source.getPosition(oe.getIndex());
                     log.debug("rawValue=" + rawValue + " angle=" + getAngleFromRawPosition(rawValue, getStartPosition(), getStartAngle()));
+
+                    if(machine != null) {
+                        read();
+                        calculateAndSetAverage();
+                        machine.updateStateBasedOnCurrentInputs();
+                        machine.updateSessionBasedOnInputs();
+                    }
+
                 } catch(Exception ex) {
                     log.error("Error reading optical encoder position.", ex);
                 }
@@ -146,5 +157,9 @@ public class OpticalEncoder extends Angle {
 
     public void setStartAngle(double startAngle) {
         this.startAngle = startAngle;
+    }
+
+    public void setMachine(Machine machine) {
+        this.machine = machine;
     }
 }

@@ -15,21 +15,23 @@ public class HardRotationMotor extends RotationMotor {
 
     @Override
     public void applyState() throws Exception {
-        String command = Config.values.getString("DIGITAL_TO_ANALOG_BIN", "dac");
-        double outputValue = getValue();
-        log.debug("Writing motor value: " + outputValue);
-        Process process = new ProcessBuilder()
-                .redirectErrorStream(true)
-                .command(command, Double.toString(outputValue), Double.toString(outputValue))
-                .start();
-        InputStream stdOut = process.getInputStream();
-        if(!process.waitFor(Config.values.getInt("MOTOR_WRITE_TIMEOUT_MS", 500), TimeUnit.MILLISECONDS)) {
-            log.error("Write to motor controller timed out.");
-            process.destroy();
-        } else {
-            BufferedReader in = new BufferedReader(new InputStreamReader(stdOut));
-            String response = in.readLine();
-            log.debug("Motor Write Response: " + response);
+        if(Config.values.getBoolean("CONTROL_MOTOR", false)) {
+            String command = Config.values.getString("DIGITAL_TO_ANALOG_BIN", "dac");
+            double outputValue = getValue();
+            log.debug("Writing motor value: " + outputValue);
+            Process process = new ProcessBuilder()
+                    .redirectErrorStream(true)
+                    .command(command, Double.toString(outputValue), Double.toString(outputValue))
+                    .start();
+            InputStream stdOut = process.getInputStream();
+            if (!process.waitFor(Config.values.getInt("MOTOR_WRITE_TIMEOUT_MS", 500), TimeUnit.MILLISECONDS)) {
+                log.error("Write to motor controller timed out.");
+                process.destroy();
+            } else {
+                BufferedReader in = new BufferedReader(new InputStreamReader(stdOut));
+                String response = in.readLine();
+                log.debug("Motor Write Response: " + response);
+            }
         }
     }
 

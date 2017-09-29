@@ -4,7 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.spriton.therapypi.components.Machine;
-import com.spriton.therapypi.components.Network;
+import com.spriton.therapypi.components.network.NetworkManager;
 import com.spriton.therapypi.components.Sound;
 import com.spriton.therapypi.database.DataAccess;
 import com.spriton.therapypi.database.Patient;
@@ -93,8 +93,8 @@ public class DataServer {
         get("/network", "application/json", (req, res) -> {
             JsonObject info = new JsonObject();
             try {
-                if (Network.instance() != null) {
-                    info = Network.instance().toJson();
+                if (NetworkManager.instance() != null) {
+                    info = NetworkManager.instance().toJson();
                 }
             } catch(Exception ex) {
                 log.error("Error getting network toJson", ex);

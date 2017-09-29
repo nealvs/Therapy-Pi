@@ -29,8 +29,11 @@ public class Machine {
     public Type type = Type.HARDWARE;
     public Angle angle;
     public Joystick joystick;
-    public RotationMotor rotationMotor;
-    public Switch motorSwitch;
+    public Motor.State joystickMotorState = Motor.State.STOPPED;
+    public Switch motorSwitch1;
+    public Switch motorSwitch2;
+    public boolean phidgetKit;
+    public boolean joystickCenterOnZero;
 
     public PatientSession currentSession = new PatientSession();
 
@@ -47,6 +50,7 @@ public class Machine {
         if(timeZ != null) {
             timeZone = TimeZone.getTimeZone(timeZ.getConfigValue());
         }
+        joystickCenterOnZero = Config.values.getBoolean("JOYSTICK_CENTER_ON_0", true);
     }
 
     public void setHoldTimeConfig(int holdTime) {
@@ -118,7 +122,23 @@ public class Machine {
         }
     }
 
+    public void shutdown() {
+        try {
+            motorSwitch1.setState(Switch.State.OFF);
+            motorSwitch2.setState(Switch.State.OFF);
+            motorSwitch1.applyState();
+            motorSwitch2.applyState();
+        } catch(Exception ex) {
+            log.error("Error shutting down.", ex);
+        }
+    }
 
+    // Event driven run
+    public void start() {
+        Sound.playTimerAlarm();
+    }
+
+    // Loop driven run
     public void run() {
         running = true;
 
@@ -126,45 +146,21 @@ public class Machine {
             @Override
             public void run() {
                 Sound.playTimerAlarm();
+
+                // With the Phidget board doing the data rate sampling with events,
+                // we could eliminate this loop and run this on each angle and joystick change
+                // to determine if the relay switches should be on or off
                 while(running) {
                     try {
                         angle.read();
                         angle.calculateAndSetAverage();
 
-                        Motor.State joystickMotorState = null;
                         if(joystick != null) {
                             joystick.read();
-                            Motor.State originalMotorState = rotationMotor.getState();
-
-                            joystickMotorState = Motor.getStateFromJoystickValue(joystick.value);
-                            rotationMotor.setState(joystickMotorState);
-
-                            // For software only.  Uses the motor state to update the angle virtually.
-                            angle.update(joystickMotorState);
-
-                            if (applyLimits && angle.isMinAngle() && !(joystickMotorState.equals(Motor.State.UP_SLOW) || joystickMotorState.equals(Motor.State.UP_MEDIUM) || joystickMotorState.equals(Motor.State.UP_FAST))) {
-                                motorSwitch.setState(Switch.State.OFF);
-                                rotationMotor.setState(Motor.State.STOPPED);
-                            } else if (applyLimits && angle.isMaxAngle() && !(joystickMotorState.equals(Motor.State.DOWN_SLOW) || joystickMotorState.equals(Motor.State.DOWN_MEDIUM) || joystickMotorState.equals(Motor.State.DOWN_FAST))) {
-                                motorSwitch.setState(Switch.State.OFF);
-                                rotationMotor.setState(Motor.State.STOPPED);
-                            } else if (joystickMotorState.equals(Motor.State.STOPPED)) {
-                                motorSwitch.setState(Switch.State.OFF);
-                                rotationMotor.setState(Motor.State.STOPPED);
-                            } else {
-                                motorSwitch.setState(Switch.State.ON);
-                            }
-                            motorSwitch.applyState();
-
-                            if (rotationMotor.getState() != originalMotorState) {
-                                log.debug("Changing motor state to: " + joystickMotorState.name());
-                            }
-                            rotationMotor.applyState();
+                            updateStateBasedOnCurrentInputs();
                         }
 
-                        if(currentSession != null) {
-                            currentSession.update(new AngleReading(angle.getKneeValue()), joystickMotorState);
-                        }
+                        updateSessionBasedOnInputs();
 
                         Thread.sleep(Config.values.getInt("MACHINE_LOOP_DELAY_MS", 100));
                     } catch(Exception ex) {
@@ -172,7 +168,41 @@ public class Machine {
                     }
                 }
             }
+
+
         }.start();
+    }
+
+    private void updateSessionBasedOnInputs() {
+        if(currentSession != null) {
+            currentSession.update(new AngleReading(angle.getKneeValue()), joystickMotorState);
+        }
+    }
+
+    private void updateStateBasedOnCurrentInputs() throws Exception {
+        joystickMotorState = Motor.getStateFromJoystick(joystick, joystickCenterOnZero, phidgetKit);
+
+        // For software only.  Uses the motor state to update the angle virtually.
+        angle.update(joystickMotorState);
+
+        if (applyLimits && angle.isMinAngle() &&
+                !(joystickMotorState.equals(Motor.State.UP_SLOW) ||
+                        joystickMotorState.equals(Motor.State.UP_MEDIUM) ||
+                        joystickMotorState.equals(Motor.State.UP_FAST))) {
+            motorSwitch1.setState(Switch.State.OFF);
+        } else if (applyLimits && angle.isMaxAngle() &&
+                !(joystickMotorState.equals(Motor.State.DOWN_SLOW) ||
+                        joystickMotorState.equals(Motor.State.DOWN_MEDIUM) ||
+                        joystickMotorState.equals(Motor.State.DOWN_FAST))) {
+            motorSwitch2.setState(Switch.State.OFF);
+        } else if (joystickMotorState.equals(Motor.State.STOPPED)) {
+            motorSwitch1.setState(Switch.State.OFF);
+            motorSwitch2.setState(Switch.State.OFF);
+        } else {
+            motorSwitch1.setState(Switch.State.ON);
+            motorSwitch2.setState(Switch.State.ON);
+        }
+        motorSwitch1.applyState();
     }
 
     public void reset() throws Exception {
@@ -184,26 +214,47 @@ public class Machine {
         run();
     }
 
-    public static void setInstance(Type type) {
+    public static void setInstance(Type type) throws Exception {
+        boolean phidgetKit = Config.values.getBoolean("PHIDGET_KIT", false);
         boolean opticalEncoder = Config.values.getBoolean("OPTICAL_ENCODER", false);
         boolean hasJoystick = Config.values.getBoolean("HAS_JOYSTICK", true);
         log.info("Encoder type=" + (opticalEncoder ? "optical" : "absolute"));
+        log.info("Phidget kit=" + phidgetKit);
+
         if(type == Type.HARDWARE) {
+
+            PhidgetsInterfaceBoard phidgetBoard = phidgetKit ? new PhidgetsInterfaceBoard() : null;
             Angle angle = opticalEncoder ? new OpticalEncoder() : new HardEncoder();
+            Joystick joystick = hasJoystick ? (phidgetKit ? new PhidgetKitJoystick(phidgetBoard) : new HardJoystick()) : null;
+
+            int switchPin1 = Config.values.getInt("PHIDGET_SWITCH_OUTPUT1", 6);
+            int switchPin2 = Config.values.getInt("PHIDGET_SWITCH_OUTPUT2", 7);
+
+            Switch motorSwitch1 = phidgetKit ?
+                    new PhidgetKitMotorRelaySwitch(phidgetBoard, switchPin1, Switch.State.ON) :
+                    new MotorRelaySwitch(Switch.State.OFF);
+            Switch motorSwitch2 = phidgetKit ?
+                    new PhidgetKitMotorRelaySwitch(phidgetBoard, switchPin2, Switch.State.ON) :
+                    new MotorRelaySwitch(Switch.State.OFF);
+
             Machine.setInstance(Machine.create()
                     .type(type)
+                    .phidgetKit(phidgetKit)
                     .angle(angle)
-                    .joystick(hasJoystick ? new HardJoystick() : null)
-                    .motorSwitch(new MotorRelaySwitch(Switch.State.ON))
-                    .rotationMotor(new HardRotationMotor()));
+                    .joystick(joystick)
+                    .motorSwitch1(motorSwitch1)
+                    .motorSwitch2(motorSwitch2));
+
         } else if(type == Type.SOFTWARE) {
+
             Angle angle = opticalEncoder ? new OpticalEncoder() : new SoftEncoder();
             Machine.setInstance(Machine.create()
                     .type(type)
+                    .phidgetKit(phidgetKit)
                     .angle(angle)
                     .joystick(hasJoystick ? new SoftJoystick() : null)
-                    .motorSwitch(new SoftSwitch(Switch.State.ON))
-                    .rotationMotor(new SoftRotationMotor()));
+                    .motorSwitch1(new SoftSwitch(Switch.State.ON))
+                    .motorSwitch2(new SoftSwitch(Switch.State.ON)));
         }
     }
 
@@ -215,7 +266,6 @@ public class Machine {
             log.info("Optical Calibrate. startPosition=" + opticalEncoder.getStartPosition() + " startAngle=" + opticalEncoder.getStartAngle());
         } else {
             angle.ANGLE_CALIBRATION_VOLTAGE = angle.rawValue;
-            angle.ANGLE_CALIBRATION_VOLTAGE = 3.2;
             ConfigValue value = DataAccess.getConfigValue("ANGLE_CALIBRATION_VOLTAGE");
             if (value == null) {
                 value = new ConfigValue();
@@ -236,6 +286,8 @@ public class Machine {
         }
         if(joystick != null) {
             info.addProperty("joystick", joystick.value);
+            info.addProperty("joystickDirection1", joystick.directionPin1On);
+            info.addProperty("joystickDirection2", joystick.directionPin2On);
         }
         if(angle != null) {
             info.addProperty("shaftAngle", angle.getAveragedValue());
@@ -252,17 +304,18 @@ public class Machine {
             }
             info.addProperty("angleCalibrationDegree", angle.ANGLE_CALIBRATION_DEGREE);
         }
-        if(rotationMotor != null) {
-            info.addProperty("rotationMotor", rotationMotor.getState().name());
+        if(motorSwitch1 != null) {
+            info.addProperty("motorSwitch1", motorSwitch1.getState().name());
         }
-        if(motorSwitch != null) {
-            info.addProperty("motorSwitch", motorSwitch.getState().name());
+        if(motorSwitch2 != null) {
+            info.addProperty("motorSwitch2", motorSwitch2.getState().name());
         }
         if(currentSession != null) {
             info.add("session", currentSession.toJson());
         } else {
             info.add("session", new PatientSession().toJson());
         }
+        info.addProperty("joystickMotorState", joystickMotorState.name());
 
         info.addProperty("applyAngleLimits", applyLimits);
         info.addProperty("holdTimeConfig", holdTimeConfig);
@@ -340,13 +393,18 @@ public class Machine {
         return this;
     }
 
-    public Machine motorSwitch(Switch motorSwitch) {
-        this.motorSwitch = motorSwitch;
+    public Machine motorSwitch1(Switch motorSwitch1) {
+        this.motorSwitch1 = motorSwitch1;
         return this;
     }
 
-    public Machine rotationMotor(RotationMotor rotationMotor) {
-        this.rotationMotor = rotationMotor;
+    public Machine motorSwitch2(Switch motorSwitch2) {
+        this.motorSwitch2 = motorSwitch2;
+        return this;
+    }
+
+    public Machine phidgetKit(boolean phidgetKit) {
+        this.phidgetKit = phidgetKit;
         return this;
     }
 

@@ -101,22 +101,22 @@ public class OpticalEncoder extends Angle {
     private void setupEncoderListeners() {
         encoder.addAttachListener(new AttachListener() {
             public void attached(AttachEvent ae) {
-                log.info("Device Attached: " + ae);
+                log.info("Encoder Attached: " + ae);
             }
         });
         encoder.addDetachListener(new DetachListener() {
             public void detached(DetachEvent ae) {
-                log.info("Device Detached: " + ae);
+                log.info("Encoder Detached: " + ae);
             }
         });
         encoder.addErrorListener(new ErrorListener() {
             public void error(ErrorEvent ee) {
-                log.info("Device Error: " + ee);
+                log.info("Encoder Error: " + ee);
             }
         });
         encoder.addInputChangeListener(new InputChangeListener() {
             public void inputChanged(InputChangeEvent oe) {
-                log.info("Device Input Changed: " + oe);
+                log.info("Encoder Input Changed: " + oe);
             }
         });
         encoder.addEncoderPositionChangeListener(new EncoderPositionChangeListener() {

@@ -2,11 +2,11 @@ package com.spriton.therapypi.components;
 
 public abstract class Joystick {
 
-    public double rawValue = 2.5;
+    public boolean directionPin1On = false;
+    public boolean directionPin2On = false;
     public double value = 2.5;
 
     public void reset() {
-        rawValue = 2.5;
         value = 2.5;
     }
 

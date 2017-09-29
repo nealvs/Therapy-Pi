@@ -1,4 +1,4 @@
-package com.spriton.therapypi.components;
+package com.spriton.therapypi.components.network;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -9,17 +9,17 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.*;
 
-public class Network {
+public class NetworkManager {
 
-    private static Logger log = Logger.getLogger(Network.class);
-    private static Network instance;
+    private static Logger log = Logger.getLogger(NetworkManager.class);
+    private static NetworkManager instance;
 
     private String hostname = "";
     private String publicIp = "";
     private String privateIp = "";
     private JsonObject geoIpInfo = null;
 
-    private Network() {
+    private NetworkManager() {
         try {
             InetAddress addr = InetAddress.getLocalHost();
             hostname = addr.getHostName();
@@ -41,9 +41,9 @@ public class Network {
         }
     }
 
-    public static Network instance() {
+    public static NetworkManager instance() {
         if(instance == null) {
-            instance = new Network();
+            instance = new NetworkManager();
         }
         return instance;
     }

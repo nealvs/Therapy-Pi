@@ -25,10 +25,18 @@ public class MainController {
             Machine.setInstance(Machine.Type.SOFTWARE);
         }
 
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            public void run() {
+                Machine.instance().shutdown();            
+            }
+        });
+
         log.info("Running machine...");
         Machine.instance().run();
 
         //DataAccess.shutdown();
     }
+
+
 
 }

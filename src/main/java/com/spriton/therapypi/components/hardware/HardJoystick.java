@@ -30,8 +30,7 @@ public class HardJoystick extends Joystick {
             BufferedReader in = new BufferedReader(new InputStreamReader(stdOut));
             String response = in.readLine();
             log.debug("Joystick Value: " + response);
-            this.rawValue = Double.parseDouble(response);
-            this.value = this.rawValue;
+            this.value = Double.parseDouble(response);
         }
     }
 

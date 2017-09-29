@@ -121,7 +121,7 @@ public class PatientSession {
         }
     }
 
-    public void update(AngleReading angleReading, Motor.State state) {
+    public synchronized void update(AngleReading angleReading, Motor.State state) {
         int angleValue = angleReading.angle;
 
         updateTimerAlarm();
@@ -202,7 +202,7 @@ public class PatientSession {
         }
     }
 
-    public void cleanUpReadingsAndUpdateRepetitions(AngleReading currentReading, int kneeAngle) {
+    public synchronized void cleanUpReadingsAndUpdateRepetitions(AngleReading currentReading, int kneeAngle) {
         if(readings.size() > 1) {
             Iterator<AngleReading> iter = readings.iterator();
             int minAngle = Integer.MAX_VALUE;

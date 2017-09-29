@@ -180,7 +180,7 @@ public class Machine {
         }.start();
     }
 
-    public void updateSessionBasedOnInputs() {
+    public synchronized void updateSessionBasedOnInputs() {
         if(currentSession != null) {
             currentSession.update(new AngleReading(angle.getKneeValue()), joystickMotorState);
         }

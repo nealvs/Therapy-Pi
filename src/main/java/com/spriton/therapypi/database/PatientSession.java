@@ -150,9 +150,6 @@ public class PatientSession {
         }
         repetitionList.get(repetitionList.size() - 1).updateAngle(angleValue);
 
-        cleanUpReadingsAndUpdateRepetitions(angleReading, angleValue);
-        //updateRepetitions();
-
         if(state != null) {
             // Consider it a hold unless in the motor medium or fast states.  Lightly bumping the joystick shouldn't reset the hold timer
             if ((state == Motor.State.STOPPED || state == Motor.State.UP_SLOW || state == Motor.State.DOWN_SLOW)) {
@@ -173,6 +170,9 @@ public class PatientSession {
                 }
             }
         }
+
+        cleanUpReadingsAndUpdateRepetitions(angleReading, angleValue);
+        //updateRepetitions();
 
         if(holdStopwatch.elapsed(TimeUnit.SECONDS) >= Config.values.getInt("IDLE_MACHINE_SECONDS", 600)) {
             endSession = true;

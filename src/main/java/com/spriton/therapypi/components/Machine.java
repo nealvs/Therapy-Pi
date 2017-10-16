@@ -29,7 +29,7 @@ public class Machine {
     public Type type = Type.HARDWARE;
     public Angle angle;
     public Joystick joystick;
-    public Motor.State joystickMotorState = Motor.State.STOPPED;
+    public Motor.State joystickMotorState = null;
     public Switch motorSwitch1;
     public Switch motorSwitch2;
     public boolean phidgetKit;
@@ -304,6 +304,7 @@ public class Machine {
             info.addProperty("joystick", joystick.value);
             info.addProperty("joystickDirection1", joystick.directionPin1On);
             info.addProperty("joystickDirection2", joystick.directionPin2On);
+            info.addProperty("joystickMotorState", joystickMotorState != null ? joystickMotorState.name() : null);
         }
         if(angle != null) {
             info.addProperty("shaftAngle", angle.getAveragedValue());
@@ -331,7 +332,6 @@ public class Machine {
         } else {
             info.add("session", new PatientSession().toJson());
         }
-        info.addProperty("joystickMotorState", joystickMotorState.name());
 
         info.addProperty("applyAngleLimits", applyLimits);
         info.addProperty("holdTimeConfig", holdTimeConfig);

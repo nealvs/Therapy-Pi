@@ -225,6 +225,8 @@ public class Machine {
         boolean phidgetKit = Config.values.getBoolean("PHIDGET_KIT", false);
         boolean opticalEncoder = Config.values.getBoolean("OPTICAL_ENCODER", false);
         boolean hasJoystick = Config.values.getBoolean("HAS_JOYSTICK", true);
+        boolean hasMotorRelays = Config.values.getBoolean("HAS_MOTOR_RELAYS", true);
+
         log.info("Encoder type=" + (opticalEncoder ? "optical" : "absolute"));
         log.info("Phidget kit=" + phidgetKit);
 
@@ -234,15 +236,16 @@ public class Machine {
             Angle angle = opticalEncoder ? new OpticalEncoder() : new HardEncoder();
             Joystick joystick = hasJoystick ? (phidgetKit ? new PhidgetKitJoystick(phidgetBoard) : new HardJoystick()) : null;
 
+
             int switchPin1 = Config.values.getInt("PHIDGET_SWITCH_OUTPUT1", 6);
             int switchPin2 = Config.values.getInt("PHIDGET_SWITCH_OUTPUT2", 7);
 
-            Switch motorSwitch1 = phidgetKit ?
+            Switch motorSwitch1 = hasMotorRelays ? (phidgetKit ?
                     new PhidgetKitMotorRelaySwitch(phidgetBoard, switchPin1, Switch.State.ON) :
-                    new MotorRelaySwitch(Switch.State.OFF);
-            Switch motorSwitch2 = phidgetKit ?
+                    new MotorRelaySwitch(Switch.State.OFF)) : null;
+            Switch motorSwitch2 = hasMotorRelays ? (phidgetKit ?
                     new PhidgetKitMotorRelaySwitch(phidgetBoard, switchPin2, Switch.State.ON) :
-                    new MotorRelaySwitch(Switch.State.OFF);
+                    new MotorRelaySwitch(Switch.State.OFF)) : null;
 
             Machine machine = Machine.create()
                     .type(type)

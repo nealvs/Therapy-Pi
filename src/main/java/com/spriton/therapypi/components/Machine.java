@@ -193,24 +193,26 @@ public class Machine {
             // For software only.  Uses the motor state to update the angle virtually.
             angle.update(joystickMotorState);
 
-            if (applyLimits && angle.isMinAngle() &&
-                    !(joystickMotorState.equals(Motor.State.UP_SLOW) ||
-                            joystickMotorState.equals(Motor.State.UP_MEDIUM) ||
-                            joystickMotorState.equals(Motor.State.UP_FAST))) {
-                motorSwitch1.setState(Switch.State.OFF);
-            } else if (applyLimits && angle.isMaxAngle() &&
-                    !(joystickMotorState.equals(Motor.State.DOWN_SLOW) ||
-                            joystickMotorState.equals(Motor.State.DOWN_MEDIUM) ||
-                            joystickMotorState.equals(Motor.State.DOWN_FAST))) {
-                motorSwitch2.setState(Switch.State.OFF);
-            } else if (joystickMotorState.equals(Motor.State.STOPPED)) {
-                motorSwitch1.setState(Switch.State.OFF);
-                motorSwitch2.setState(Switch.State.OFF);
-            } else {
-                motorSwitch1.setState(Switch.State.ON);
-                motorSwitch2.setState(Switch.State.ON);
+            if(motorSwitch1 != null && motorSwitch2 != null) {
+                if (applyLimits && angle.isMinAngle() &&
+                        !(joystickMotorState.equals(Motor.State.UP_SLOW) ||
+                                joystickMotorState.equals(Motor.State.UP_MEDIUM) ||
+                                joystickMotorState.equals(Motor.State.UP_FAST))) {
+                    motorSwitch1.setState(Switch.State.OFF);
+                } else if (applyLimits && angle.isMaxAngle() &&
+                        !(joystickMotorState.equals(Motor.State.DOWN_SLOW) ||
+                                joystickMotorState.equals(Motor.State.DOWN_MEDIUM) ||
+                                joystickMotorState.equals(Motor.State.DOWN_FAST))) {
+                    motorSwitch2.setState(Switch.State.OFF);
+                } else if (joystickMotorState.equals(Motor.State.STOPPED)) {
+                    motorSwitch1.setState(Switch.State.OFF);
+                    motorSwitch2.setState(Switch.State.OFF);
+                } else {
+                    motorSwitch1.setState(Switch.State.ON);
+                    motorSwitch2.setState(Switch.State.ON);
+                }
+                motorSwitch1.applyState();
             }
-            motorSwitch1.applyState();
         }
     }
 

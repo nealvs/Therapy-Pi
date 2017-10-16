@@ -139,7 +139,7 @@ public class Machine {
         if(angle instanceof OpticalEncoder) {
             ((OpticalEncoder) angle).setMachine(this);
         }
-        if(joystick instanceof PhidgetKitJoystick) {
+        if(joystick != null && joystick instanceof PhidgetKitJoystick) {
             ((PhidgetKitJoystick) joystick).setMachine(this);
         }
     }
@@ -187,29 +187,31 @@ public class Machine {
     }
 
     public void updateStateBasedOnCurrentInputs() throws Exception {
-        joystickMotorState = Motor.getStateFromJoystick(joystick, joystickCenterOnZero, phidgetKit);
+        if(joystick != null) {
+            joystickMotorState = Motor.getStateFromJoystick(joystick, joystickCenterOnZero, phidgetKit);
 
-        // For software only.  Uses the motor state to update the angle virtually.
-        angle.update(joystickMotorState);
+            // For software only.  Uses the motor state to update the angle virtually.
+            angle.update(joystickMotorState);
 
-        if (applyLimits && angle.isMinAngle() &&
-                !(joystickMotorState.equals(Motor.State.UP_SLOW) ||
-                        joystickMotorState.equals(Motor.State.UP_MEDIUM) ||
-                        joystickMotorState.equals(Motor.State.UP_FAST))) {
-            motorSwitch1.setState(Switch.State.OFF);
-        } else if (applyLimits && angle.isMaxAngle() &&
-                !(joystickMotorState.equals(Motor.State.DOWN_SLOW) ||
-                        joystickMotorState.equals(Motor.State.DOWN_MEDIUM) ||
-                        joystickMotorState.equals(Motor.State.DOWN_FAST))) {
-            motorSwitch2.setState(Switch.State.OFF);
-        } else if (joystickMotorState.equals(Motor.State.STOPPED)) {
-            motorSwitch1.setState(Switch.State.OFF);
-            motorSwitch2.setState(Switch.State.OFF);
-        } else {
-            motorSwitch1.setState(Switch.State.ON);
-            motorSwitch2.setState(Switch.State.ON);
+            if (applyLimits && angle.isMinAngle() &&
+                    !(joystickMotorState.equals(Motor.State.UP_SLOW) ||
+                            joystickMotorState.equals(Motor.State.UP_MEDIUM) ||
+                            joystickMotorState.equals(Motor.State.UP_FAST))) {
+                motorSwitch1.setState(Switch.State.OFF);
+            } else if (applyLimits && angle.isMaxAngle() &&
+                    !(joystickMotorState.equals(Motor.State.DOWN_SLOW) ||
+                            joystickMotorState.equals(Motor.State.DOWN_MEDIUM) ||
+                            joystickMotorState.equals(Motor.State.DOWN_FAST))) {
+                motorSwitch2.setState(Switch.State.OFF);
+            } else if (joystickMotorState.equals(Motor.State.STOPPED)) {
+                motorSwitch1.setState(Switch.State.OFF);
+                motorSwitch2.setState(Switch.State.OFF);
+            } else {
+                motorSwitch1.setState(Switch.State.ON);
+                motorSwitch2.setState(Switch.State.ON);
+            }
+            motorSwitch1.applyState();
         }
-        motorSwitch1.applyState();
     }
 
     public void reset() throws Exception {
@@ -235,7 +237,6 @@ public class Machine {
             PhidgetsInterfaceBoard phidgetBoard = phidgetKit ? new PhidgetsInterfaceBoard() : null;
             Angle angle = opticalEncoder ? new OpticalEncoder() : new HardEncoder();
             Joystick joystick = hasJoystick ? (phidgetKit ? new PhidgetKitJoystick(phidgetBoard) : new HardJoystick()) : null;
-
 
             int switchPin1 = Config.values.getInt("PHIDGET_SWITCH_OUTPUT1", 6);
             int switchPin2 = Config.values.getInt("PHIDGET_SWITCH_OUTPUT2", 7);

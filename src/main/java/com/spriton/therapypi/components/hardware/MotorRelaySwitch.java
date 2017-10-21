@@ -10,16 +10,12 @@ public class MotorRelaySwitch extends Switch {
     private static Logger log = Logger.getLogger(MotorRelaySwitch.class);
     private GpioController gpio;
     private GpioPinDigitalOutput switchPin;
-    private GpioPinDigitalOutput switchPin2;
 
-    public MotorRelaySwitch(State state) {
+    public MotorRelaySwitch(State state, int pinNumber) {
         super(state);
         gpio = GpioFactory.getInstance();
-        Pin pin = getPin(Config.values.getInt("MOTOR_SWITCH_PIN", 6));
-        switchPin = gpio.provisionDigitalOutputPin(pin, "Motor Relay Control", PinState.HIGH);
-
-        Pin pin2 = getPin(Config.values.getInt("MOTOR_SWITCH_PIN2", 7));
-        switchPin2 = gpio.provisionDigitalOutputPin(pin2, "Motor Relay Control 2", PinState.HIGH);
+        Pin pin = getPin(pinNumber);
+        switchPin = gpio.provisionDigitalOutputPin(pin, "Motor Relay Control " + pinNumber, PinState.HIGH);
     }
 
     @Override
@@ -31,13 +27,6 @@ public class MotorRelaySwitch extends Switch {
             } else if (getState() == State.OFF && !switchPin.isLow()) {
                 switchPin.low();
                 log.debug("Motor Switch: OFF");
-            }
-        }
-        if(switchPin2 != null) {
-            if (getState() == State.ON && !switchPin2.isHigh()) {
-                switchPin2.high();
-            } else if (getState() == State.OFF && !switchPin2.isLow()) {
-                switchPin2.low();
             }
         }
     }

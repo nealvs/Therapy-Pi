@@ -272,11 +272,12 @@ public class Machine {
 
     }
 
-    public void calibrate() {
+    public void calibrate() throws Exception {
         if(Config.values.getBoolean("OPTICAL_ENCODER", false)) {
             OpticalEncoder opticalEncoder = (OpticalEncoder) angle;
             opticalEncoder.setStartPosition(opticalEncoder.rawValue);
             opticalEncoder.setStartAngle(Config.values.getInt("OPTICAL_START_ANGLE", 90));
+            updateStateBasedOnCurrentInputs();
             log.info("Optical Calibrate. startPosition=" + opticalEncoder.getStartPosition() + " startAngle=" + opticalEncoder.getStartAngle());
         } else {
             angle.ANGLE_CALIBRATION_VOLTAGE = angle.rawValue;
@@ -327,8 +328,6 @@ public class Machine {
         }
         if(currentSession != null) {
             info.add("session", currentSession.toJson());
-        } else {
-            info.add("session", new PatientSession().toJson());
         }
 
         info.addProperty("applyAngleLimits", applyLimits);

@@ -16,6 +16,31 @@ public class KneeAngleLookup {
     }
 
     static {
+        lookupChart.put(-45, -11.4);
+        lookupChart.put(-44, -11.2);
+        lookupChart.put(-43, -11.0);
+        lookupChart.put(-42, -10.8);
+        lookupChart.put(-41, -10.6);
+        lookupChart.put(-40, -10.4);
+        lookupChart.put(-39, -10.2);
+        lookupChart.put(-38, -10.0);
+        lookupChart.put(-37, -9.8);
+        lookupChart.put(-36, -9.6);
+        lookupChart.put(-35, -9.4);
+        lookupChart.put(-34, -9.2);
+        lookupChart.put(-33, -9.0);
+        lookupChart.put(-32, -8.8);
+        lookupChart.put(-31, -8.6);
+        lookupChart.put(-30, -8.4);
+        lookupChart.put(-29, -8.2);
+        lookupChart.put(-28, -8.0);
+        lookupChart.put(-27, -7.8);
+        lookupChart.put(-26, -7.6);
+        lookupChart.put(-25, -7.4);
+        lookupChart.put(-24, -7.2);
+        lookupChart.put(-23, -7.0);
+        lookupChart.put(-22, -6.8);
+        lookupChart.put(-21, -6.6);
         lookupChart.put(-20, -6.4);
         lookupChart.put(-19, -6.2);
         lookupChart.put(-18, -6.0);

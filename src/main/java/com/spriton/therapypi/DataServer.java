@@ -116,25 +116,32 @@ public class DataServer {
 
     public static void startSession() {
         post("/startSession",  "application/json", (req, res) -> {
-            JsonObject result = new JsonObject();
-            if(req.body() != null) {
-                JsonParser parser = new JsonParser();
-                JsonObject request = (JsonObject) parser.parse(req.body());
-                if(request.has("patientId")) {
-                    PatientSession session = new PatientSession();
-                    if(request.has("minutes")) {
-                        int minutes = request.get("minutes").getAsInt();
-                        if(minutes >= 1) {
-                            session.setTimerMinutes(minutes);
+            if(Machine.instance() != null) {
+                JsonObject result = new JsonObject();
+                if (req.body() != null) {
+                    JsonParser parser = new JsonParser();
+                    JsonObject request = (JsonObject) parser.parse(req.body());
+                    if (request.has("patientId")) {
+                        PatientSession session = new PatientSession();
+                        if (request.has("minutes")) {
+                            int minutes = request.get("minutes").getAsInt();
+                            if (minutes >= 1) {
+                                session.setTimerMinutes(minutes);
+                            }
                         }
+                        Patient patient = DataAccess.getPatient(request.get("patientId").getAsInt());
+                        session.setPatient(patient);
+                        session.start();
+                        Machine.instance().currentSession = session;
                     }
-                    Patient patient = DataAccess.getPatient(request.get("patientId").getAsInt());
-                    session.setPatient(patient);
-                    session.start();
-                    Machine.instance().currentSession = session;
                 }
+                return result.toString();
+            } else {
+                log.error("Can not start session.  Machine is not initialized.");
+                JsonObject result = new JsonObject();
+                result.addProperty("error", "Machine is not initialized.  Please check wire connections.");
+                return result;
             }
-            return result.toString();
         });
     }
 
@@ -243,26 +250,32 @@ public class DataServer {
 
     public static void patientList() {
         get("/patientList",  "application/json", (req, res) -> {
-            JsonObject result = new JsonObject();
-            JsonArray patients = new JsonArray();
-            List<Patient> patientList = null;
-            String all = req.queryParams("all");
-            if(all != null && all.equalsIgnoreCase("true")) {
-                patientList = DataAccess.getAllPatients();
-            } else {
-                patientList = DataAccess.getRecentPatients();
-            }
-
-            if(patientList != null) {
-                for (Patient patient : patientList) {
-                    patients.add(patient.toJson());
+            if(Machine.instance() != null) {
+                JsonObject result = new JsonObject();
+                JsonArray patients = new JsonArray();
+                List<Patient> patientList = null;
+                String all = req.queryParams("all");
+                if (all != null && all.equalsIgnoreCase("true")) {
+                    patientList = DataAccess.getAllPatients();
+                } else {
+                    patientList = DataAccess.getRecentPatients();
                 }
-            } else {
-                log.warn("No patient list received from database.");
-            }
 
-            result.add("patients", patients);
-            return result.toString();
+                if (patientList != null) {
+                    for (Patient patient : patientList) {
+                        patients.add(patient.toJson());
+                    }
+                } else {
+                    log.warn("No patient list received from database.");
+                }
+
+                result.add("patients", patients);
+                return result.toString();
+            } else {
+                JsonObject result = new JsonObject();
+                result.addProperty("error", "Machine is not initialized.  Please check wire connections.");
+                return result;
+            }
         });
     }
 
@@ -315,8 +328,15 @@ public class DataServer {
 
     public static void settings() {
         post("/settings/calibrate",  "application/json", (req, res) -> {
-            Machine.instance().calibrate();
-            return Machine.instance().toJson();
+            try {
+                Machine.instance().calibrate();
+                return Machine.instance().toJson();
+            } catch(Exception ex) {
+                log.error("Error calibrating.", ex);
+                JsonObject result = new JsonObject();
+                result.addProperty("error", "Error calibrating: " + ex.getMessage());
+                return result;
+            }
         });
         post("/settings/setTimeZone",  "application/json", (req, res) -> {
             if(req.body() != null) {

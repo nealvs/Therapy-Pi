@@ -104,11 +104,13 @@ public class OpticalEncoder extends Angle {
     private void setupEncoderListeners() {
         encoder.addAttachListener(new AttachListener() {
             public void attached(AttachEvent ae) {
+                connected = true;
                 log.info("Encoder Attached: " + ae);
             }
         });
         encoder.addDetachListener(new DetachListener() {
             public void detached(DetachEvent ae) {
+                connected = false;
                 log.info("Encoder Detached: " + ae);
             }
         });

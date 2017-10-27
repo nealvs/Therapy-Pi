@@ -12,6 +12,7 @@ import java.util.List;
 
 public abstract class Angle {
 
+    protected boolean connected = false;
     protected double rawValue = 2.0;
     protected double value = DEFAULT_ANGLE;
     private double averagedValue = DEFAULT_ANGLE;
@@ -73,6 +74,10 @@ public abstract class Angle {
 
     public boolean isMinAngle() {
         return getAveragedValue() <= MIN_ANGLE || value <= MIN_ANGLE;
+    }
+
+    public boolean isConnected() {
+        return connected;
     }
 
     public abstract void read() throws Exception;

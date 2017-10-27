@@ -142,6 +142,23 @@ public class Machine {
         if(joystick != null && joystick instanceof PhidgetKitJoystick) {
             ((PhidgetKitJoystick) joystick).setMachine(this);
         }
+
+        // Need a loop to periodically update the session when the angle and other event-driven inputs aren't changing so we can time-out
+        new Thread() {
+            @Override
+            public void run() {
+                while(running) {
+                    try {
+                        updateSessionBasedOnInputs();
+                        // Run every second
+                        Thread.sleep(Config.values.getInt("MACHINE_LOOP_UPDATE_SESSION", 1000));
+                    } catch(Exception ex) {
+                        log.error("Error in machine run thread", ex);
+                    }
+                }
+            }
+        }.start();
+
     }
 
     // Loop driven run

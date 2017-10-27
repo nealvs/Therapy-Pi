@@ -129,7 +129,10 @@ public class DataServer {
                                 session.setTimerMinutes(minutes);
                             }
                         }
-                        Patient patient = DataAccess.getPatient(request.get("patientId").getAsInt());
+
+                        int patientId = request.get("patientId").getAsInt();
+                        log.info("Starting new session. patientId=" + patientId);
+                        Patient patient = DataAccess.getPatient(patientId);
                         session.setPatient(patient);
                         session.start();
                         Machine.instance().currentSession = session;

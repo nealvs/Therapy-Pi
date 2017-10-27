@@ -277,6 +277,8 @@ public class Machine {
             OpticalEncoder opticalEncoder = (OpticalEncoder) angle;
             opticalEncoder.setStartPosition(opticalEncoder.rawValue);
             opticalEncoder.setStartAngle(Config.values.getInt("OPTICAL_START_ANGLE", 90));
+            opticalEncoder.read();
+            opticalEncoder.calculateAndSetAverage();
             updateStateBasedOnCurrentInputs();
             log.info("Optical Calibrate. startPosition=" + opticalEncoder.getStartPosition() + " startAngle=" + opticalEncoder.getStartAngle());
         } else {
@@ -367,6 +369,7 @@ public class Machine {
     public static void stopAndSaveSession() {
         if(Machine.instance().currentSession != null) {
             Machine.instance().currentSession.stop();
+            log.info("Stopping and saving session");
             if(Machine.instance().currentSession.getPatient() != null) {
                 Machine.instance().currentSession.setPatientId(Machine.instance().currentSession.getPatient().getId());
             }

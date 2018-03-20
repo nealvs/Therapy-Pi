@@ -18,6 +18,7 @@ public class OpticalEncoder extends Angle {
     private Machine machine;
     private double startPosition;
     private double startAngle;
+    private Integer indexPosition;
 
     // 2800 CPR
     private static double OPTICAL_CLICKS_PER_DEGREE = Config.values.getDouble("OPTICAL_CLICKS_PER_DEGREE", 7.77777777778);
@@ -129,8 +130,13 @@ public class OpticalEncoder extends Angle {
                 try {
                     EncoderPhidget source = (EncoderPhidget) oe.getSource();
                     rawValue = source.getPosition(oe.getIndex());
-                    long indexPosition = source.getIndexPosition(oe.getIndex());
-                    log.debug("rawValue=" + rawValue + " indexPosition=" + indexPosition + " angle=" + getAngleFromRawPosition(rawValue, getStartPosition(), getStartAngle()));
+                    Integer eventIndexPosition = getIndexPosition(source, oe);
+                    log.debug("rawValue=" + rawValue + " indexPosition=" + eventIndexPosition + " angle=" + getAngleFromRawPosition(rawValue, getStartPosition(), getStartAngle()));
+
+                    if(indexPosition == null && eventIndexPosition != null) {
+                        // Index position was triggered
+                        indexPosition = eventIndexPosition;
+                    }
 
                     if(machine != null) {
                         read();
@@ -144,6 +150,14 @@ public class OpticalEncoder extends Angle {
                 }
             }
         });
+    }
+
+    private Integer getIndexPosition(EncoderPhidget source, EncoderPositionChangeEvent oe) {
+        Integer indexPosition = null;
+        try {
+            indexPosition = source.getIndexPosition(oe.getIndex());
+        } catch(Exception ex) { }
+        return indexPosition;
     }
 
     public double getStartPosition() {

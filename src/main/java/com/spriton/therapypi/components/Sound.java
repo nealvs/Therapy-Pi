@@ -64,17 +64,21 @@ public class Sound {
                 AudioFormat format = audioIn.getFormat();
                 DataLine.Info info = new DataLine.Info(Clip.class, format);
                 Clip clip = (Clip) AudioSystem.getLine(info);
-                clip.open(audioIn);
+                if(!clip.isRunning()) {
+                    clip.open(audioIn);
 
-                FloatControl masterGain = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
-                float range = masterGain.getMaximum() - masterGain.getMinimum();
-                float scaledRange = range * volume / 100; // Scale the range 0-100%
-                float value = masterGain.getMinimum() + scaledRange;
-                log.debug("Sound MasterGain=" + value);
-                masterGain.setValue(value);
+                    FloatControl masterGain = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
+                    float range = masterGain.getMaximum() - masterGain.getMinimum();
+                    float scaledRange = range * volume / 100; // Scale the range 0-100%
+                    float value = masterGain.getMinimum() + scaledRange;
+                    log.debug("Sound MasterGain=" + value);
+                    masterGain.setValue(value);
 
-                clip.start();
-                Thread.sleep(clip.getMicrosecondLength() / 1000);
+                    clip.start();
+                    Thread.sleep(clip.getMicrosecondLength() / 1000);
+                } else {
+                    log.info("Not playing sound, clip is running already");
+                }
             } catch (UnsupportedAudioFileException | IOException | LineUnavailableException | InterruptedException  e1) {
                 log.error("Error playing sound.", e1);
             }

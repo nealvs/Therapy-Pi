@@ -16,8 +16,9 @@ public class MainController {
 
             if(Config.values.getBoolean("SET_VOLUME_ON_BOOT", true)) {
                 try {
+                    log.info("Setting PCM volume to 100%");
                     Runtime runtime = Runtime.getRuntime();
-                    runtime.exec("amixer sset 'Master' 100%");
+                    runtime.exec("amixer sset 'PCM' 100%");
                 } catch(Exception ex) {
                     log.error("Unable to set volume on boot", ex);
                 }

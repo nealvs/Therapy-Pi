@@ -14,6 +14,15 @@ public class MainController {
             PropertyConfigurator.configure("log4j.properties");
             Config.init(args, "therapypi.properties");
 
+            if(Config.values.getBoolean("SET_VOLUME_ON_BOOT", true)) {
+                try {
+                    Runtime runtime = Runtime.getRuntime();
+                    runtime.exec("amixer sset 'Master' 100%");
+                } catch(Exception ex) {
+                    log.error("Unable to set volume on boot", ex);
+                }
+            }
+
             DataServer.init();
             DataAccess.init();
 

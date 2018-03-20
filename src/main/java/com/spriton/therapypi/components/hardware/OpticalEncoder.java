@@ -129,7 +129,8 @@ public class OpticalEncoder extends Angle {
                 try {
                     EncoderPhidget source = (EncoderPhidget) oe.getSource();
                     rawValue = source.getPosition(oe.getIndex());
-                    log.debug("rawValue=" + rawValue + " angle=" + getAngleFromRawPosition(rawValue, getStartPosition(), getStartAngle()));
+                    long indexPosition = source.getIndexPosition(oe.getIndex());
+                    log.debug("rawValue=" + rawValue + " indexPosition=" + indexPosition + " angle=" + getAngleFromRawPosition(rawValue, getStartPosition(), getStartAngle()));
 
                     if(machine != null) {
                         read();

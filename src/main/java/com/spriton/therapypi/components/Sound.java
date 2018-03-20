@@ -54,7 +54,12 @@ public class Sound {
     public static class SoundThread implements Runnable {
         @Override
         public void run() {
-            try(InputStream inputStream = new BufferedInputStream(getClass().getClassLoader().getResourceAsStream("beep.wav"));
+            playSound();
+        }
+
+        private static synchronized void playSound() {
+            try(InputStream inputStream = new BufferedInputStream(
+                    SoundThread.class.getClassLoader().getResourceAsStream("beep.wav"));
                 AudioInputStream audioIn = AudioSystem.getAudioInputStream(inputStream)) {
                 AudioFormat format = audioIn.getFormat();
                 DataLine.Info info = new DataLine.Info(Clip.class, format);

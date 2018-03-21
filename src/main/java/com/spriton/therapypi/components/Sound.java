@@ -81,6 +81,8 @@ public class Sound {
                         if(lastClip.isRunning()) {
                             log.debug("Stopping sound position=" + lastClip.getMicrosecondPosition() + " length=" + lastClip.getMicrosecondLength());
                             lastClip.stop();
+                            // Found that if you don't let it stop before closing it, it will get hung up for a second
+                            Thread.sleep(1);
                         }
                         lastClip.close();
 
@@ -103,7 +105,7 @@ public class Sound {
                     //Thread.sleep(microSecondLength / 1000);
                 }
 
-            } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e1) {
+            } catch (UnsupportedAudioFileException | IOException | LineUnavailableException | InterruptedException e1) {
                 log.error("Error playing sound.", e1);
             }
 

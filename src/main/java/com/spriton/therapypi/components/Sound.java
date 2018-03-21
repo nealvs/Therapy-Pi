@@ -7,6 +7,8 @@ import org.apache.log4j.Logger;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.sound.sampled.*;
 
@@ -52,8 +54,9 @@ public class Sound {
 
     public static class SoundThread implements Runnable {
 
-        private static final Object lock = new Object();
+        private static Lock lock = new ReentrantLock();
         private static Clip lastClip;
+        private static long microSecondLength;
 
         @Override
         public void run() {
@@ -63,33 +66,47 @@ public class Sound {
         private static void playSound() {
 
             try {
-                synchronized (lock) {
-                    if(lastClip != null && lastClip.isRunning()) {
-                        log.info("Stopping current sound");
-                        lastClip.stop();
-                    }
+                try (InputStream inputStream = new BufferedInputStream(
+                        SoundThread.class.getClassLoader().getResourceAsStream("beep.wav"));
+                     AudioInputStream audioIn = AudioSystem.getAudioInputStream(inputStream)) {
 
-                    try(InputStream inputStream = new BufferedInputStream(
-                            SoundThread.class.getClassLoader().getResourceAsStream("beep.wav"));
-                        AudioInputStream audioIn = AudioSystem.getAudioInputStream(inputStream)) {
-                        AudioFormat format = audioIn.getFormat();
-                        DataLine.Info info = new DataLine.Info(Clip.class, format);
-                        lastClip = (Clip) AudioSystem.getLine(info);
+                    try {
+                        lock.lock();
+                        if (lastClip == null) {
+                            AudioFormat format = audioIn.getFormat();
+                            DataLine.Info info = new DataLine.Info(Clip.class, format);
+                            lastClip = (Clip) AudioSystem.getLine(info);
+                        }
+
+                        if(lastClip.isRunning()) {
+                            log.debug("Stopping sound position=" + lastClip.getMicrosecondPosition() + " length=" + lastClip.getMicrosecondLength());
+                            lastClip.stop();
+                        }
+                        lastClip.close();
+
                         lastClip.open(audioIn);
+                        microSecondLength = lastClip.getMicrosecondLength();
+                        // Set volume with latest value
                         FloatControl masterGain = (FloatControl) lastClip.getControl(FloatControl.Type.MASTER_GAIN);
                         float range = masterGain.getMaximum() - masterGain.getMinimum();
-                        float scaledRange = range * volume / 100; // Scale the range 0-100%
+                        // Make anything under 50 be mute
+                        int vol = volume <= 50 ? 0 : volume;
+                        float scaledRange = range * vol / 100; // Scale the range 0-100%
                         float value = masterGain.getMinimum() + scaledRange;
                         log.debug("Sound MasterGain=" + value);
                         masterGain.setValue(value);
-                        lastClip.start();
-                    }
-                }
-                Thread.sleep(lastClip.getMicrosecondLength() / 1000);
 
-            } catch (UnsupportedAudioFileException | IOException | LineUnavailableException | InterruptedException  e1) {
+                        lastClip.start();
+                    } finally {
+                        lock.unlock();
+                    }
+                    //Thread.sleep(microSecondLength / 1000);
+                }
+
+            } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e1) {
                 log.error("Error playing sound.", e1);
             }
+
         }
     }
 }

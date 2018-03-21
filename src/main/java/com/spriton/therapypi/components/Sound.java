@@ -5,7 +5,6 @@ import com.spriton.therapypi.database.DataAccess;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -52,33 +51,42 @@ public class Sound {
     }
 
     public static class SoundThread implements Runnable {
+
+        private static final Object lock = new Object();
+        private static Clip lastClip;
+
         @Override
         public void run() {
             playSound();
         }
 
-        private static synchronized void playSound() {
-            try(InputStream inputStream = new BufferedInputStream(
-                    SoundThread.class.getClassLoader().getResourceAsStream("beep.wav"));
-                AudioInputStream audioIn = AudioSystem.getAudioInputStream(inputStream)) {
-                AudioFormat format = audioIn.getFormat();
-                DataLine.Info info = new DataLine.Info(Clip.class, format);
-                Clip clip = (Clip) AudioSystem.getLine(info);
-                if(!clip.isRunning()) {
-                    clip.open(audioIn);
+        private static void playSound() {
 
-                    FloatControl masterGain = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
-                    float range = masterGain.getMaximum() - masterGain.getMinimum();
-                    float scaledRange = range * volume / 100; // Scale the range 0-100%
-                    float value = masterGain.getMinimum() + scaledRange;
-                    log.debug("Sound MasterGain=" + value);
-                    masterGain.setValue(value);
+            try {
+                synchronized (lock) {
+                    if(lastClip != null && lastClip.isRunning()) {
+                        log.info("Stopping current sound");
+                        lastClip.stop();
+                    }
 
-                    clip.start();
-                    Thread.sleep(clip.getMicrosecondLength() / 1000);
-                } else {
-                    log.info("Not playing sound, clip is running already");
+                    try(InputStream inputStream = new BufferedInputStream(
+                            SoundThread.class.getClassLoader().getResourceAsStream("beep.wav"));
+                        AudioInputStream audioIn = AudioSystem.getAudioInputStream(inputStream)) {
+                        AudioFormat format = audioIn.getFormat();
+                        DataLine.Info info = new DataLine.Info(Clip.class, format);
+                        lastClip = (Clip) AudioSystem.getLine(info);
+                        lastClip.open(audioIn);
+                        FloatControl masterGain = (FloatControl) lastClip.getControl(FloatControl.Type.MASTER_GAIN);
+                        float range = masterGain.getMaximum() - masterGain.getMinimum();
+                        float scaledRange = range * volume / 100; // Scale the range 0-100%
+                        float value = masterGain.getMinimum() + scaledRange;
+                        log.debug("Sound MasterGain=" + value);
+                        masterGain.setValue(value);
+                        lastClip.start();
+                    }
                 }
+                Thread.sleep(lastClip.getMicrosecondLength() / 1000);
+
             } catch (UnsupportedAudioFileException | IOException | LineUnavailableException | InterruptedException  e1) {
                 log.error("Error playing sound.", e1);
             }

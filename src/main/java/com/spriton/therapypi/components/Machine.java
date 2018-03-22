@@ -315,6 +315,7 @@ public class Machine {
 
     public JsonObject toJson() {
         JsonObject info = new JsonObject();
+        info.addProperty("version", "1.1.57");
         if(type != null) {
             info.addProperty("type", type.name());
         }

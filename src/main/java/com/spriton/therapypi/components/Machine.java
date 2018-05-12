@@ -136,11 +136,11 @@ public class Machine {
     // Event driven run
     public void startEventHandling() {
         Sound.playTimerAlarm();
-        if(angle instanceof OpticalEncoder) {
-            ((OpticalEncoder) angle).setMachine(this);
+        if(angle instanceof OpticalEncoder2) {
+            ((OpticalEncoder2) angle).setMachine(this);
         }
-        if(joystick != null && joystick instanceof PhidgetKitJoystick) {
-            ((PhidgetKitJoystick) joystick).setMachine(this);
+        if(joystick != null && joystick instanceof PhidgetKitJoystick2) {
+            ((PhidgetKitJoystick2) joystick).setMachine(this);
         }
 
         // Need a loop to periodically update the session when the angle and other event-driven inputs aren't changing so we can time-out
@@ -253,9 +253,9 @@ public class Machine {
 
         if(type == Type.HARDWARE) {
 
-            PhidgetsInterfaceBoard phidgetBoard = phidgetKit ? new PhidgetsInterfaceBoard() : null;
-            Angle angle = opticalEncoder ? new OpticalEncoder() : new HardEncoder();
-            Joystick joystick = hasJoystick ? (phidgetKit ? new PhidgetKitJoystick(phidgetBoard) : new HardJoystick()) : null;
+            PhidgetsInterfaceBoard2 phidgetBoard = phidgetKit ? new PhidgetsInterfaceBoard2() : null;
+            Angle angle = opticalEncoder ? new OpticalEncoder2() : new HardEncoder();
+            Joystick joystick = hasJoystick ? (phidgetKit ? new PhidgetKitJoystick2(phidgetBoard) : new HardJoystick()) : null;
 
             Switch motorSwitch1 = hasMotorRelays ? (phidgetKit ?
                     new PhidgetKitMotorRelaySwitch(phidgetBoard, Config.values.getInt("PHIDGET_SWITCH_OUTPUT1", 6), Switch.State.ON) :
@@ -276,7 +276,7 @@ public class Machine {
 
         } else if(type == Type.SOFTWARE) {
 
-            Angle angle = opticalEncoder ? new OpticalEncoder() : new SoftEncoder();
+            Angle angle = opticalEncoder ? new OpticalEncoder2() : new SoftEncoder();
             Machine machine = Machine.create()
                     .type(type)
                     .phidgetKit(phidgetKit)
@@ -291,11 +291,12 @@ public class Machine {
 
     public void calibrate() throws Exception {
         if(Config.values.getBoolean("OPTICAL_ENCODER", false)) {
-            OpticalEncoder opticalEncoder = (OpticalEncoder) angle;
+            OpticalEncoder2 opticalEncoder = (OpticalEncoder2) angle;
             opticalEncoder.setStartPosition(opticalEncoder.rawValue);
             opticalEncoder.setStartAngle(Config.values.getInt("OPTICAL_START_ANGLE", 90));
             opticalEncoder.read();
             opticalEncoder.calculateAndSetAverage();
+            opticalEncoder.resetIndexPinAngle();
             updateStateBasedOnCurrentInputs();
             log.info("Optical Calibrate. startPosition=" + opticalEncoder.getStartPosition() + " startAngle=" + opticalEncoder.getStartAngle());
         } else {
@@ -331,7 +332,7 @@ public class Machine {
         }
         if(angle != null) {
             if(Config.values.getBoolean("OPTICAL_ENCODER", false)) {
-                OpticalEncoder opticalEncoder = (OpticalEncoder) angle;
+                OpticalEncoder2 opticalEncoder = (OpticalEncoder2) angle;
                 info.addProperty("startPosition", opticalEncoder.getStartPosition());
                 info.addProperty("currentPosition", opticalEncoder.rawValue);
             } else {

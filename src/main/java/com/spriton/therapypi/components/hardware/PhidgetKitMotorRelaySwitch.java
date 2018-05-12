@@ -8,10 +8,10 @@ public class PhidgetKitMotorRelaySwitch extends Switch {
 
     private static Logger log = Logger.getLogger(PhidgetKitMotorRelaySwitch.class);
 
-    private PhidgetsInterfaceBoard phidgetBoard;
+    private PhidgetsInterfaceBoard2 phidgetBoard;
     private int switchPin = 0;
 
-    public PhidgetKitMotorRelaySwitch(PhidgetsInterfaceBoard phidgetBoard, int switchPin, State state) throws Exception {
+    public PhidgetKitMotorRelaySwitch(PhidgetsInterfaceBoard2 phidgetBoard, int switchPin, State state) throws Exception {
         super(state);
         this.phidgetBoard = phidgetBoard;
         this.switchPin = switchPin;
@@ -21,13 +21,13 @@ public class PhidgetKitMotorRelaySwitch extends Switch {
     @Override
     public void applyState() throws Exception {
         // Adjust output pin
-        if (getState() == State.ON && !phidgetBoard.getKit().getOutputState(switchPin)) {
-            phidgetBoard.getKit().setOutputState(switchPin, true);
-            log.debug("Phidget Motor Switch " + switchPin + ": ON");
-        } else if (getState() == State.OFF && phidgetBoard.getKit().getOutputState(switchPin)) {
-            phidgetBoard.getKit().setOutputState(switchPin, false);
-            log.debug("Phidget Motor Switch " + switchPin + ": OFF");
-        }
+//        if (getState() == State.ON && !phidgetBoard.getKit().getOutputState(switchPin)) {
+//            phidgetBoard.getKit().setOutputState(switchPin, true);
+//            log.debug("Phidget Motor Switch " + switchPin + ": ON");
+//        } else if (getState() == State.OFF && phidgetBoard.getKit().getOutputState(switchPin)) {
+//            phidgetBoard.getKit().setOutputState(switchPin, false);
+//            log.debug("Phidget Motor Switch " + switchPin + ": OFF");
+//        }
 
     }
 

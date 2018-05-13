@@ -124,10 +124,14 @@ public class Machine {
 
     public void shutdown() {
         try {
-            motorSwitch1.setState(Switch.State.OFF);
-            motorSwitch2.setState(Switch.State.OFF);
-            motorSwitch1.applyState();
-            motorSwitch2.applyState();
+            if(motorSwitch1 != null) {
+                motorSwitch1.setState(Switch.State.OFF);
+                motorSwitch1.applyState();
+            }
+            if(motorSwitch2 != null) {
+                motorSwitch2.setState(Switch.State.OFF);
+                motorSwitch2.applyState();
+            }
         } catch(Exception ex) {
             log.error("Error shutting down.", ex);
         }

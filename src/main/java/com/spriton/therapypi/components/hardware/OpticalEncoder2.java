@@ -39,7 +39,8 @@ public class OpticalEncoder2 extends Angle {
 
             // 5 minute connection time
             encoder.open(1_000 * Config.values.getInt("ENCODER_CONNECT_SECONDS", 300));
-            encoder.setDataInterval(encoder.getMinDataInterval());
+            int dataInterval = Math.min(encoder.getMaxDataInterval(), Math.max(encoder.getMinDataInterval(), Config.values.getInt("ENCODER_DATA_INTERVAL", 100)));
+            encoder.setDataInterval(dataInterval);
             log.info("Optical Encoder: deviceName=" + encoder.getDeviceName() +
                     " deviceLabel=" + encoder.getDeviceLabel() +
                     " deviceName=" + encoder.getDeviceName() +

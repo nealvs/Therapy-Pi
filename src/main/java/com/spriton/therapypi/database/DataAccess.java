@@ -1,6 +1,8 @@
 package com.spriton.therapypi.database;
 
 import com.spriton.therapypi.Config;
+import org.apache.commons.lang3.builder.CompareToBuilder;
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.log4j.Logger;
 import org.flywaydb.core.Flyway;
 import org.hibernate.Session;
@@ -80,6 +82,7 @@ public class DataAccess {
     public static List<Patient> getAllPatients() {
         try(Session session = getSessionFactory().openSession()) {
             List<Patient> patients = session.createQuery("FROM Patient WHERE deleted IS NULL ORDER BY lastName, firstName").list();
+            Collections.sort(patients, new PatientComparator());
             return patients;
         }
     }
@@ -103,6 +106,8 @@ public class DataAccess {
                     "AND s.startTime > :date ORDER BY p.lastName, p.firstName ")
                     .setDate("date", cal.getTime())
                     .list();
+
+            Collections.sort(patients, new PatientComparator());
 
 //            for(Patient patient : patients) {
 //                patient.setSessions(getPatientSessions(patient.getId()));
@@ -282,6 +287,29 @@ public class DataAccess {
     public static void shutdown() {
         getSessionFactory().close();
         sessionFactory = null;
+    }
+
+    private static class PatientComparator implements Comparator<Patient> {
+        @Override
+        public int compare(Patient o1, Patient o2) {
+            if(o1 != null && o2 != null) {
+                if(o1 != null && o2 == null) {
+                    return 1;
+                }
+                if(o2 != null && o1 == null) {
+                    return -1;
+                }
+                if(o1.getLastName() != null && o2.getLastName() != null && o1.getFirstName() != null && o2.getFirstName() != null) {
+                    return new CompareToBuilder()
+                            .append(o1.getLastName().toLowerCase(), o2.getLastName().toLowerCase())
+                            .append(o1.getFirstName().toLowerCase(), o2.getFirstName().toLowerCase())
+                            .toComparison();
+                } else if(o1.getLastName() != null && o2.getLastName() != null) {
+                    return o1.getLastName().compareToIgnoreCase(o2.getLastName());
+                }
+            }
+            return 0;
+        }
     }
 
 }

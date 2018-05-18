@@ -14,6 +14,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 
 @Entity
@@ -69,7 +70,7 @@ public class PatientSession {
     private List<AngleReading> readings = new LinkedList<>();
 
     @Transient
-    private List<Repetition> repetitionList = new LinkedList<>();
+    private List<Repetition> repetitionList = Collections.synchronizedList(new LinkedList<>());
 
     @Transient
     private AngleReading lastHold = null;

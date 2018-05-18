@@ -18,6 +18,7 @@ public class OpticalEncoder2 extends Angle {
     private double startPosition;
     private double startAngle;
     private Double indexPinAngle;
+    private boolean supportsIndexPin;
 
     // 720 CPR or 2880 index changes
     private static double OPTICAL_CLICKS_PER_DEGREE = Config.values.getDouble("OPTICAL_CLICKS_PER_DEGREE", 8.0);
@@ -200,8 +201,12 @@ public class OpticalEncoder2 extends Angle {
 
     public Long getIndexPosition(Encoder source) {
         try {
-            return source.getIndexPosition();
-        } catch(PhidgetException ex) { }
+            long indexPosition = source.getIndexPosition();
+            supportsIndexPin = true;
+            return indexPosition;
+        } catch(PhidgetException ex) {
+            supportsIndexPin = false;
+        }
         return null;
     }
 
@@ -250,5 +255,13 @@ public class OpticalEncoder2 extends Angle {
                 angleStorage.close();
             }
         }
+    }
+
+    public boolean isSupportsIndexPin() {
+        return supportsIndexPin;
+    }
+
+    public void setSupportsIndexPin(boolean supportsIndexPin) {
+        this.supportsIndexPin = supportsIndexPin;
     }
 }

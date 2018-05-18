@@ -320,7 +320,7 @@ public class Machine {
 
     public JsonObject toJson() {
         JsonObject info = new JsonObject();
-        info.addProperty("version", "1.1.57");
+        info.addProperty("version", "1.2.6");
         if(type != null) {
             info.addProperty("type", type.name());
         }
@@ -339,6 +339,8 @@ public class Machine {
                 OpticalEncoder2 opticalEncoder = (OpticalEncoder2) angle;
                 info.addProperty("startPosition", opticalEncoder.getStartPosition());
                 info.addProperty("currentPosition", opticalEncoder.rawValue);
+                info.addProperty("supportsIndexPin", opticalEncoder.isSupportsIndexPin());
+                info.addProperty("indexPinAngle", opticalEncoder.getIndexPinAngle());
             } else {
                 info.addProperty("rawAngle", angle.rawValue);
                 info.addProperty("angleCalibrationVoltage", angle.ANGLE_CALIBRATION_VOLTAGE);

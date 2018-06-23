@@ -1,10 +1,12 @@
 package com.spriton.therapypi.components;
 
+import com.spriton.therapypi.Config;
 import com.spriton.therapypi.database.ConfigValue;
 import com.spriton.therapypi.database.DataAccess;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.locks.Lock;
@@ -60,10 +62,33 @@ public class Sound {
 
         @Override
         public void run() {
-            playSound();
+            if(Config.values.getBoolean("JAVA_SOUND", true)) {
+                playSoundJava();
+            } else {
+                playSoundNative();
+            }
         }
 
-        private static void playSound() {
+        private void playSoundNative() {
+            try {
+                // Set the volume
+                int vol = volume <= 50 ? 0 : volume;
+                if(vol > 100) {
+                    vol = 100;
+                }
+                Runtime runtime = Runtime.getRuntime();
+                runtime.exec("amixer sset 'PCM' " + vol + "%");
+
+                // Play the beep sound
+                File beepFile = new File(Config.values.getString("BEEP_FILE_LOCATION", "/home/pi/Therapy-Pi/beep.wav"));
+                Process proc = Runtime.getRuntime().exec("aplay " + beepFile.getAbsolutePath());
+                proc.waitFor();
+            } catch(Exception ex) {
+                log.error("Error playing native sound.", ex);
+            }
+        }
+
+        private static void playSoundJava() {
 
             try {
                 try (InputStream inputStream = new BufferedInputStream(

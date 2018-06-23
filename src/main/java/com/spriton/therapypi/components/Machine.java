@@ -320,7 +320,7 @@ public class Machine {
 
     public JsonObject toJson() {
         JsonObject info = new JsonObject();
-        info.addProperty("version", "1.2.6");
+        info.addProperty("version", "1.2.7");
         if(type != null) {
             info.addProperty("type", type.name());
         }

@@ -34,6 +34,7 @@ public class Machine {
     public Switch motorSwitch2;
     public boolean phidgetKit;
     public boolean joystickCenterOnZero;
+    public boolean eventsSetup = false;
 
     public PatientSession currentSession = new PatientSession();
 
@@ -139,66 +140,72 @@ public class Machine {
 
     // Event driven run
     public void startEventHandling() {
-        Sound.playTimerAlarm();
-        if(angle instanceof OpticalEncoder2) {
-            ((OpticalEncoder2) angle).setMachine(this);
-        }
-        if(joystick != null && joystick instanceof PhidgetKitJoystick2) {
-            ((PhidgetKitJoystick2) joystick).setMachine(this);
-        }
+        if(!eventsSetup) {
+            eventsSetup = true;
+            Sound.playTimerAlarm();
+            if (angle instanceof OpticalEncoder2) {
+                ((OpticalEncoder2) angle).setMachine(this);
+            }
+            if (joystick != null && joystick instanceof PhidgetKitJoystick2) {
+                ((PhidgetKitJoystick2) joystick).setMachine(this);
+            }
 
-        // Need a loop to periodically update the session when the angle and other event-driven inputs aren't changing so we can time-out
-        new Thread() {
-            @Override
-            public void run() {
-                while(running) {
-                    try {
-                        updateSessionBasedOnInputs();
-                        // Run every second
-                        Thread.sleep(Config.values.getInt("MACHINE_LOOP_UPDATE_SESSION", 1000));
-                    } catch(Exception ex) {
-                        log.error("Error in machine run thread", ex);
+            // Need a loop to periodically update the session when the angle and other event-driven inputs aren't changing so we can time-out
+            new Thread() {
+                @Override
+                public void run() {
+                    while (running) {
+                        try {
+                            updateSessionBasedOnInputs();
+                            // Run every second
+                            Thread.sleep(Config.values.getInt("MACHINE_LOOP_UPDATE_SESSION", 1000));
+                        } catch (Exception ex) {
+                            log.error("Error in machine run thread", ex);
+                        }
                     }
                 }
-            }
-        }.start();
-
+            }.start();
+        }
     }
 
-    // Loop driven run
-    // Deprecated
     public void run() {
-        running = true;
+        if (Config.values.getBoolean("OPTICAL_ENCODER", true)) {
+            startEventHandling();
+        } else {
+            // Deprecated
+            // Loop driven run
+            running = true;
 
-        new Thread() {
-            @Override
-            public void run() {
-                startEventHandling();
+            new Thread() {
+                @Override
+                public void run() {
+                    startEventHandling();
 
-                // With the Phidget board doing the data rate sampling with events,
-                // we could eliminate this loop and run this on each angle and joystick change
-                // to determine if the relay switches should be on or off
-                while(running) {
-                    try {
-                        angle.read();
-                        angle.calculateAndSetAverage();
+                    // With the Phidget board doing the data rate sampling with events,
+                    // we could eliminate this loop and run this on each angle and joystick change
+                    // to determine if the relay switches should be on or off
+                    while (running) {
+                        try {
+                            angle.read();
+                            angle.calculateAndSetAverage();
 
-                        if(joystick != null) {
-                            joystick.read();
-                            updateStateBasedOnCurrentInputs();
+                            if (joystick != null) {
+                                joystick.read();
+                                updateStateBasedOnCurrentInputs();
+                            }
+
+                            updateSessionBasedOnInputs();
+
+                            Thread.sleep(Config.values.getInt("MACHINE_LOOP_DELAY_MS", 100));
+                        } catch (Exception ex) {
+                            log.error("Error in machine run thread", ex);
                         }
-
-                        updateSessionBasedOnInputs();
-
-                        Thread.sleep(Config.values.getInt("MACHINE_LOOP_DELAY_MS", 100));
-                    } catch(Exception ex) {
-                        log.error("Error in machine run thread", ex);
                     }
                 }
-            }
 
 
-        }.start();
+            }.start();
+        }
     }
 
     public synchronized void updateSessionBasedOnInputs() {

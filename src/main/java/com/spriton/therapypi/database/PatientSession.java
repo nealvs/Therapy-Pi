@@ -175,7 +175,10 @@ public class PatientSession {
         cleanUpReadingsAndUpdateRepetitions(angleReading, angleValue);
         //updateRepetitions();
 
-        if(holdStopwatch.elapsed(TimeUnit.SECONDS) >= Config.values.getInt("IDLE_MACHINE_SECONDS", 600)) {
+        long threshold = Config.values.getInt("IDLE_MACHINE_SECONDS", 600);
+        long elapsedSeconds = holdStopwatch.elapsed(TimeUnit.SECONDS);
+        if(elapsedSeconds >= threshold) {
+            log.info("Idle session detected. seconds=" + holdStopwatch.elapsed(TimeUnit.SECONDS) + " threshold=" + threshold);
             endSession = true;
             Machine.stopAndSaveSession();
         }

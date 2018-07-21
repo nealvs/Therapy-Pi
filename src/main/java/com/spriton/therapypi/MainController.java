@@ -45,11 +45,7 @@ public class MainController {
             });
 
             log.info("Running machine...");
-            if (Config.values.getBoolean("OPTICAL_ENCODER", true)) {
-                Machine.instance().startEventHandling();
-            } else {
-                Machine.instance().run();
-            }
+            Machine.instance().run();
 
         } catch(Exception ex) {
             log.error("Unable to start. ", ex);

@@ -47,6 +47,7 @@ public class OpticalEncoder2 extends Angle {
                     " deviceName=" + encoder.getDeviceName() +
                     " deviceId=" + encoder.getDeviceID() +
                     " deviceSku=" + encoder.getDeviceSKU() +
+                    " ioMode=" + encoder.getIOMode().name() +
                     " deviceVersion=" + encoder.getDeviceVersion() +
                     " phidgetIdString=" + encoder.getPhidgetIDString() +
                     " maxDataInterval=" + encoder.getMaxDataInterval() +
@@ -164,34 +165,36 @@ public class OpticalEncoder2 extends Angle {
             public void onPositionChange(EncoderPositionChangeEvent encoderPositionChangeEvent) {
                 try {
                     Encoder source = encoderPositionChangeEvent.getSource();
-                    rawValue = source.getPosition();
-                    Long indexPosition = getIndexPosition(source);
-                    double angle = getAngleFromRawPosition(rawValue, startPosition, startAngle);
-                    log.debug("rawValue=" + rawValue + " indexPosition=" + indexPosition + " angle=" + angle);
+                    double newRawValue = source.getPosition();
+                    if(newRawValue != rawValue) {
+                        rawValue = newRawValue;
+                        Long indexPosition = getIndexPosition(source);
+                        double angle = getAngleFromRawPosition(rawValue, startPosition, startAngle);
+                        log.debug("rawValue=" + rawValue + " indexPosition=" + indexPosition + " angle=" + angle);
 
-                    if(encoderPositionChangeEvent.getIndexTriggered()) {
-                        // Calibrate
-                        log.debug("Index pin triggered. position=" + indexPosition);
-                        if(indexPinAngle == null) {
-                            setIndexPinAngle(angle);
-                        } else {
-                            // Update start angle
-                            double newStartPosition = getCalibratedStartPosition(indexPosition, startAngle, indexPinAngle);
-                            if(startPosition != newStartPosition) {
-                                log.info("Calibrating based on index pin. oldStartPosition=" + startPosition + " newStartPosition=" + startPosition +
-                                        " rawValue=" + rawValue + " startAngle=" + startAngle + " indexPinAngle=" + indexPinAngle);
-                                startPosition = newStartPosition;
+                        if (encoderPositionChangeEvent.getIndexTriggered()) {
+                            // Calibrate
+                            log.debug("Index pin triggered. position=" + indexPosition);
+                            if (indexPinAngle == null) {
+                                setIndexPinAngle(angle);
+                            } else {
+                                // Update start angle
+                                double newStartPosition = getCalibratedStartPosition(indexPosition, startAngle, indexPinAngle);
+                                if (startPosition != newStartPosition) {
+                                    log.info("Calibrating based on index pin. oldStartPosition=" + startPosition + " newStartPosition=" + startPosition +
+                                            " rawValue=" + rawValue + " startAngle=" + startAngle + " indexPinAngle=" + indexPinAngle);
+                                    startPosition = newStartPosition;
+                                }
                             }
                         }
-                    }
 
-                    if(machine != null) {
-                        read();
-                        calculateAndSetAverage();
-                        machine.updateStateBasedOnCurrentInputs();
-                        machine.updateSessionBasedOnInputs();
+                        if (machine != null) {
+                            read();
+                            calculateAndSetAverage();
+                            machine.updateStateBasedOnCurrentInputs();
+                            machine.updateSessionBasedOnInputs();
+                        }
                     }
-
                 } catch(Exception ex) {
                     log.error("Error reading optical encoder position.", ex);
                 }

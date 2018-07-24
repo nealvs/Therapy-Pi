@@ -136,6 +136,8 @@ public class DataServer {
                         session.setPatient(patient);
                         session.start();
                         Machine.instance().currentSession = session;
+                        Machine.instance().updateStateBasedOnCurrentInputs();
+                        Machine.instance().updateSessionBasedOnInputs();
                     }
                 }
                 return result.toString();

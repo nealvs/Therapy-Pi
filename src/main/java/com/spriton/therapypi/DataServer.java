@@ -390,7 +390,7 @@ public class DataServer {
                     // Set the date
                     String setDateCommand = "sudo date -s \"" + dateFormat.format(setTime) + "\"";
                     log.info("Running command: " + setDateCommand);
-                    ProcessBuilder dateBuilder = new ProcessBuilder(setDateCommand);
+                    ProcessBuilder dateBuilder = new ProcessBuilder("sudo", "date", "-s", "\"" + dateFormat.format(setTime) + "\"");
                     dateBuilder.redirectErrorStream(true);
                     dateBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
                     Process setDate = dateBuilder.start();
@@ -399,7 +399,7 @@ public class DataServer {
                     // Update the hwclock
                     String clockCommand = "sudo hwclock -w";
                     log.info("Running command: " + clockCommand);
-                    ProcessBuilder clockBuilder = new ProcessBuilder(clockCommand);
+                    ProcessBuilder clockBuilder = new ProcessBuilder(clockCommand.split(" "));
                     clockBuilder.redirectErrorStream(true);
                     clockBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
                     Process clockProcess = clockBuilder.start();
@@ -520,7 +520,7 @@ public class DataServer {
             if(Config.values.getBoolean("HARDWARE_MACHINE", true)) {
                 String command = "shutdown -r now";
                 log.info("Running command: " + command);
-                ProcessBuilder builder = new ProcessBuilder(command);
+                ProcessBuilder builder = new ProcessBuilder(command.split(" "));
                 builder.redirectErrorStream(true);
                 builder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
                 Process process = builder.start();
@@ -533,7 +533,7 @@ public class DataServer {
             if(Config.values.getBoolean("HARDWARE_MACHINE", true)) {
                 String shutdownCommand = "shutdown now";
                 log.info("Running command: " + shutdownCommand);
-                ProcessBuilder shutdownBuilder = new ProcessBuilder(shutdownCommand);
+                ProcessBuilder shutdownBuilder = new ProcessBuilder(shutdownCommand.split(" "));
                 shutdownBuilder.redirectErrorStream(true);
                 shutdownBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
                 Process shutdownProcess = shutdownBuilder.start();

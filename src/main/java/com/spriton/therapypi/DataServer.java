@@ -390,7 +390,7 @@ public class DataServer {
                     // Set the date
                     String setDateCommand = "sudo date -s \"" + dateFormat.format(setTime) + "\"";
                     log.info("Running command: " + setDateCommand);
-                    ProcessBuilder dateBuilder = new ProcessBuilder("sudo", "date", "-s", "\"" + dateFormat.format(setTime) + "\"");
+                    ProcessBuilder dateBuilder = new ProcessBuilder("sudo", "date", "-s", dateFormat.format(setTime));
                     dateBuilder.redirectErrorStream(true);
                     dateBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
                     Process setDate = dateBuilder.start();

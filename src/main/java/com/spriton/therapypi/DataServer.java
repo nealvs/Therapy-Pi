@@ -394,7 +394,7 @@ public class DataServer {
                     dateBuilder.redirectErrorStream(true);
                     dateBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
                     Process setDate = dateBuilder.start();
-                    log.info("Set date process exit code=" + setDate.exitValue());
+                    log.info("Date process exit code=" + setDate.waitFor());
 
                     // Update the hwclock
                     String clockCommand = "sudo hwclock -w";
@@ -403,7 +403,7 @@ public class DataServer {
                     clockBuilder.redirectErrorStream(true);
                     clockBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
                     Process clockProcess = clockBuilder.start();
-                    log.info("clock process exit code=" + clockProcess.exitValue());
+                    log.info("Clock process exit code=" + clockProcess.waitFor());
                 }
             }
             return Machine.instance().toJson();
@@ -518,26 +518,26 @@ public class DataServer {
         post("/restart",  "application/json", (req, res) -> {
             JsonObject result = new JsonObject();
             if(Config.values.getBoolean("HARDWARE_MACHINE", true)) {
-                String command = "shutdown -r now";
+                String command = "sudo shutdown -r now";
                 log.info("Running command: " + command);
                 ProcessBuilder builder = new ProcessBuilder(command.split(" "));
                 builder.redirectErrorStream(true);
                 builder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
                 Process process = builder.start();
-                log.info("restart process exit code=" + process.exitValue());
+                log.info("Restart process exit code=" + process.waitFor());
             }
             return result.toString();
         });
         post("/shutdown",  "application/json", (req, res) -> {
             JsonObject result = new JsonObject();
             if(Config.values.getBoolean("HARDWARE_MACHINE", true)) {
-                String shutdownCommand = "shutdown now";
+                String shutdownCommand = "sudo shutdown now";
                 log.info("Running command: " + shutdownCommand);
                 ProcessBuilder shutdownBuilder = new ProcessBuilder(shutdownCommand.split(" "));
                 shutdownBuilder.redirectErrorStream(true);
                 shutdownBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
                 Process shutdownProcess = shutdownBuilder.start();
-                log.info("shutdown process exit code=" + shutdownProcess.exitValue());
+                log.info("Shutdown process exit code=" + shutdownProcess.waitFor());
             }
             return result.toString();
         });

@@ -386,9 +386,24 @@ public class DataServer {
                 // sudo date -s "2017-08-12 16:36"  (Current UTC timezone time which is our time +6 hours)
                 // sudo hwclock -w
                 if(Config.values.getBoolean("HARDWARE_MACHINE", true)) {
-                    Runtime runtime = Runtime.getRuntime();
-                    runtime.exec("sudo date -s \"" + dateFormat.format(setTime) + "\"");
-                    runtime.exec("sudo hwclock -w");
+
+                    // Set the date
+                    String setDateCommand = "sudo date -s \"" + dateFormat.format(setTime) + "\"";
+                    log.info("Running command: " + setDateCommand);
+                    ProcessBuilder dateBuilder = new ProcessBuilder(setDateCommand);
+                    dateBuilder.redirectErrorStream(true);
+                    dateBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+                    Process setDate = dateBuilder.start();
+                    log.info("Set date process exit code=" + setDate.exitValue());
+
+                    // Update the hwclock
+                    String clockCommand = "sudo hwclock -w";
+                    log.info("Running command: " + clockCommand);
+                    ProcessBuilder clockBuilder = new ProcessBuilder(clockCommand);
+                    clockBuilder.redirectErrorStream(true);
+                    clockBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+                    Process clockProcess = clockBuilder.start();
+                    log.info("clock process exit code=" + clockProcess.exitValue());
                 }
             }
             return Machine.instance().toJson();
@@ -503,16 +518,26 @@ public class DataServer {
         post("/restart",  "application/json", (req, res) -> {
             JsonObject result = new JsonObject();
             if(Config.values.getBoolean("HARDWARE_MACHINE", true)) {
-                Runtime runtime = Runtime.getRuntime();
-                runtime.exec("shutdown -r now");
+                String command = "shutdown -r now";
+                log.info("Running command: " + command);
+                ProcessBuilder builder = new ProcessBuilder(command);
+                builder.redirectErrorStream(true);
+                builder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+                Process process = builder.start();
+                log.info("restart process exit code=" + process.exitValue());
             }
             return result.toString();
         });
         post("/shutdown",  "application/json", (req, res) -> {
             JsonObject result = new JsonObject();
             if(Config.values.getBoolean("HARDWARE_MACHINE", true)) {
-                Runtime runtime = Runtime.getRuntime();
-                runtime.exec("shutdown now");
+                String shutdownCommand = "shutdown now";
+                log.info("Running command: " + shutdownCommand);
+                ProcessBuilder shutdownBuilder = new ProcessBuilder(shutdownCommand);
+                shutdownBuilder.redirectErrorStream(true);
+                shutdownBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+                Process shutdownProcess = shutdownBuilder.start();
+                log.info("shutdown process exit code=" + shutdownProcess.exitValue());
             }
             return result.toString();
         });

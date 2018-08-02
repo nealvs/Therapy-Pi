@@ -77,13 +77,13 @@ public class Sound {
                     vol = 100;
                 }
                 Runtime runtime = Runtime.getRuntime();
-                String card = Config.values.getBoolean("USB_SPEAKERS", false) ? "-c 1" : "";
-                runtime.exec("amixer " + card + " sset 'PCM' " + vol + "%");
+                String card = Config.values.getBoolean("USB_SPEAKERS", false) ? "-c 1 " : "";
+                runtime.exec("amixer " + card + "sset 'PCM' " + vol + "%");
 
 
                 // Play the beep sound
                 File beepFile = new File(Config.values.getString("BEEP_FILE_LOCATION", "/home/pi/Therapy-Pi/beep.wav"));
-                String device = Config.values.getBoolean("USB_SPEAKERS", false) ? "-D hw:1,0" : "";
+                String device = Config.values.getBoolean("USB_SPEAKERS", false) ? "-D hw:1,0 " : "";
                 Process proc = Runtime.getRuntime().exec("aplay " + device + beepFile.getAbsolutePath());
                 proc.waitFor();
             } catch(Exception ex) {

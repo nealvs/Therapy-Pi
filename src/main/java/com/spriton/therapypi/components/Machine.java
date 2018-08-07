@@ -9,6 +9,7 @@ import com.spriton.therapypi.database.DataAccess;
 import com.spriton.therapypi.database.PatientSession;
 import org.apache.log4j.Logger;
 
+import java.net.InetAddress;
 import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import java.util.Date;
@@ -35,6 +36,7 @@ public class Machine {
     public boolean phidgetKit;
     public boolean joystickCenterOnZero;
     public boolean eventsSetup = false;
+    public String hostname = null;
 
     public PatientSession currentSession = new PatientSession();
 
@@ -327,7 +329,7 @@ public class Machine {
 
     public JsonObject toJson() {
         JsonObject info = new JsonObject();
-        info.addProperty("version", "1.2.9");
+        info.addProperty("version", "1.3.0");
         if(type != null) {
             info.addProperty("type", type.name());
         }
@@ -395,7 +397,19 @@ public class Machine {
         info.addProperty("hasJoystick", Config.values.getBoolean("HAS_JOYSTICK", true));
         info.addProperty("opticalEncoder", Config.values.getBoolean("OPTICAL_ENCODER", false));
         info.addProperty("volume", Sound.getVolume());
+        info.addProperty("hostname", getHostName());
         return info;
+    }
+
+    private String getHostName() {
+        try {
+            if (hostname == null) {
+                hostname = InetAddress.getLocalHost().getHostName();
+            }
+        } catch(Exception ex) {
+            hostname = "";
+        }
+        return hostname;
     }
 
     public static void stopAndSaveSession() {
